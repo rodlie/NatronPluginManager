@@ -1,0 +1,1 @@
+# Natron Plug-in Manager
