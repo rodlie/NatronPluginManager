@@ -1,2 +1,1 @@
-# natron-plugin-manager
-Natron Plugin Manager
+# Natron Plug-in Manager
