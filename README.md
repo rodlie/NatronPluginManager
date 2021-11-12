@@ -1,1 +1,13 @@
 # Natron Plug-in Manager
+
+A plug-in ([PyPlug](https://github.com/NatronGitHub/natron-plugins)) manager for [Natron](https://github.com/NatronGitHub/Natron).
+
+## Build
+
+This application requires Qt5+ (Concurrent/Network/Widgets) and libzip to build.
+
+```
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make
+```
