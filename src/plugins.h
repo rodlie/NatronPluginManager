@@ -23,8 +23,8 @@
 #define PLUGINS_H
 
 #include <QObject>
-#include <QString>
 #include <QStringList>
+
 #include <vector>
 
 class Plugins : public QObject
@@ -84,6 +84,9 @@ public:
     const QString getCachePath();
 
     Plugins::PluginStatus installPlugin(const QString &id);
+
+    Plugins::PluginStatus extractPluginArchive(const QString &filename,
+                                               const QString &folder);
 
 private:
 

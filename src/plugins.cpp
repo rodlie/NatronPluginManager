@@ -31,6 +31,10 @@
 #include <QStandardPaths>
 #include <QRegExp>
 
+#include <zip.h>
+
+#define ZIP_BUF_SIZE 2048
+
 Plugins::Plugins(QObject *parent)
     : QObject(parent)
 {
@@ -248,7 +252,12 @@ const QString Plugins::getUserPluginPath()
 
 const QString Plugins::getCachePath()
 {
-    return QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    QString folder = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    if (!QFile::exists(folder) && !folder.isEmpty()) {
+        QDir dir;
+        dir.mkpath(folder);
+    }
+    return folder;
 }
 
 Plugins::PluginStatus Plugins::installPlugin(const QString &id)
@@ -299,5 +308,97 @@ Plugins::PluginStatus Plugins::installPlugin(const QString &id)
         }
     }
     status.success = true;
+    return status;
+}
+
+Plugins::PluginStatus Plugins::extractPluginArchive(const QString &filename,
+                                                    const QString &folder)
+{
+    PluginStatus status;
+    status.success = true;
+
+    if (!QFile::exists(filename)) {
+        status.message = tr("File %1 does not exists").arg(filename);
+        status.success = false;
+        return status;
+    }
+
+    QFileInfo dir(folder);
+    if (!dir.isWritable()) {
+        status.message = tr("Directory %1 is not writable").arg(folder);
+        status.success = false;
+        return status;
+    }
+
+    struct zip* p_zip = NULL;
+    zip_int64_t n_entries;
+    struct zip_file* p_file = NULL;
+    int bytes_read;
+    char buffer[ZIP_BUF_SIZE];
+
+    int error;
+    p_zip = zip_open(filename.toStdString().c_str(), 0, &error);
+    if (p_zip == NULL) {
+      status.message = tr("Failed to open %1").arg(filename);
+      status.success = false;
+      return status;
+    }
+
+    n_entries = zip_get_num_entries(p_zip, 0);
+    for (zip_int64_t entry_idx=0; entry_idx < n_entries; entry_idx++) {
+        struct zip_stat file_stat;
+        if (zip_stat_index(p_zip, entry_idx, 0, &file_stat)) {
+            status.message = tr("Failed to read file from %1").arg(filename);
+            status.success = false;
+            break;
+        }
+        if (!(file_stat.valid & ZIP_STAT_NAME)) { continue; }
+        QString filePath = QString("%1/%2").arg(folder, file_stat.name);
+
+        qDebug() << "EXTRACT" << filePath;
+
+        if ((file_stat.name[0] != '\0') && (file_stat.name[strlen(file_stat.name)-1] == '/')) {
+            QDir newDir;
+            if (!newDir.mkpath(filePath)) {
+                status.message = tr("Unable to create directory %1").arg(filePath);
+                status.success = false;
+                break;
+            }
+            continue;
+        }
+
+        if ((p_file = zip_fopen_index(p_zip, entry_idx, 0)) == NULL) {
+            status.message = tr("Failed to extract file %1").arg(filePath);
+            status.success = false;
+            break;
+        }
+
+        QFile output(filePath);
+        if (!output.open(QIODevice::WriteOnly)) {
+            status.message = tr("Unable to write to file %1").arg(filePath);
+            status.success = false;
+            break;
+        }
+
+        do {
+            if ((bytes_read = zip_fread(p_file, buffer, ZIP_BUF_SIZE)) == -1) {
+                status.message = tr("Failed to extract file %1").arg(filePath);
+                status.success = false;
+                break;
+            }
+            if (bytes_read > 0) { output.write(buffer, bytes_read); }
+        } while(bytes_read > 0);
+
+        output.close();
+        zip_fclose(p_file);
+        p_file = NULL;
+    }
+
+    if (p_file) {
+        zip_fclose(p_file);
+        p_file = NULL;
+    }
+    if (p_zip) { zip_close(p_zip); }
+
     return status;
 }
