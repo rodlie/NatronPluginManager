@@ -68,8 +68,6 @@ public:
     explicit Plugins(QObject *parent = nullptr);
     ~Plugins();
 
-    void updatePlugins();
-
     void scanForAvailablePlugins(const QString &path,
                                  bool append = false);
     void scanForInstalledPlugins(const QString &path,
@@ -119,14 +117,17 @@ public:
 
     bool isBusy();
 
-    void startDownloads();
     void removeFromDownloadQueue(const QUrl &url);
 
 signals:
 
     void updatedPlugins();
     void statusMessage(const QString &message);
-    void statusDownload(const QString &message, qint64 value, qint64 total);
+    void statusDownload(const QString &message,
+                        qint64 value,
+                        qint64 total);
+    void statusError(const QString &message);
+    void downloadRequired();
 
 private:
 
@@ -146,9 +147,11 @@ private:
 
 private slots:
 
+    void startDownloads();
     void handleFileDownloaded(QNetworkReply *reply);
     void handleDownloadError(QNetworkReply::NetworkError error);
-    void handleDownloadProgress(qint64 value, qint64 total);
+    void handleDownloadProgress(qint64 value,
+                                qint64 total);
     void handleDownloadReadyRead();
 };
 
