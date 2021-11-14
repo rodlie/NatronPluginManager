@@ -96,12 +96,10 @@ public:
 
     const QString getUserPluginPath();
     const QString getCachePath();
-    const QString getDownloadPath();
     const QString getRepoPath();
     const QString getRepoPath(const QString &uid);
     const QString getRandom();
     const QString getTempPath();
-    const QString getPasturePath();
 
     Plugins::PluginStatus installPlugin(const QString &id);
 

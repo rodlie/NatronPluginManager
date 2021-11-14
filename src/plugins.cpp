@@ -307,18 +307,6 @@ const QString Plugins::getCachePath()
     return folder;
 }
 
-const QString Plugins::getDownloadPath()
-{
-    QString cache = getCachePath();
-    if (cache.isEmpty()) { return cache; }
-    cache.append("/Downloads");
-    if (!QFile::exists(cache)) {
-        QDir dir;
-        dir.mkpath(cache);
-    }
-    return cache;
-}
-
 const QString Plugins::getRepoPath()
 {
     QString cache = getCachePath();
@@ -353,18 +341,6 @@ const QString Plugins::getTempPath()
     QString cache = getCachePath();
     if (cache.isEmpty()) { return cache; }
     cache.append("/Temp");
-    if (!QFile::exists(cache)) {
-        QDir dir;
-        dir.mkpath(cache);
-    }
-    return cache;
-}
-
-const QString Plugins::getPasturePath()
-{
-    QString cache = getCachePath();
-    if (cache.isEmpty()) { return cache; }
-    cache.append("/Pasture");
     if (!QFile::exists(cache)) {
         QDir dir;
         dir.mkpath(cache);
@@ -698,6 +674,7 @@ void Plugins::handleDownloadError(QNetworkReply::NetworkError /*error*/)
     if (!reply) { return; }
     QUrl url = reply->objectName().isEmpty() ? reply->url() : QUrl::fromUserInput(reply->objectName());
     removeFromDownloadQueue(url);
+    reply->deleteLater();
 }
 
 void Plugins::handleDownloadProgress(qint64 value, qint64 total)
