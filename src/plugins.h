@@ -24,6 +24,9 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QUrl>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 #include <vector>
 
@@ -44,6 +47,13 @@ public:
         QString folder;
     };
 
+    struct RepoSpecs {
+        QString label;
+        QString folder;
+        QUrl archive;
+        QUrl manifest;
+    };
+
     struct PluginStatus {
         bool success = false;
         QString message;
@@ -56,9 +66,14 @@ public:
     };
 
     explicit Plugins(QObject *parent = nullptr);
+    ~Plugins();
 
-    void scanForAvailablePlugins(const QString &path);
-    void scanForInstalledPlugins(const QString &path);
+    void updatePlugins();
+
+    void scanForAvailablePlugins(const QString &path,
+                                 bool append = false);
+    void scanForInstalledPlugins(const QString &path,
+                                 bool append = false);
 
     bool hasAvailablePlugin(const QString &id);
     bool hasInstalledPlugin(const QString &id);
@@ -79,25 +94,62 @@ public:
     Plugins::PluginSpecs getPluginSpecs(const QString &path);
     bool isValidPlugin(const Plugins::PluginSpecs &plugin);
     bool folderHasPlugin(const QString &path);
+    int folderHasPlugins(const QString &path);
 
     const QString getUserPluginPath();
     const QString getCachePath();
+    const QString getDownloadPath();
+    const QString getRepoPath();
+    const QString getRepoPath(const QString &uid);
+    const QString getRandom();
+    const QString getTempPath();
+    const QString getPasturePath();
 
     Plugins::PluginStatus installPlugin(const QString &id);
 
     Plugins::PluginStatus extractPluginArchive(const QString &filename,
                                                const QString &folder);
 
+    bool isValidRepository(const RepoSpecs &repo);
+    void loadRepositories();
+    void saveRepositories(const std::vector<RepoSpecs> &repos);
+    void checkRepositories();
+    std::vector<Plugins::RepoSpecs> getAvailableRepositories();
+    Plugins::RepoSpecs getRepoFromUrl(const QUrl &url);
+
+    bool isBusy();
+
+    void startDownloads();
+    void removeFromDownloadQueue(const QUrl &url);
+
+signals:
+
+    void updatedPlugins();
+    void statusMessage(const QString &message);
+    void statusDownload(const QString &message, qint64 value, qint64 total);
+
 private:
 
+    bool _isWorking;
+    bool _isDownloading;
     std::vector<Plugins::PluginSpecs> _availablePlugins;
     std::vector<Plugins::PluginSpecs> _installedPlugins;
+    std::vector<Plugins::RepoSpecs> _availableRepositories;
+    std::vector<QUrl> _downloadQueue;
+    QNetworkAccessManager *_nam;
 
     static bool comparePluginsOrder(const Plugins::PluginSpecs &a,
                                     const Plugins::PluginSpecs &b)
     {
         return a.label < b.label;
     }
+
+private slots:
+
+    void handleFileDownloaded(QNetworkReply *reply);
+    void handleDownloadError(QNetworkReply::NetworkError error);
+    void handleDownloadProgress(qint64 value, qint64 total);
+    void handleDownloadReadyRead();
 };
 
 #endif // PLUGINS_H

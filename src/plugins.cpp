@@ -30,20 +30,44 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QRegExp>
+#include <QRandomGenerator>
+#include <QHash>
+#include <QHashIterator>
+#include <QNetworkRequest>
 
 #include <zip.h>
 
 #define ZIP_BUF_SIZE 2048
+#define NATRON_COMMUNITY_PLUGINS_URL "https://github.com/NatronGitHub/natron-plugins/archive/master.zip"
 
 Plugins::Plugins(QObject *parent)
     : QObject(parent)
+    , _isWorking(false)
+    , _isDownloading(false)
+    , _nam(nullptr)
 {
+    _nam = new QNetworkAccessManager(this);
+    connect(_nam,
+            SIGNAL(finished(QNetworkReply*)),
+            this,
+            SLOT(handleFileDownloaded(QNetworkReply*)));
 }
 
-void Plugins::scanForAvailablePlugins(const QString &path)
+Plugins::~Plugins()
+{
+    //saveRepositories(_availableRepositories);
+}
+
+void Plugins::updatePlugins()
+{
+    qDebug() << "update plugins...";
+}
+
+void Plugins::scanForAvailablePlugins(const QString &path,
+                                      bool append)
 {
     if (!QFile::exists(path)) { return; }
-    _availablePlugins.clear();
+    if (!append) { _availablePlugins.clear(); }
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -55,12 +79,14 @@ void Plugins::scanForAvailablePlugins(const QString &path)
             !hasInstalledPlugin(plugin.id))
         { _availablePlugins.push_back(plugin); }
     }
+    if (_availablePlugins.size() > 0) { emit updatedPlugins(); }
 }
 
-void Plugins::scanForInstalledPlugins(const QString &path)
+void Plugins::scanForInstalledPlugins(const QString &path,
+                                      bool append)
 {
     if (!QFile::exists(path)) { return; }
-    _installedPlugins.clear();
+    if (!append) { _installedPlugins.clear(); }
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -237,6 +263,22 @@ bool Plugins::folderHasPlugin(const QString &path)
     return false;
 }
 
+int Plugins::folderHasPlugins(const QString &path)
+{
+    int plugins = 0;
+    if (!QFile::exists(path)) { return plugins; }
+    QDirIterator it(path,
+                    QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
+                    QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        QString item = it.next();
+        if (!folderHasPlugin(item)) { continue; }
+        PluginSpecs plugin = getPluginSpecs(item);
+        if (isValidPlugin(plugin)) { plugins++; }
+    }
+    return plugins;
+}
+
 const QString Plugins::getUserPluginPath()
 {
     QSettings settings;
@@ -258,6 +300,71 @@ const QString Plugins::getCachePath()
         dir.mkpath(folder);
     }
     return folder;
+}
+
+const QString Plugins::getDownloadPath()
+{
+    QString cache = getCachePath();
+    if (cache.isEmpty()) { return cache; }
+    cache.append("/Downloads");
+    if (!QFile::exists(cache)) {
+        QDir dir;
+        dir.mkpath(cache);
+    }
+    return cache;
+}
+
+const QString Plugins::getRepoPath()
+{
+    QString cache = getCachePath();
+    if (cache.isEmpty()) { return cache; }
+    cache.append("/Repositories");
+    if (!QFile::exists(cache)) {
+        QDir dir;
+        dir.mkpath(cache);
+    }
+    return cache;
+}
+
+const QString Plugins::getRepoPath(const QString &uid)
+{
+    QString cache = getRepoPath();
+    if (cache.isEmpty() || uid.isEmpty()) { return QString(); }
+    cache.append(QString("/%1").arg(uid));
+    /*if (!QFile::exists(cache)) {
+        QDir dir;
+        dir.mkpath(cache);
+    }*/
+    return cache;
+}
+
+const QString Plugins::getRandom()
+{
+    return QString::number(QRandomGenerator::global()->generate64());
+}
+
+const QString Plugins::getTempPath()
+{
+    QString cache = getCachePath();
+    if (cache.isEmpty()) { return cache; }
+    cache.append("/Temp");
+    if (!QFile::exists(cache)) {
+        QDir dir;
+        dir.mkpath(cache);
+    }
+    return cache;
+}
+
+const QString Plugins::getPasturePath()
+{
+    QString cache = getCachePath();
+    if (cache.isEmpty()) { return cache; }
+    cache.append("/Pasture");
+    if (!QFile::exists(cache)) {
+        QDir dir;
+        dir.mkpath(cache);
+    }
+    return cache;
 }
 
 Plugins::PluginStatus Plugins::installPlugin(const QString &id)
@@ -401,4 +508,192 @@ Plugins::PluginStatus Plugins::extractPluginArchive(const QString &filename,
     if (p_zip) { zip_close(p_zip); }
 
     return status;
+}
+
+bool Plugins::isValidRepository(const Plugins::RepoSpecs &repo)
+{
+    if (repo.label.isEmpty() || repo.archive.isEmpty()) { return false; }
+    return true;
+}
+
+void Plugins::loadRepositories()
+{
+    emit statusMessage(tr("Loading repositories"));
+    _availableRepositories.clear();
+    QSettings settings;
+    if (settings.value("repos").isValid()) {
+        QHashIterator<QString, QVariant> i(settings.value("repos").toHash());
+        while (i.hasNext()) {
+            i.next();
+            qDebug() << "repo" << i.key() << i.value();
+            QString label = i.key();
+            QStringList options = i.value().toStringList();
+            if (label.isEmpty() || options.size() < 1) { continue; }
+            RepoSpecs repo;
+            repo.label = label;
+            repo.archive = QUrl::fromUserInput(options.at(0));
+            if (options.size() > 1) { repo.folder = options.at(1); }
+            if (isValidRepository(repo)) { _availableRepositories.push_back(repo); }
+        }
+    } else {
+        RepoSpecs repo;
+        repo.label = "Community";
+        repo.archive = QUrl::fromUserInput(NATRON_COMMUNITY_PLUGINS_URL);
+        _availableRepositories.push_back(repo);
+    }
+
+    checkRepositories();
+}
+
+void Plugins::saveRepositories(const std::vector<Plugins::RepoSpecs> &repos)
+{
+    emit statusMessage(tr("Saving repositories"));
+    if (repos.size() < 1) { return; }
+    QSettings settings;
+    QHash<QString,QVariant> list;
+    for (unsigned long i = 0; i < repos.size(); ++i) {
+        if (list.contains(repos.at(i).label)) { continue; }
+        list.insert(repos.at(i).label,
+                    QStringList() << repos.at(i).archive.toString() << repos.at(i).folder);
+    }
+    settings.setValue("repos", list);
+    settings.sync();
+}
+
+void Plugins::checkRepositories()
+{
+    emit statusMessage(tr("Checking repositories"));
+    scanForInstalledPlugins(getUserPluginPath());
+    _downloadQueue.clear();
+    for (unsigned long i = 0; i < _availableRepositories.size(); ++i) {
+        RepoSpecs repo = _availableRepositories.at(i);
+        if (!isValidRepository(repo)) { continue; }
+        bool hasFolder = false;
+        if (repo.folder.isEmpty()) {
+            repo.folder = getRandom();
+            _availableRepositories.at(i).folder = repo.folder;
+        }
+        QString repoPath = getRepoPath(repo.folder);
+        if (folderHasPlugins(repoPath) > 0) { hasFolder = true; }
+        if (!hasFolder) {
+            emit statusMessage(tr("Need to download %1 repository").arg(repo.label));
+            _downloadQueue.push_back(repo.archive);
+        } else {
+            scanForAvailablePlugins(repoPath, true);
+        }
+    }
+    if (_downloadQueue.size() > 0) { startDownloads(); }
+}
+
+std::vector<Plugins::RepoSpecs> Plugins::getAvailableRepositories()
+{
+    return _availableRepositories;
+}
+
+Plugins::RepoSpecs Plugins::getRepoFromUrl(const QUrl &url)
+{
+    for (unsigned long i = 0; i < _availableRepositories.size(); ++i) {
+        QUrl repoUrl = _availableRepositories.at(i).archive;
+        if (!url.isEmpty() && url == repoUrl) { return _availableRepositories.at(i); }
+    }
+    return RepoSpecs();
+}
+
+bool Plugins::isBusy()
+{
+    return _isWorking || _isDownloading;
+}
+
+void Plugins::startDownloads()
+{
+    if (_isDownloading || _downloadQueue.size() < 1) { return; }
+    QUrl url = _downloadQueue.front();
+    if (url.isEmpty()) { return; }
+    qDebug() << "download" << url;
+    QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+    QNetworkReply *reply = _nam->get(request);
+    reply->setObjectName(url.toString());
+    connect(reply,
+            SIGNAL(readyRead()),
+            this,
+            SLOT(handleDownloadReadyRead()));
+    connect(reply,
+            SIGNAL(error(QNetworkReply::NetworkError)),
+            this,
+            SLOT(handleDownloadError(QNetworkReply::NetworkError)));
+    connect(reply,
+            SIGNAL(downloadProgress(qint64, qint64)),
+            this,
+            SLOT(handleDownloadProgress(qint64, qint64)));
+}
+
+void Plugins::removeFromDownloadQueue(const QUrl &url)
+{
+    int pos = -1;
+    for (unsigned long i = 0; i < _downloadQueue.size(); ++i) {
+        if (_downloadQueue.at(i) == url) {
+            pos = i;
+            break;
+        }
+    }
+    if (pos > -1) { _downloadQueue.erase(_downloadQueue.begin()+(pos)); }
+}
+
+void Plugins::handleFileDownloaded(QNetworkReply *reply)
+{
+    qDebug() << "file downloaded?";
+    if (!reply) { return; }
+    QUrl url = reply->objectName().isEmpty() ? reply->url() : QUrl::fromUserInput(reply->objectName());
+    QByteArray fileData = reply->readAll();
+    reply->deleteLater();
+    _isDownloading = false;
+    qDebug() << "file downloaded" << fileData.size() << url;
+    removeFromDownloadQueue(url);
+
+    RepoSpecs repo = getRepoFromUrl(url);
+    if (fileData.size() > 0 && isValidRepository(repo)) {
+        QFile tempFile(QString("%1/%2.zip").arg(getTempPath(), getRandom()));
+        if (tempFile.open(QIODevice::WriteOnly)) {
+            tempFile.write(fileData);
+            tempFile.close();
+        }
+        QString destFolder = getRepoPath(repo.folder);
+        if (!destFolder.isEmpty() && !QFile::exists(destFolder)) {
+            QDir dir;
+            dir.mkpath(destFolder);
+        }
+        if (tempFile.exists() && QFile::exists(destFolder)) {
+            PluginStatus res = extractPluginArchive(tempFile.fileName(), destFolder);
+            qDebug() << res.success << res.message;
+            if (res.success) {
+                scanForAvailablePlugins(destFolder, true);
+                tempFile.remove();
+            }
+        }
+    }
+    if (_downloadQueue.size() > 0) {
+        qDebug() << "more to download";
+        startDownloads();
+    }
+}
+
+void Plugins::handleDownloadError(QNetworkReply::NetworkError /*error*/)
+{
+    emit statusMessage(tr("Failed to download repository"));
+    _isDownloading = false;
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(QObject::sender());
+    if (!reply) { return; }
+    QUrl url = reply->objectName().isEmpty() ? reply->url() : QUrl::fromUserInput(reply->objectName());
+    removeFromDownloadQueue(url);
+}
+
+void Plugins::handleDownloadProgress(qint64 value, qint64 total)
+{
+    emit statusDownload(tr("Downloading repository, please wait ..."), value, total);
+}
+
+void Plugins::handleDownloadReadyRead()
+{
+    if (!_isDownloading) { _isDownloading = true; }
 }
