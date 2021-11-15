@@ -59,7 +59,7 @@ Plugins::Plugins(QObject *parent)
 
 Plugins::~Plugins()
 {
-    //saveRepositories(_availableRepositories);
+    saveRepositories(_availableRepositories);
 }
 
 void Plugins::scanForAvailablePlugins(const QString &path,
@@ -548,6 +548,7 @@ void Plugins::checkRepositories()
 {
     emit statusMessage(tr("Checking repositories"));
     scanForInstalledPlugins(getUserPluginPath());
+    _availablePlugins.clear();
     _downloadQueue.clear();
     for (unsigned long i = 0; i < _availableRepositories.size(); ++i) {
         RepoSpecs repo = _availableRepositories.at(i);
