@@ -121,6 +121,13 @@ bool Plugins::hasInstalledPlugin(const QString &id)
     return false;
 }
 
+Plugins::PluginSpecs Plugins::getPlugin(const QString &id)
+{
+    PluginSpecs plugin = getAvailablePlugin(id);
+    if (!isValidPlugin(plugin)) { plugin = getInstalledPlugin(id); }
+    return plugin;
+}
+
 Plugins::PluginSpecs Plugins::getAvailablePlugin(const QString &id)
 {
     for (unsigned long i = 0; i < _availablePlugins.size(); ++i) {
@@ -397,6 +404,36 @@ Plugins::PluginStatus Plugins::installPlugin(const QString &id)
     }
     status.success = true;
     return status;
+}
+
+Plugins::PluginStatus Plugins::removePlugin(const QString &id)
+{
+    PluginStatus status;
+    if (!hasInstalledPlugin(id)) {
+        status.message = tr("Plug-in is not installed");
+        status.success = false;
+        return status;
+    }
+
+    PluginSpecs plugin = getInstalledPlugin(id);
+    if (!isValidPlugin(plugin)) {
+        status.message = tr("Plug-in not found or is invalid");
+        status.success = false;
+        return  status;
+    }
+
+    QString destPath = QString("%1/%2").arg(getUserPluginPath(), plugin.folder);
+    if (QFile::exists(destPath)) {
+        QDir dir(destPath);
+        if (!dir.removeRecursively()) {
+            status.message = tr("Unable to remove directory %1").arg(destPath);
+            status.success = false;
+        } else { status.success = true; }
+    } else {
+        status.message = tr("Unable to find directory %1").arg(destPath);
+        status.success = false;
+    }
+    return  status;
 }
 
 Plugins::PluginStatus Plugins::extractPluginArchive(const QString &filename,

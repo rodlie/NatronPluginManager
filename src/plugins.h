@@ -76,6 +76,7 @@ public:
     bool hasAvailablePlugin(const QString &id);
     bool hasInstalledPlugin(const QString &id);
 
+    Plugins::PluginSpecs getPlugin(const QString &id);
     Plugins::PluginSpecs getAvailablePlugin(const QString &id);
     Plugins::PluginSpecs getInstalledPlugin(const QString &id);
 
@@ -102,6 +103,7 @@ public:
     const QString getTempPath();
 
     Plugins::PluginStatus installPlugin(const QString &id);
+    Plugins::PluginStatus removePlugin(const QString &id);
 
     Plugins::PluginStatus extractPluginArchive(const QString &filename,
                                                const QString &folder);

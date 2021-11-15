@@ -44,9 +44,12 @@ public:
     NatronPluginManager(QWidget *parent = nullptr);
     ~NatronPluginManager();
     void installPlugins();
+    void removePlugins();
     bool isPluginTreeItemChecked(QTreeWidgetItem *item);
     void setDefaultPluginInfo();
+    const QStringList getCheckedPlugins(QTreeWidget* tree);
     const QStringList getCheckedAvailablePlugins();
+    const QStringList getCheckedInstalledPlugins();
 
 private:
 

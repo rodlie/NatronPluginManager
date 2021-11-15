@@ -39,6 +39,9 @@
 
 #define NATRON_ICON ":/natron.png"
 
+#define PLUGIN_TREE_ROLE_ID Qt::UserRole+1
+#define PLUGIN_TREE_ROLE_TYPE Qt::UserRole+2
+
 NatronPluginManager::NatronPluginManager(QWidget *parent)
     : QMainWindow(parent)
     , _plugins(nullptr)
@@ -141,6 +144,20 @@ void NatronPluginManager::installPlugins()
     updatePlugins();
 }
 
+void NatronPluginManager::removePlugins()
+{
+    QStringList plugins = getCheckedInstalledPlugins();
+    for (int i = 0; i < plugins.size(); ++i) {
+        Plugins::PluginStatus result = _plugins->removePlugin(plugins.at(i));
+        if (!result.success) {
+            QMessageBox::warning(this,
+                                 tr("Failed to remove plugin"),
+                                 result.message);
+        }
+    }
+    updatePlugins();
+}
+
 bool NatronPluginManager::isPluginTreeItemChecked(QTreeWidgetItem *item)
 {
     if (item && item->checkState(0) == Qt::Checked) { return true; }
@@ -164,19 +181,29 @@ void NatronPluginManager::setDefaultPluginInfo()
                                                                              Qt::SmoothTransformation));
 }
 
-const QStringList NatronPluginManager::getCheckedAvailablePlugins()
+const QStringList NatronPluginManager::getCheckedPlugins(QTreeWidget *tree)
 {
     QStringList plugins;
-    for (int i = 0; i < _availablePluginsTree->topLevelItemCount(); ++i) {
-        QTreeWidgetItem *item = _availablePluginsTree->topLevelItem(i);
+    for (int i = 0; i < tree->topLevelItemCount(); ++i) {
+        QTreeWidgetItem *item = tree->topLevelItem(i);
         for (int y = 0; y < item->childCount(); ++y) {
             QTreeWidgetItem *child = item->child(y);
             if (child->checkState(0) == Qt::Checked) {
-                plugins << child->data(0, Qt::UserRole).toString();
+                plugins << child->data(0, PLUGIN_TREE_ROLE_ID).toString();
             }
         }
     }
     return plugins;
+}
+
+const QStringList NatronPluginManager::getCheckedAvailablePlugins()
+{
+    return getCheckedPlugins(_availablePluginsTree);
+}
+
+const QStringList NatronPluginManager::getCheckedInstalledPlugins()
+{
+    return getCheckedPlugins(_installedPluginsTree);
 }
 
 void NatronPluginManager::setupPalette()
@@ -281,7 +308,6 @@ void NatronPluginManager::setupButtons()
 
     _removeButton = new QPushButton(tr("Remove"), this);
     _removeButton->setEnabled(false);
-    _removeButton->setHidden(true);
 
     connect(_installButton,
             SIGNAL(released()),
@@ -324,8 +350,23 @@ void NatronPluginManager::setupPluginsTab()
     installTabLayout->addWidget(_availablePluginsTree);
     installTabLayout->addWidget(installButtonWidget);
 
+    QWidget *removeTabWidget = new QWidget(this);
+    removeTabWidget->setContentsMargins(0, 0, 0, 0);
+    QVBoxLayout *removeTabLayout = new QVBoxLayout(removeTabWidget);
+    removeTabLayout->setContentsMargins(0, 0, 0, 0);
+    removeTabLayout->setSpacing(0);
+
+    QWidget *removeButtonWidget = new QWidget(this);
+    removeButtonWidget->setContentsMargins(0, 0, 0, 0);
+    QHBoxLayout *removeButtonLayout = new QHBoxLayout(removeButtonWidget);
+    removeButtonLayout->setContentsMargins(2, 2, 2, 2);
+
+    removeButtonLayout->addWidget(_removeButton);
+    removeTabLayout->addWidget(_installedPluginsTree);
+    removeTabLayout->addWidget(removeButtonWidget);
+
     _leftTab->addTab(installTabWidget, tr("Available"));
-    _leftTab->addTab(_installedPluginsTree, tr("Installed"));
+    _leftTab->addTab(removeTabWidget, tr("Installed"));
     //_leftTab->addTab(new QWidget(), tr("Updates"));
 }
 
@@ -409,13 +450,25 @@ void NatronPluginManager::handleItemActivated(QTreeWidgetItem *item,
                                               QTreeWidgetItem */*prev*/)
 {
     if (!item) { return; }
-    QString id = item->data(0, Qt::UserRole).toString();
-    Plugins::PluginSpecs specs = _plugins->getAvailablePlugin(id);
+    QString id = item->data(0, PLUGIN_TREE_ROLE_ID).toString();
+    Plugins::PluginSpecs specs;
+    int type = item->data(0, PLUGIN_TREE_ROLE_TYPE).toInt();
+    switch(type) {
+    case Plugins::NATRON_PLUGIN_TYPE_AVAILABLE:
+        specs = _plugins->getAvailablePlugin(id);
+        break;
+    case Plugins::NATRON_PLUGIN_TYPE_INSTALLED:
+        specs = _plugins->getInstalledPlugin(id);
+        break;
+    default:;
+    }
     if (!_plugins->isValidPlugin(specs) || specs.id != id) { return; }
 
-    _pluginLabel->setText( QString("<h1 style=\"font-weight: normal;\">%1<br><span style=\"font-size: small;\">%2 v%4</span></h1>").arg(specs.label,
-                                                                                                                                        specs.id,
-                                                                                                                                        QString::number(specs.version)) );
+    _pluginLabel->setText(QString("<h1 style=\"font-weight: normal;\">%1<br>"
+                                  "<span style=\"font-size: small;\">%2 v%4</span></h1>")
+                          .arg(specs.label,
+                               specs.id,
+                               QString::number(specs.version)));
     if (specs.icon.isEmpty()) {
         _pluginIcon->setPixmap(QIcon(QString(NATRON_ICON)).pixmap(48,
                                                                   48).scaled(48,
@@ -449,12 +502,19 @@ void NatronPluginManager::handleInstallButton()
     else {
         QMessageBox::information(this,
                                  tr("Install"),
-                                 tr("No plug-ins selected for installation."));
+                                 tr("No plug-ins marked for installation."));
     }
 }
 
 void NatronPluginManager::handleRemoveButton()
 {
+    QStringList plugins = getCheckedInstalledPlugins();
+    if (plugins.size() > 0) { removePlugins(); }
+    else {
+        QMessageBox::information(this,
+                                 tr("Install"),
+                                 tr("No plug-ins marked for removal."));
+    }
 }
 
 void NatronPluginManager::updatePlugins()
@@ -505,9 +565,11 @@ void NatronPluginManager::populatePluginsTree(Plugins::PluginType type,
             }
             if (pluginIcon.isNull()) { pluginIcon = fallbackIcon; }
             pluginItem->setIcon(0, pluginIcon);
-            pluginItem->setData(0, Qt::UserRole, specs.id);
+            pluginItem->setData(0, PLUGIN_TREE_ROLE_ID, specs.id);
+            pluginItem->setData(0, PLUGIN_TREE_ROLE_TYPE, type);
             pluginItem->setText(0, specs.label);
             pluginItem->setCheckState(0, Qt::Unchecked);
+
             groupItem->addChild(pluginItem);
         }
         tree->expandItem(groupItem); // add to settings?
