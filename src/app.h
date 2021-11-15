@@ -53,6 +53,7 @@ public:
 
 private:
 
+    QString _appDoc;
     Plugins *_plugins;
     QTreeWidget *_availablePluginsTree;
     QTreeWidget *_installedPluginsTree;

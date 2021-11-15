@@ -10,6 +10,6 @@ This application requires Qt 5.10+ (Concurrent/Network/Widgets) and libzip to bu
 
 ```
 mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make
+make DESTDIR=<PACKAGE> install
 ```

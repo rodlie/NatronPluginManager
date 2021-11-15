@@ -37,7 +37,8 @@
 #include <QtConcurrentRun>
 #include <QPalette>
 
-#define NATRON_ICON ":/natron.png"
+#define NATRON_ICON ":/NatronPluginManager.png"
+#define NATRON_PLUGIN_DOC_HTML ":/doc.html"
 
 #define PLUGIN_TREE_ROLE_ID Qt::UserRole+1
 #define PLUGIN_TREE_ROLE_TYPE Qt::UserRole+2
@@ -166,12 +167,14 @@ bool NatronPluginManager::isPluginTreeItemChecked(QTreeWidgetItem *item)
 
 void NatronPluginManager::setDefaultPluginInfo()
 {
-    _pluginDesc->setHtml(QString("<h3>Lorem ipsum</h3><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-                                 "In auctor ante in urna ornare, eu tincidunt felis condimentum. Vestibulum ut molestie mi. "
-                                 "Aenean sit amet feugiat tellus, sit amet tempor augue. Nullam sollicitudin posuere ipsum, "
-                                 "quis lobortis augue dignissim id. Suspendisse nec efficitur lectus, eget lacinia metus. "
-                                 "Nullam eu leo a justo pellentesque dictum. Curabitur ultricies, tellus et condimentum elementum, "
-                                 "odio nisl ultricies quam, nec ultrices diam mauris vitae erat.</p>") );
+    if (_appDoc.isEmpty()) {
+        QFile doc(NATRON_PLUGIN_DOC_HTML);
+        if (doc.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            _appDoc = doc.readAll();
+            doc.close();
+        }
+    }
+    _pluginDesc->setHtml(_appDoc);
     _pluginLabel->setText(QString("<h1 style=\"font-weight: normal;\">Natron"
                                   "<br><span style=\"font-size: small;\">%1 v%2</span></h1>")
                           .arg(tr("Plug-in Manager"), qApp->applicationVersion()));

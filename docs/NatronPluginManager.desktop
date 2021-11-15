@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Natron Plug-in Manager
+GenericName=Natron Plug-in Manager
+Comment=Natron Plug-in Manager
+Type=Application
+Icon=NatronPluginManager
+Exec=NatronPluginManager
+Terminal=false
+Categories=Graphics;2DGraphics;RasterGraphics;
+StartupNotify=false

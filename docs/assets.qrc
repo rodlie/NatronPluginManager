@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>natron.png</file>
+        <file>NatronPluginManager.png</file>
+        <file>doc.html</file>
     </qresource>
 </RCC>

@@ -36,6 +36,13 @@ add_definitions(-DAPP_ORG="Natron")
 add_definitions(-DAPP_DOMAIN="natronvfx.org")
 add_definitions(-DAPP_URL="https://plugins.natronvfx.org")
 
+add_compile_options(-Wall -Wextra)
+if(CMAKE_BUILD_TYPE MATCHES "^(release|Release|RELEASE)$")
+    add_definitions(-DQT_NO_DEBUG_OUTPUT)
+else()
+    add_definitions(-DQT_MESSAGELOGCONTEXT)
+endif()
+
 find_package(Qt${QTV} 5.10 COMPONENTS Concurrent Network Widgets REQUIRED)
 
 if(${USE_PKGCONF})
@@ -62,3 +69,30 @@ target_link_libraries(${PROJECT_NAME}
     Qt${QTV}::Widgets
     ${ZIP_LDFLAGS}
 )
+
+if(UNIX AND NOT APPLE)
+    include(GNUInstallDirs)
+    install(TARGETS
+        ${PROJECT_NAME}
+        DESTINATION
+        ${CMAKE_INSTALL_BINDIR}
+    )
+    install(FILES
+        docs/${PROJECT_NAME}.desktop
+        DESTINATION
+        ${CMAKE_INSTALL_DATAROOTDIR}/applications
+    )
+    install(FILES
+        LICENSE
+        README.md
+        DESTINATION
+        ${CMAKE_INSTALL_DOCDIR}-${PROJECT_VERSION}
+    )
+    install(
+        DIRECTORY
+        docs/hicolor
+        DESTINATION
+        ${CMAKE_INSTALL_DATAROOTDIR}/icons/
+    )
+endif()
+
