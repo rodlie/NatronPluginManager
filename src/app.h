@@ -1,0 +1,100 @@
+/*
+#
+# Natron Plug-in Manager
+#
+# Copyright (c) 2021 Ole-André Rodlie. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#
+*/
+
+#ifndef NATRONPLUGINMANAGER_H
+#define NATRONPLUGINMANAGER_H
+
+#include "plugins.h"
+
+#include <QMainWindow>
+#include <QTreeWidget>
+#include <QTextBrowser>
+#include <QLabel>
+#include <QTabWidget>
+#include <QStatusBar>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QMenuBar>
+#include <QCloseEvent>
+
+class NatronPluginManager : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+
+    NatronPluginManager(QWidget *parent = nullptr);
+    ~NatronPluginManager();
+    void installPlugins();
+    bool isPluginTreeItemChecked(QTreeWidgetItem *item);
+    void setDefaultPluginInfo();
+    const QStringList getCheckedAvailablePlugins();
+
+private:
+
+    Plugins *_plugins;
+    QTreeWidget *_availablePluginsTree;
+    QTreeWidget *_installedPluginsTree;
+    QTextBrowser *_pluginDesc;
+    QLabel *_pluginLabel;
+    QLabel *_pluginIcon;
+    QTabWidget *_leftTab;
+    QStatusBar *_statusBar;
+    QProgressBar *_progBar;
+    QPushButton *_installButton;
+    QPushButton *_removeButton;
+    QPushButton *_updateButton;
+    QMenuBar *_menuBar;
+
+private slots:
+
+    void setupPalette();
+    void setupPlugins();
+    void setupMenu();
+    void setupStatusBar();
+    void setupButtons();
+    void setupTreeWidget(QTreeWidget *tree);
+    void setupPluginsTab();
+    void setupPluginInfo();
+
+    void startup();
+    void loadRepositories();
+    void handleUpdatedPlugins();
+    void handleAboutActionTriggered();
+    void handleAboutQtActionTriggered();
+    void handlePluginsStatusError(const QString &message);
+    void handlePluginsStatusMessage(const QString &message);
+    void handleDownloadStatusMessage(const QString &message,
+                                     qint64 value,
+                                     qint64 total);
+    void handleItemActivated(QTreeWidgetItem *item,
+                             QTreeWidgetItem* prev);
+    void handleInstallButton();
+    void handleRemoveButton();
+    void updatePlugins();
+    void populatePluginsTree(Plugins::PluginType type,
+                             QTreeWidget *tree);
+
+protected:
+
+     void closeEvent(QCloseEvent *e);
+};
+#endif // NATRONPLUGINMANAGER_H
