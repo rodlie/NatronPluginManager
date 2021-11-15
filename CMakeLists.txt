@@ -53,7 +53,30 @@ endif()
 include_directories("src")
 include_directories(${ZIP_INCLUDE_DIRS})
 
-add_executable(${PROJECT_NAME}
+if(WIN32)
+    set(ICON_FILE "${PROJECT_NAME}.ico")
+    set(ICON_FILE_PATH ${CMAKE_CURRENT_BINARY_DIR}/${ICON_FILE})
+    set(GUI_TYPE WIN32)
+    set(PRODUCT_COMMENTS ${PROJECT_NAME})
+    set(PRODUCT_COMPANY_NAME ${COMPANY})
+    set(PRODUCT_FILE_DESCRIPTION "Natron Plug-in Manager")
+    set(PRODUCT_VERSION "${PROJECT_VERSION}")
+    set(PRODUCT_INTERNAL_NAME ${PROJECT_NAME})
+    set(PRODUCT_COMPANY_COPYRIGHT "Copyright Ole-Andre Rodlie")
+    set(PRODUCT_ORIGINAL_FILENAME "${PROJECT_NAME}.exe")
+    set(PRODUCT_BUNDLE ${PROJECT_NAME})
+    set(WINDOWS_RESOURCE_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.rc)
+    configure_file(docs/${PROJECT_NAME}.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.rc
+        @ONLY
+    )
+    configure_file(docs/${PROJECT_NAME}.ico
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.ico
+        COPYONLY
+    )
+endif()
+
+set(SRC
     src/main.cpp
     src/plugins.cpp
     src/plugins.h
@@ -61,6 +84,17 @@ add_executable(${PROJECT_NAME}
     src/app.h
     docs/assets.qrc
 )
+
+if(WIN32)
+    add_executable(${PROJECT_NAME}
+        WIN32
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.ico
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.rc
+        ${SRC}
+    )
+else()
+    add_executable(${PROJECT_NAME} ${SRC})
+endif()
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
@@ -95,4 +129,3 @@ if(UNIX AND NOT APPLE)
         ${CMAKE_INSTALL_DATAROOTDIR}/icons/
     )
 endif()
-
