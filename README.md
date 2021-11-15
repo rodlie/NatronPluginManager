@@ -6,7 +6,7 @@ A plug-in ([PyPlug](https://github.com/NatronGitHub/natron-plugins)) manager for
 
 ## Build
 
-This application requires Qt 5.10+ (Concurrent/Network/Widgets) and libzip to build.
+This application requires CMake, Qt 5.10+ (Concurrent/Network/Widgets) and libzip to build.
 
 ```
 mkdir build && cd build
