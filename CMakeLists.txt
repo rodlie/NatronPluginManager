@@ -88,8 +88,8 @@ set(SRC
 if(WIN32)
     add_executable(${PROJECT_NAME}
         WIN32
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.ico
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.rc
+        ${ICON_FILE_PATH}
+        ${WINDOWS_RESOURCE_FILE}
         ${SRC}
     )
 else()
