@@ -1,4 +1,4 @@
-name: MinGW
+name: Windows (MinGW)
 
 on: [push, pull_request]
 
