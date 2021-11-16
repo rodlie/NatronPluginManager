@@ -20,5 +20,5 @@ make DESTDIR=<PACKAGE> install
 
 ### Artifacts
 
-* [Windows 7/8/10/11 x64](https://github.com/rodlie/NatronPluginManager/actions/workflows/mingw.yml)
-* [macOS High Sierra (10.13) or newer](https://github.com/rodlie/NatronPluginManager/actions/workflows/macos.yml)
+* [Windows](https://github.com/rodlie/NatronPluginManager/actions/workflows/mingw.yml)
+* [macOS](https://github.com/rodlie/NatronPluginManager/actions/workflows/macos.yml)
