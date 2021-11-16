@@ -26,7 +26,7 @@ make -j${MKJOBS}
 
 $SDK/bin/macdeployqt NatronPluginManager.app
 
-rm -rf NatronPluginManager.app/Contents/Frameworks/QtDBus.framework
+#rm -rf NatronPluginManager.app/Contents/Frameworks/QtDBus.framework
 rm -rf NatronPluginManager.app/Contents/Frameworks/QtSvg.framework
 
 rm -rf NatronPluginManager.app/Contents/PlugIns/bearer

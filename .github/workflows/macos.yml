@@ -19,7 +19,7 @@ jobs:
       run: sudo cp build/NatronPluginManager.dmg /opt/
     - uses: actions/upload-artifact@v2
       with:
-        name: NatronPluginManager-${{github.sha}}-macOS-1.zip
+        name: NatronPluginManager-${{github.sha}}-macOS.zip
         path: /opt/NatronPluginManager.dmg
   build2:
     runs-on: macos-11
@@ -33,9 +33,3 @@ jobs:
       run: sudo mkdir -p /opt/local/lib && sudo cp -a /opt/libzip/lib/* /opt/local/lib/
     - name: Build
       run: CMAKE=cmake sh docs/macos.sh
-    - name: Artifact
-      run: sudo cp build/NatronPluginManager.dmg /opt/
-    - uses: actions/upload-artifact@v2
-      with:
-        name: NatronPluginManager-${{github.sha}}-macOS-2.zip
-        path: /opt/NatronPluginManager.dmg
