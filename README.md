@@ -18,4 +18,7 @@ make DESTDIR=<PACKAGE> install
 
 ## Downloads
 
-Windows artifacts are available for every [commit](https://github.com/rodlie/NatronPluginManager/actions/workflows/mingw.yml).
+### Artifacts
+
+* [Windows 7/8/10/11 x64](https://github.com/rodlie/NatronPluginManager/actions/workflows/mingw.yml)
+* [macOS High Sierra (10.13) or newer](https://github.com/rodlie/NatronPluginManager/actions/workflows/macos.yml)
