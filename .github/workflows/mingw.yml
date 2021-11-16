@@ -14,3 +14,9 @@ jobs:
       run: wget https://github.com/rodlie/NatronPluginManager/releases/download/continuous/mxe-NatronPluginManager-gcc7-qt515.tar.xz && tar xvf mxe-NatronPluginManager-gcc7-qt515.tar.xz -C /opt/mxe-NatronPluginManager/
     - name: Build
       run: bash docs/mxe.sh
+    - name: Artifact
+      run: sudo cp build/NatronPluginManager.zip /opt/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: NatronPluginManager.zip
+        path: /opt/NatronPluginManager.zip
