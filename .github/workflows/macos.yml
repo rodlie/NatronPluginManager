@@ -9,9 +9,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Setup Qt
-      run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/macos-Qt5.12.11.tar.gz --output qt.tar.gz && sudo tar xvf qt.tar.gz -C /opt
+      run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/macos-Qt5.12.11.tar.gz --output qt.tar.gz && sudo tar xf qt.tar.gz -C /opt
     - name: Setup libzip
-      run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/libzip-HighSierra.tar.gz --output libzip.tar.gz && sudo tar xvf libzip.tar.gz -C /opt
+      run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/libzip-HighSierra.tar.gz --output libzip.tar.gz && sudo tar xf libzip.tar.gz -C /opt
+    - name: Setup local
+      run: sudo mkdir -p /opt/local/lib && sudo cp -a /opt/libzip/lib/* /opt/local/lib/
     - name: Build
       run: CMAKE=cmake sh docs/macos.sh
     - name: Artifact
