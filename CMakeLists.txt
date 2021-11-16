@@ -27,6 +27,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(COMPANY "Natron")
+set(COPYRIGHT "Copyright (c) Ole-Andre Rodlie")
+set(IDENTIFIER "org.natronvfx.plugins")
+
 set(QTV "5" CACHE STRING "Qt major version")
 option(USE_PKGCONF "Use pkg-config" ON)
 
@@ -55,14 +59,14 @@ include_directories(${ZIP_INCLUDE_DIRS})
 
 if(WIN32)
     set(ICON_FILE "${PROJECT_NAME}.ico")
-    set(ICON_FILE_PATH ${CMAKE_CURRENT_BINARY_DIR}/${ICON_FILE})
+    set(WINDOWS_ICON_FILE ${CMAKE_CURRENT_BINARY_DIR}/${ICON_FILE})
     set(GUI_TYPE WIN32)
     set(PRODUCT_COMMENTS ${PROJECT_NAME})
     set(PRODUCT_COMPANY_NAME ${COMPANY})
     set(PRODUCT_FILE_DESCRIPTION "Natron Plug-in Manager")
     set(PRODUCT_VERSION "${PROJECT_VERSION}")
     set(PRODUCT_INTERNAL_NAME ${PROJECT_NAME})
-    set(PRODUCT_COMPANY_COPYRIGHT "Copyright Ole-Andre Rodlie")
+    set(PRODUCT_COMPANY_COPYRIGHT ${COPYRIGHT})
     set(PRODUCT_ORIGINAL_FILENAME "${PROJECT_NAME}.exe")
     set(PRODUCT_BUNDLE ${PROJECT_NAME})
     set(WINDOWS_RESOURCE_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.rc)
@@ -74,6 +78,19 @@ if(WIN32)
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.ico
         COPYONLY
     )
+endif()
+
+if(APPLE)
+    set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/docs/${PROJECT_NAME}.icns)
+    set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
+    set(MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
+    set(MACOSX_BUNDLE_LONG_VERSION_STRING ${PROJECT_VERSION})
+    set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+    set(MACOSX_BUNDLE_COPYRIGHT ${COPYRIGHT})
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER ${IDENTIFIER})
+    set(MACOSX_BUNDLE_ICON_FILE ${PROJECT_NAME})
+    set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    set(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
 endif()
 
 set(SRC
@@ -88,10 +105,15 @@ set(SRC
 if(WIN32)
     add_executable(${PROJECT_NAME}
         WIN32
-        ${ICON_FILE_PATH}
+        ${WINDOWS_ICON_FILE}
         ${WINDOWS_RESOURCE_FILE}
         ${SRC}
     )
+elseif(APPLE)
+    add_executable(${PROJECT_NAME}
+        MACOSX_BUNDLE
+        ${ICON_FILE}
+        ${SRC})
 else()
     add_executable(${PROJECT_NAME} ${SRC})
 endif()
