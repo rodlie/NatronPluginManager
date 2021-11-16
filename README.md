@@ -13,3 +13,7 @@ mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make
 make DESTDIR=<PACKAGE> install
 ```
+
+## Downloads
+
+Windows artifacts are available for every [commit](https://github.com/rodlie/NatronPluginManager/actions/workflows/mingw.yml).
