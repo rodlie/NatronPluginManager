@@ -10,7 +10,7 @@ OSX_MIN=10.13
 rm -rf build || true
 mkdir build && cd build
 
-export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
+#export PATH="/usr/bin:/bin:/usr/sbin:/sbin"
 export CC="/usr/bin/clang -stdlib=libc++ -mmacosx-version-min=$OSX_MIN"
 export CXX="/usr/bin/clang++ -stdlib=libc++ -mmacosx-version-min=$OSX_MIN"
 
