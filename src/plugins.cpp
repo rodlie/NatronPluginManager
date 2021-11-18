@@ -144,6 +144,15 @@ Plugins::PluginSpecs Plugins::getInstalledPlugin(const QString &id)
     return PluginSpecs();
 }
 
+std::vector<Plugins::PluginSpecs> Plugins::getPlugins()
+{
+    std::vector<PluginSpecs> plugins;
+    for (unsigned long i = 0; i < _installedPlugins.size(); ++i) { plugins.push_back(_installedPlugins.at(i)); }
+    for (unsigned long i = 0; i < _availablePlugins.size(); ++i) { plugins.push_back(_availablePlugins.at(i)); }
+    std::sort(plugins.begin(), plugins.end(), comparePluginsOrder);
+    return plugins;
+}
+
 std::vector<Plugins::PluginSpecs> Plugins::getAvailablePlugins()
 {
     return _availablePlugins;
@@ -152,6 +161,20 @@ std::vector<Plugins::PluginSpecs> Plugins::getAvailablePlugins()
 std::vector<Plugins::PluginSpecs> Plugins::getInstalledPlugins()
 {
     return _installedPlugins;
+}
+
+const QStringList Plugins::getPluginGroups()
+{
+    QStringList result;
+    for (unsigned long i = 0; i < _installedPlugins.size(); ++i) {
+        if (!result.contains(_installedPlugins.at(i).group)) { result << _installedPlugins.at(i).group; }
+    }
+    for (unsigned long i = 0; i < _availablePlugins.size(); ++i) {
+        if (!result.contains(_availablePlugins.at(i).group)) { result << _availablePlugins.at(i).group; }
+    }
+
+    result.sort();
+    return result;
 }
 
 const QStringList Plugins::getPluginGroups(Plugins::PluginType type)

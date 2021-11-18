@@ -80,9 +80,11 @@ public:
     Plugins::PluginSpecs getAvailablePlugin(const QString &id);
     Plugins::PluginSpecs getInstalledPlugin(const QString &id);
 
+    std::vector<Plugins::PluginSpecs> getPlugins();
     std::vector<Plugins::PluginSpecs> getAvailablePlugins();
     std::vector<Plugins::PluginSpecs> getInstalledPlugins();
 
+    const QStringList getPluginGroups();
     const QStringList getPluginGroups(Plugins::PluginType type);
     const std::vector<Plugins::PluginSpecs> getPluginsInGroup(Plugins::PluginType type,
                                                               const QString &group);
