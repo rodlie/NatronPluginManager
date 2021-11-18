@@ -1,7 +1,5 @@
 # Natron Plug-in Manager
 
-![screenshot](docs/screenshot.png)
-
 A plug-in ([PyPlug](https://github.com/NatronGitHub/natron-plugins)) manager for [Natron](https://github.com/NatronGitHub/Natron).
 
 **WORK-IN-PROGRESS!**
