@@ -1,0 +1,101 @@
+/*
+#
+# Natron Plug-in Manager
+#
+# Copyright (c) 2021 Ole-André Rodlie. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#
+*/
+
+QToolBar#ToolBar,
+QMenuBar#MenuBar {
+    border: 0;
+    background-color: #232528;
+    color: #ebebeb;
+}
+
+QWidget#rightWidget {
+    margin: 0;
+    padding: 0;
+    background-color: #17181a;
+    color: #ebebeb;
+}
+
+QTreeWidget#GroupTree {
+    font-size: 12pt;
+    background-color: #232528;
+    color: #97999d;
+}
+
+QListWidget#PluginList {
+    background-color: #101113;
+}
+
+QListWidget#PluginList .QFrame {
+    border: 2px solid #252525;
+    border-radius: 10%;
+    background-color: #191919;
+}
+
+QListWidget#PluginList .QFrame:hover {
+    border-color: #ebebeb;
+}
+
+QListWidget#PluginList .QPushButton {
+    padding: 0.5em;
+    border: 2px solid #ebebeb;
+    border-radius: 10%;
+    color: #ebebeb;
+}
+
+QListWidget#PluginList .QPushButton:hover {
+    font-weight: bold;
+}
+
+QListWidget#PluginList .QPushButton[InstallButton=true]:pressed,
+QListWidget#PluginList .QPushButton[RemoveButton=true]:pressed,
+QListWidget#PluginList .QPushButton[UpdateButton=true]:pressed {
+    border-color: #ebebeb;
+}
+
+QListWidget#PluginList .QPushButton[InstallButton=true] {
+    border-color: #2e82be;
+}
+
+QListWidget#PluginList .QPushButton[InstallButton=true]:hover {
+    background-color: #2e82be;
+}
+
+QListWidget#PluginList .QPushButton[RemoveButton=true] {
+    border-color: #be2e44;
+}
+
+QListWidget#PluginList .QPushButton[RemoveButton=true]:hover {
+    background-color: #be2e44;
+}
+
+QListWidget#PluginList .QPushButton[UpdateButton=true] {
+    border-color: #2ebe34;
+}
+
+QListWidget#PluginList .QPushButton[UpdateButton=true]:hover {
+    background-color: #2ebe34;
+}
+
+QLabel#ComboGroupLabel,
+QLabel#ComboStatusLabel {
+    margin-right: 0.5em;
+    margin-left: 0.5em;
+}
