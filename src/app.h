@@ -26,14 +26,18 @@
 
 #include <QMainWindow>
 #include <QTreeWidget>
-#include <QTextBrowser>
-#include <QLabel>
-#include <QTabWidget>
-#include <QStatusBar>
-#include <QProgressBar>
-#include <QPushButton>
+//#include <QTextBrowser>
+//#include <QLabel>
+//#include <QTabWidget>
+//#include <QStatusBar>
+//#include <QProgressBar>
+//#include <QPushButton>
 #include <QMenuBar>
 #include <QCloseEvent>
+#include <QListWidget>
+#include <QStackedWidget>
+#include <QToolBar>
+#include <QComboBox>
 
 class NatronPluginManager : public QMainWindow
 {
@@ -53,23 +57,32 @@ public:
 
 private:
 
+    QComboBox *_comboStatus;
+    QComboBox *_comboGroup;
+    QToolBar *_toolBar;
+    QStackedWidget *_stack;
     QString _appDoc;
     Plugins *_plugins;
-    QTreeWidget *_availablePluginsTree;
-    QTreeWidget *_installedPluginsTree;
-    QTextBrowser *_pluginDesc;
-    QLabel *_pluginLabel;
-    QLabel *_pluginIcon;
-    QTabWidget *_leftTab;
-    QStatusBar *_statusBar;
-    QProgressBar *_progBar;
-    QPushButton *_installButton;
-    QPushButton *_removeButton;
-    QPushButton *_updateButton;
+    QTreeWidget *_groupTree;
+   // QTreeWidget *_availablePluginsTree;
+   // QTreeWidget *_installedPluginsTree;
+    //QTextBrowser *_pluginDesc;
+    //QLabel *_pluginLabel;
+    //QLabel *_pluginIcon;
+//    QTabWidget *_leftTab;
+  //  QStatusBar *_statusBar;
+  //  QProgressBar *_progBar;
+   // QPushButton *_installButton;
+   // QPushButton *_removeButton;
+  //  QPushButton *_updateButton;
     QMenuBar *_menuBar;
+    QListWidget *_pluginsTree;
+
+    QWidget *generatePluginWidget(const Plugins::PluginSpecs &plugin);
 
 private slots:
 
+    void setupStyle();
     void setupPalette();
     void setupPlugins();
     void setupMenu();
@@ -96,6 +109,11 @@ private slots:
     void updatePlugins();
     void populatePluginsTree(Plugins::PluginType type,
                              QTreeWidget *tree);
+
+    void populatePlugins(const QString &group = QString());
+
+    void handleComboGroup(const QString &group);
+    void filterPluginsGroup(const QString &group);
 
 protected:
 
