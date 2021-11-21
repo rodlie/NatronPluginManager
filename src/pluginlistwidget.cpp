@@ -54,25 +54,23 @@ PluginListWidget::PluginListWidget(const Plugins::PluginSpecs &plugin,
 
     QWidget *pluginHeaderText = new QWidget(this);
     pluginHeaderText->setContentsMargins(0, 0, 0, 0);
-    QVBoxLayout *pluginHeaderTextLayout = new QVBoxLayout(pluginHeaderText);
-    pluginHeaderLayout->setContentsMargins(0, 0, 0, 0);
-    pluginHeaderLayout->setSpacing(0);
 
-    QLabel *pluginTitleLabel = new QLabel(tr("N/A"), this);
-    QLabel *pluginGroupLabel = new QLabel(tr("N/A"), this);
+    QVBoxLayout *pluginHeaderTextLayout = new QVBoxLayout(pluginHeaderText);
+    pluginHeaderTextLayout->setContentsMargins(0, 0, 0, 0);
+    pluginHeaderTextLayout->setSpacing(0);
+
+    QLabel *pluginTitleLabel = new QLabel(_plugin.label, this);
+    QLabel *pluginGroupLabel = new QLabel(_plugin.group, this);
     QLabel *pluginIconLabel = new QLabel(this);
 
     pluginTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     pluginGroupLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    pluginTitleLabel->setProperty("TitleLabel",  true);
+    pluginTitleLabel->setProperty("TitleLabel", true);
     pluginGroupLabel->setProperty("GroupLabel", true);
 
     pluginIconLabel->setMinimumSize(iconSize);
     pluginIconLabel->setMaximumSize(iconSize);
-
-    if (!_plugin.label.isEmpty()) { pluginTitleLabel->setText(_plugin.label); }
-    if (!_plugin.group.isEmpty()) { pluginGroupLabel->setText(_plugin.group); }
 
     pluginIconLabel->setPixmap(QIcon(QString(NATRON_ICON)).pixmap(iconSize).scaled(iconSize,
                                                                                    Qt::KeepAspectRatio,
@@ -103,6 +101,7 @@ PluginListWidget::PluginListWidget(const Plugins::PluginSpecs &plugin,
     pluginsFooterLayout->addWidget(_installButton);
     pluginsFooterLayout->addWidget(_removeButton);
 
+    pluginHeaderTextLayout->addStretch();
     pluginHeaderTextLayout->addWidget(pluginTitleLabel);
     pluginHeaderTextLayout->addWidget(pluginGroupLabel);
     pluginHeaderTextLayout->addStretch();

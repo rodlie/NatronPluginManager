@@ -72,7 +72,9 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
 
     QWidget *mainWidget = new QWidget(this);
     mainWidget->setObjectName("MainWidget");
+    mainWidget->setContentsMargins(0, 0, 0, 0);
     QHBoxLayout *mainLayout = new QHBoxLayout(mainWidget);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
     setCentralWidget(mainWidget);
