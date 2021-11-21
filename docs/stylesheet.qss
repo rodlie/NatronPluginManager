@@ -26,17 +26,10 @@ QMenuBar#MenuBar {
     color: #ebebeb;
 }
 
-QWidget#rightWidget {
-    margin: 0;
-    padding: 0;
-    background-color: #17181a;
+QStatusBar#StatusBar,
+QWidget#MainWidget {
+    background-color: #101113;
     color: #ebebeb;
-}
-
-QTreeWidget#GroupTree {
-    font-size: 12pt;
-    background-color: #232528;
-    color: #97999d;
 }
 
 QListWidget#PluginList {
@@ -92,6 +85,41 @@ QListWidget#PluginList .QPushButton[UpdateButton=true] {
 
 QListWidget#PluginList .QPushButton[UpdateButton=true]:hover {
     background-color: #2ebe34;
+}
+
+QListWidget#PluginList .QLabel[TitleLabel=true] {
+    font-size: 16pt;
+    color: #ebebeb;
+}
+
+QListWidget#PluginList .QLabel[GroupLabel=true] {
+    font-size: 11pt;
+    color: #767776;
+}
+
+QListWidget#PluginList .QScrollBar:vertical {
+    border: 0px;
+    background: transparent;
+    width: 10px;
+}
+
+QListWidget#PluginList .QScrollBar::handle:vertical {
+    background-color: #252525;
+    min-height: 25px;
+    border: 0px solid red;
+    border-radius: 5px;
+}
+
+QListWidget#PluginList .QScrollBar::add-line:vertical {
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QListWidget#PluginList .QScrollBar::sub-line:vertical {
+    height: 0 px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
 }
 
 QLabel#ComboGroupLabel,

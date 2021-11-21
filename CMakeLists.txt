@@ -100,6 +100,8 @@ set(SRC
     src/main.cpp
     src/plugins.cpp
     src/plugins.h
+    src/pluginlistwidget.cpp
+    src/pluginlistwidget.h
     src/app.cpp
     src/app.h
     docs/assets.qrc

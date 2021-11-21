@@ -63,10 +63,12 @@ Plugins::~Plugins()
 }
 
 void Plugins::scanForAvailablePlugins(const QString &path,
-                                      bool append)
+                                      bool append,
+                                      bool emitChanges)
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _availablePlugins.clear(); }
+    emit statusMessage(tr("Scaning for plug-ins in %1").arg(path));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -77,12 +79,12 @@ void Plugins::scanForAvailablePlugins(const QString &path,
         if (!hasAvailablePlugin(plugin.id) &&
             !hasInstalledPlugin(plugin.id))
         {
-            emit statusMessage(tr("Found available plug-in %1").arg(plugin.label));
+            //emit statusMessage(tr("Found available plug-in %1").arg(plugin.label));
             _availablePlugins.push_back(plugin);
         }
     }
     emit statusMessage(tr("Done"));
-    if (_availablePlugins.size() > 0) { emit updatedPlugins(); }
+    if (_availablePlugins.size() > 0 && emitChanges) { emit updatedPlugins(); }
 }
 
 void Plugins::scanForInstalledPlugins(const QString &path,
@@ -90,6 +92,7 @@ void Plugins::scanForInstalledPlugins(const QString &path,
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _installedPlugins.clear(); }
+    emit statusMessage(tr("Scaning for plug-ins in %1").arg(path));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -98,11 +101,16 @@ void Plugins::scanForInstalledPlugins(const QString &path,
         if (!folderHasPlugin(item)) { continue; }
         PluginSpecs plugin = getPluginSpecs(item);
         if (!hasInstalledPlugin(plugin.id)) {
-            emit statusMessage(tr("Found installed plug-in %1").arg(plugin.label));
+            //emit statusMessage(tr("Found installed plug-in %1").arg(plugin.label));
             _installedPlugins.push_back(plugin);
         }
     }
     emit statusMessage(tr("Done"));
+}
+
+bool Plugins::hasPlugin(const QString &id)
+{
+    return hasAvailablePlugin(id) || hasInstalledPlugin(id);
 }
 
 bool Plugins::hasAvailablePlugin(const QString &id)
@@ -559,7 +567,7 @@ bool Plugins::isValidRepository(const Plugins::RepoSpecs &repo)
 
 void Plugins::loadRepositories()
 {
-    emit statusMessage(tr("Loading repositories"));
+    emit statusMessage(tr("Loading repositories ..."));
     _availableRepositories.clear();
     QSettings settings;
     if (settings.value("repos").isValid()) {
@@ -575,7 +583,7 @@ void Plugins::loadRepositories()
             repo.archive = QUrl::fromUserInput(options.at(0));
             if (options.size() > 1) { repo.folder = options.at(1); }
             if (isValidRepository(repo)) {
-                emit statusMessage(tr("Found repository %1").arg(repo.label));
+                //emit statusMessage(tr("Found repository %1").arg(repo.label));
                 _availableRepositories.push_back(repo);
             }
         }
@@ -604,9 +612,9 @@ void Plugins::saveRepositories(const std::vector<Plugins::RepoSpecs> &repos)
     settings.sync();
 }
 
-void Plugins::checkRepositories()
+void Plugins::checkRepositories(bool emitChanges)
 {
-    emit statusMessage(tr("Checking repositories"));
+    emit statusMessage(tr("Checking repositories ..."));
     scanForInstalledPlugins(getUserPluginPath());
     _availablePlugins.clear();
     _downloadQueue.clear();
@@ -624,7 +632,7 @@ void Plugins::checkRepositories()
             emit statusMessage(tr("Need to download %1 repository").arg(repo.label));
             _downloadQueue.push_back(repo.archive);
         } else {
-            scanForAvailablePlugins(repoPath, true);
+            scanForAvailablePlugins(repoPath, true, emitChanges);
         }
     }
     if (_downloadQueue.size() > 0) { emit downloadRequired(); }
