@@ -1,0 +1,164 @@
+/*
+#
+# Natron Plug-in Manager
+#
+# Copyright (c) 2021 Ole-André Rodlie. All rights reserved.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+#
+*/
+
+QToolBar#ToolBar,
+QMenuBar#MenuBar {
+    border: 0;
+    background-color: #232528;
+    color: #ebebeb;
+}
+
+QStatusBar#StatusBar,
+QWidget#MainWidget {
+    background-color: #101113;
+    color: #ebebeb;
+}
+
+QListWidget#PluginList {
+    background-color: #101113;
+}
+
+QListWidget#PluginList .QFrame {
+    border: 2px solid #252525;
+    border-radius: 10%;
+    background-color: #191919;
+}
+
+QListWidget#PluginList .QFrame:hover {
+    border-color: #ebebeb;
+}
+
+QListWidget#PluginList .QPushButton {
+    padding: 0.5em;
+    border: 2px solid #ebebeb;
+    border-radius: 10%;
+    color: #ebebeb;
+}
+
+QListWidget#PluginList .QPushButton:hover {
+    font-weight: bold;
+}
+
+QListWidget#PluginList .QPushButton[InstallButton=true]:pressed,
+QListWidget#PluginList .QPushButton[RemoveButton=true]:pressed,
+QListWidget#PluginList .QPushButton[UpdateButton=true]:pressed {
+    border-color: #ebebeb;
+}
+
+QListWidget#PluginList .QPushButton[InstallButton=true] {
+    border-color: #2e82be;
+}
+
+QListWidget#PluginList .QPushButton[InstallButton=true]:hover {
+    background-color: #2e82be;
+}
+
+QListWidget#PluginList .QPushButton[RemoveButton=true] {
+    border-color: #be2e44;
+}
+
+QListWidget#PluginList .QPushButton[RemoveButton=true]:hover {
+    background-color: #be2e44;
+}
+
+QListWidget#PluginList .QPushButton[UpdateButton=true] {
+    border-color: #2ebe34;
+}
+
+QListWidget#PluginList .QPushButton[UpdateButton=true]:hover {
+    background-color: #2ebe34;
+}
+
+QListWidget#PluginList .QLabel[TitleLabel=true] {
+    font-size: 16pt;
+    padding: 0;
+    margin: 0;
+    color: #ebebeb;
+}
+
+QListWidget#PluginList .QLabel[GroupLabel=true] {
+    font-size: 11pt;
+    padding: 0;
+    margin: 0;
+    color: #767776;
+}
+
+QListWidget#PluginList .QScrollBar:vertical {
+    border: 0px;
+    background: transparent;
+    width: 10px;
+}
+
+QListWidget#PluginList .QScrollBar::handle:vertical {
+    background-color: #252525;
+    min-height: 25px;
+    border: 0px solid red;
+    border-radius: 5px;
+}
+
+QListWidget#PluginList .QScrollBar::add-line:vertical {
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QListWidget#PluginList .QScrollBar::sub-line:vertical {
+    height: 0 px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QLabel#ComboGroupLabel,
+QLabel#ComboStatusLabel {
+    margin-right: 0.5em;
+}
+
+QLabel#ComboGroupLabel {
+    margin-left: 0.5em;
+}
+
+QComboBox#ComboGroup,
+QComboBox#ComboStatus {
+    padding: 0.2em;
+    padding-left: 0.5em;
+    border: 2px solid #252525;
+    border-radius: 10%;
+    background-color: #191919;
+}
+
+QComboBox#ComboGroup::down-arrow,
+QComboBox#ComboStatus::down-arrow {
+    image: none;
+}
+
+QComboBox#ComboGroup::drop-down,
+QComboBox#ComboStatus::drop-down {
+    border: 0;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #101113;
+}
+
+QProgressBar#ProgressBar {
+    padding: 0.1em;
+    margin-right: 0.3em;
+}

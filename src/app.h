@@ -25,15 +25,13 @@
 #include "plugins.h"
 
 #include <QMainWindow>
-#include <QTreeWidget>
-#include <QTextBrowser>
-#include <QLabel>
-#include <QTabWidget>
 #include <QStatusBar>
 #include <QProgressBar>
-#include <QPushButton>
 #include <QMenuBar>
 #include <QCloseEvent>
+#include <QListWidget>
+#include <QStackedWidget>
+#include <QComboBox>
 
 class NatronPluginManager : public QMainWindow
 {
@@ -43,44 +41,37 @@ public:
 
     NatronPluginManager(QWidget *parent = nullptr);
     ~NatronPluginManager();
-    void installPlugins();
-    void removePlugins();
-    bool isPluginTreeItemChecked(QTreeWidgetItem *item);
-    void setDefaultPluginInfo();
-    const QStringList getCheckedPlugins(QTreeWidget* tree);
-    const QStringList getCheckedAvailablePlugins();
-    const QStringList getCheckedInstalledPlugins();
+
+    const QSize getConfigPluginIconSize();
+    const QSize getConfigPluginGridSize();
+    const QSize getConfigWindowSize();
+
+signals:
+
+    void pluginStatusChanged(const QString &id,
+                             int type);
 
 private:
 
-    QString _appDoc;
+    QComboBox *_comboStatus;
+    QComboBox *_comboGroup;
+    QStackedWidget *_stack;
     Plugins *_plugins;
-    QTreeWidget *_availablePluginsTree;
-    QTreeWidget *_installedPluginsTree;
-    QTextBrowser *_pluginDesc;
-    QLabel *_pluginLabel;
-    QLabel *_pluginIcon;
-    QTabWidget *_leftTab;
     QStatusBar *_statusBar;
     QProgressBar *_progBar;
-    QPushButton *_installButton;
-    QPushButton *_removeButton;
-    QPushButton *_updateButton;
     QMenuBar *_menuBar;
+    QListWidget *_pluginList;
 
 private slots:
 
-    void setupPalette();
+    void setupStyle();
     void setupPlugins();
     void setupMenu();
     void setupStatusBar();
-    void setupButtons();
-    void setupTreeWidget(QTreeWidget *tree);
-    void setupPluginsTab();
-    void setupPluginInfo();
+    void setupPluginsComboBoxes();
+    void setupPluginList();
 
     void startup();
-    void loadRepositories();
     void handleUpdatedPlugins();
     void handleAboutActionTriggered();
     void handleAboutQtActionTriggered();
@@ -89,13 +80,15 @@ private slots:
     void handleDownloadStatusMessage(const QString &message,
                                      qint64 value,
                                      qint64 total);
-    void handleItemActivated(QTreeWidgetItem *item,
-                             QTreeWidgetItem* prev);
-    void handleInstallButton();
-    void handleRemoveButton();
-    void updatePlugins();
-    void populatePluginsTree(Plugins::PluginType type,
-                             QTreeWidget *tree);
+    void populatePlugins();
+
+    void handleComboGroupChanged(const QString &group);
+    void filterPluginsGroup(const QString &group);
+
+    void handlePluginButtonReleased(const QString &id,
+                                    int type);
+    void installPlugin(const QString &id);
+    void removePlugin(const QString &id);
 
 protected:
 

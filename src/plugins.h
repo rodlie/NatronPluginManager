@@ -30,6 +30,8 @@
 
 #include <vector>
 
+#define NATRON_ICON ":/NatronPluginManager.png"
+
 class Plugins : public QObject
 {
     Q_OBJECT
@@ -60,6 +62,7 @@ public:
     };
 
     enum PluginType {
+        NATRON_PLUGIN_TYPE_NONE,
         NATRON_PLUGIN_TYPE_AVAILABLE,
         NATRON_PLUGIN_TYPE_INSTALLED,
         NATRON_PLUGIN_TYPE_UPDATE
@@ -69,10 +72,12 @@ public:
     ~Plugins();
 
     void scanForAvailablePlugins(const QString &path,
-                                 bool append = false);
+                                 bool append = false,
+                                 bool emitChanges = true);
     void scanForInstalledPlugins(const QString &path,
                                  bool append = false);
 
+    bool hasPlugin(const QString &id);
     bool hasAvailablePlugin(const QString &id);
     bool hasInstalledPlugin(const QString &id);
 
@@ -80,9 +85,11 @@ public:
     Plugins::PluginSpecs getAvailablePlugin(const QString &id);
     Plugins::PluginSpecs getInstalledPlugin(const QString &id);
 
+    std::vector<Plugins::PluginSpecs> getPlugins();
     std::vector<Plugins::PluginSpecs> getAvailablePlugins();
     std::vector<Plugins::PluginSpecs> getInstalledPlugins();
 
+    const QStringList getPluginGroups();
     const QStringList getPluginGroups(Plugins::PluginType type);
     const std::vector<Plugins::PluginSpecs> getPluginsInGroup(Plugins::PluginType type,
                                                               const QString &group);
@@ -111,7 +118,7 @@ public:
     bool isValidRepository(const RepoSpecs &repo);
     void loadRepositories();
     void saveRepositories(const std::vector<RepoSpecs> &repos);
-    void checkRepositories();
+    void checkRepositories(bool emitChanges = true);
     std::vector<Plugins::RepoSpecs> getAvailableRepositories();
     Plugins::RepoSpecs getRepoFromUrl(const QUrl &url);
 

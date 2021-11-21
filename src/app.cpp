@@ -27,7 +27,6 @@
 #include <QFont>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QTreeWidgetItem>
 #include <QMessageBox>
 #include <QMenu>
 #include <QAction>
@@ -36,200 +35,149 @@
 #include <QTimer>
 #include <QtConcurrentRun>
 #include <QPalette>
+#include <QLabel>
+#include <QSettings>
 
-#define NATRON_ICON ":/NatronPluginManager.png"
-#define NATRON_PLUGIN_DOC_HTML ":/doc.html"
+#include "pluginlistwidget.h"
 
-#define PLUGIN_TREE_ROLE_ID Qt::UserRole+1
-#define PLUGIN_TREE_ROLE_TYPE Qt::UserRole+2
+#define NATRON_STYLE ":/stylesheet.qss"
+
+#define PLUGIN_LIST_ROLE_ID Qt::UserRole+1
+#define PLUGIN_LIST_ROLE_GROUP Qt::UserRole+2
+
+#define APP_STACK_LOADING 0
+#define APP_STACK_PLUGINS 1
 
 NatronPluginManager::NatronPluginManager(QWidget *parent)
     : QMainWindow(parent)
+    , _comboStatus(nullptr)
+    , _comboGroup(nullptr)
+    , _stack(nullptr)
     , _plugins(nullptr)
-    , _availablePluginsTree(nullptr)
-    , _installedPluginsTree(nullptr)
-    , _pluginDesc(nullptr)
-    , _pluginLabel(nullptr)
-    , _pluginIcon(nullptr)
-    , _leftTab(nullptr)
     , _statusBar(nullptr)
     , _progBar(nullptr)
-    , _installButton(nullptr)
-    , _removeButton(nullptr)
-    , _updateButton(nullptr)
     , _menuBar(nullptr)
+    , _pluginList(nullptr)
 {
-    setMinimumSize(780, 440);
+
+    setMinimumSize(getConfigWindowSize());
     setWindowIcon(QIcon(NATRON_ICON));
 
-    setupPalette();
+    setupStyle();
     setupPlugins();
     setupMenu();
     setupStatusBar();
-    setupButtons();
-    setupPluginInfo();
+    setupPluginsComboBoxes();
+    setupPluginList();
 
     QWidget *mainWidget = new QWidget(this);
-    QVBoxLayout *mainLayout = new QVBoxLayout(mainWidget);
-    mainLayout->setSpacing(5);
+    mainWidget->setObjectName("MainWidget");
+    mainWidget->setContentsMargins(0, 0, 0, 0);
+    QHBoxLayout *mainLayout = new QHBoxLayout(mainWidget);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
     setCentralWidget(mainWidget);
 
-    QWidget *topWidget = new QWidget(this);
-    topWidget->setContentsMargins(0, 0, 0, 0);
-    QVBoxLayout *topLayout = new QVBoxLayout(topWidget);
-    topLayout->setContentsMargins(0, 0, 0, 0);
+    QWidget *pluginsWidget = new QWidget(this);
+    pluginsWidget->setObjectName("PluginsWidget");
+    QVBoxLayout *pluginsWidgetLayout = new QVBoxLayout(pluginsWidget);
 
-    QWidget *bottomWidget = new QWidget(this);
-    bottomWidget->setContentsMargins(0, 0, 0, 0);
-    QHBoxLayout *bottomLayout = new QHBoxLayout(bottomWidget);
+    QWidget *pluginsComboWidget = new QWidget(this);
+    pluginsComboWidget->setObjectName("PluginsComboWidget");
+    QHBoxLayout *pluginsComboWidgetLayout = new QHBoxLayout(pluginsComboWidget);
 
-    QWidget *leftWidget = new QWidget(this);
-    leftWidget->setContentsMargins(0, 0, 0, 0);
-    QVBoxLayout *leftLayout = new QVBoxLayout(leftWidget);
-    leftLayout->setContentsMargins(0, 0, 0, 0);
+    QLabel *comboStatusLabel = new QLabel(tr("Status"), this);
+    comboStatusLabel->setObjectName("ComboStatusLabel");
 
-    QWidget *rightWidget = new QWidget(this);
-    rightWidget->setContentsMargins(0, 0, 0, 0);
-    QVBoxLayout *rightLayout = new QVBoxLayout(rightWidget);
-    rightLayout->setContentsMargins(0, 0, 0, 0);
+    QLabel *comboGroupLabel = new QLabel(tr("Groups"), this);
+    comboGroupLabel->setObjectName("ComboGroupLabel");
 
-    _availablePluginsTree = new QTreeWidget(this);
-    setupTreeWidget(_availablePluginsTree);
+    pluginsComboWidgetLayout->addWidget(comboStatusLabel);
+    pluginsComboWidgetLayout->addWidget(_comboStatus);
+    pluginsComboWidgetLayout->addWidget(comboGroupLabel);
+    pluginsComboWidgetLayout->addWidget(_comboGroup);
+    pluginsComboWidgetLayout->addStretch();
 
-    _installedPluginsTree = new QTreeWidget(this);
-    setupTreeWidget(_installedPluginsTree);
+    pluginsWidgetLayout->addWidget(pluginsComboWidget);
+    pluginsWidgetLayout->addWidget(_pluginList);
 
-    setupPluginsTab();
+    QWidget *loadingWidget = new QWidget(this);
+    QVBoxLayout *loadingWidgetLayout = new QVBoxLayout(loadingWidget);
+    QLabel *loadingWidgetLabel = new QLabel("<h1 style=\"text-align: center;\">"
+                                            "<img src=\":/NatronPluginManager.png\">"
+                                            "<br>Natron<br>"
+                                            "<span style=\"font-weight:normal;\">Plug-in Manager</span>"
+                                            "</h1>", this);
+    loadingWidgetLayout->addStretch();
+    loadingWidgetLayout->addWidget(loadingWidgetLabel);
+    loadingWidgetLayout->addStretch();
 
-    QWidget *pluginInfoWidget = new QWidget(this);
-    pluginInfoWidget->setContentsMargins(0, 0, 0, 0);
+    _stack = new QStackedWidget(this);
+    _stack->addWidget(loadingWidget);
+    _stack->addWidget(pluginsWidget);
 
-    QHBoxLayout *pluginInfoLayout = new QHBoxLayout(pluginInfoWidget);
-    pluginInfoLayout->setContentsMargins(10, 0, 10, 0);
-    rightLayout->addWidget(pluginInfoWidget);
+    _stack->setCurrentIndex(APP_STACK_LOADING);
+    mainLayout->addWidget(_stack);
 
-    pluginInfoLayout->addWidget(_pluginLabel);
-    pluginInfoLayout->addStretch();
-    pluginInfoLayout->addWidget(_pluginIcon);
-
-    mainLayout->addWidget(topWidget);
-    mainLayout->addWidget(bottomWidget);
-
-    bottomLayout->addWidget(leftWidget);
-    bottomLayout->addWidget(rightWidget);
-
-    leftLayout->addWidget(_leftTab);
-    topLayout->addWidget(pluginInfoWidget);
-    rightLayout->addWidget(_pluginDesc);
-
-    setDefaultPluginInfo();
-
-    QTimer::singleShot(100, this, SLOT(startup()));
+    QTimer::singleShot(100,
+                       this,
+                       SLOT(startup()));
 }
 
 NatronPluginManager::~NatronPluginManager()
 {
 }
 
-void NatronPluginManager::installPlugins()
+const QSize NatronPluginManager::getConfigPluginIconSize()
 {
-    QStringList plugins = getCheckedAvailablePlugins();
-    for (int i = 0; i < plugins.size(); ++i) {
-        Plugins::PluginStatus result = _plugins->installPlugin(plugins.at(i));
-        if (!result.success) {
-            QMessageBox::warning(this,
-                                 tr("Failed to install plugin"),
-                                 result.message);
-        }
-    }
-    updatePlugins();
+    QSettings settings;
+    return settings.value("PluginIconSize",
+                          QSize(48,48)).toSize();
 }
 
-void NatronPluginManager::removePlugins()
+const QSize NatronPluginManager::getConfigPluginGridSize()
 {
-    QStringList plugins = getCheckedInstalledPlugins();
-    for (int i = 0; i < plugins.size(); ++i) {
-        Plugins::PluginStatus result = _plugins->removePlugin(plugins.at(i));
-        if (!result.success) {
-            QMessageBox::warning(this,
-                                 tr("Failed to remove plugin"),
-                                 result.message);
-        }
-    }
-    updatePlugins();
+    QSettings settings;
+    return settings.value("PluginGridSize",
+                          QSize(330,160)).toSize();
 }
 
-bool NatronPluginManager::isPluginTreeItemChecked(QTreeWidgetItem *item)
+const QSize NatronPluginManager::getConfigWindowSize()
 {
-    if (item && item->checkState(0) == Qt::Checked) { return true; }
-    return false;
+    QSettings settings;
+    return settings.value("WindowSize",
+                          QSize(710,610)).toSize();
 }
 
-void NatronPluginManager::setDefaultPluginInfo()
-{
-    if (_appDoc.isEmpty()) {
-        QFile doc(NATRON_PLUGIN_DOC_HTML);
-        if (doc.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            _appDoc = doc.readAll();
-            doc.close();
-        }
-    }
-    _pluginDesc->setHtml(_appDoc);
-    _pluginLabel->setText(QString("<h1 style=\"font-weight: normal;\">Natron"
-                                  "<br><span style=\"font-size: small;\">%1 v%2</span></h1>")
-                          .arg(tr("Plug-in Manager"), qApp->applicationVersion()));
-    _pluginIcon->setPixmap(QIcon(QString(NATRON_ICON)).pixmap(48, 48).scaled(48,
-                                                                             48,
-                                                                             Qt::KeepAspectRatio,
-                                                                             Qt::SmoothTransformation));
-}
-
-const QStringList NatronPluginManager::getCheckedPlugins(QTreeWidget *tree)
-{
-    QStringList plugins;
-    for (int i = 0; i < tree->topLevelItemCount(); ++i) {
-        QTreeWidgetItem *item = tree->topLevelItem(i);
-        for (int y = 0; y < item->childCount(); ++y) {
-            QTreeWidgetItem *child = item->child(y);
-            if (child->checkState(0) == Qt::Checked) {
-                plugins << child->data(0, PLUGIN_TREE_ROLE_ID).toString();
-            }
-        }
-    }
-    return plugins;
-}
-
-const QStringList NatronPluginManager::getCheckedAvailablePlugins()
-{
-    return getCheckedPlugins(_availablePluginsTree);
-}
-
-const QStringList NatronPluginManager::getCheckedInstalledPlugins()
-{
-    return getCheckedPlugins(_installedPluginsTree);
-}
-
-void NatronPluginManager::setupPalette()
+void NatronPluginManager::setupStyle()
 {
     QPalette palette;
-    palette.setColor(QPalette::Window, QColor(53, 53, 53));
-    palette.setColor(QPalette::WindowText, Qt::white);
+    palette.setColor(QPalette::Window, QColor("#232528"));
+    palette.setColor(QPalette::WindowText, QColor("#ebebeb"));
     palette.setColor(QPalette::Base, QColor(15, 15, 15));
-    palette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
-    palette.setColor(QPalette::Link, Qt::white);
-    palette.setColor(QPalette::LinkVisited, Qt::white);
+    palette.setColor(QPalette::AlternateBase, QColor("#232528"));
+    palette.setColor(QPalette::Link, QColor("#ebebeb"));
+    palette.setColor(QPalette::LinkVisited, QColor("#ebebeb"));
     palette.setColor(QPalette::ToolTipText, Qt::black);
-    palette.setColor(QPalette::Text, Qt::white);
-    palette.setColor(QPalette::Button, QColor(53, 53, 53));
-    palette.setColor(QPalette::ButtonText, Qt::white);
+    palette.setColor(QPalette::Text, QColor("#ebebeb"));
+    palette.setColor(QPalette::Button, QColor("#232528"));
+    palette.setColor(QPalette::ButtonText, QColor("#ebebeb"));
     palette.setColor(QPalette::BrightText, Qt::red);
-    palette.setColor(QPalette::Highlight, QColor(196, 110, 33));
-    palette.setColor(QPalette::HighlightedText, Qt::white);
+    palette.setColor(QPalette::Highlight, QColor("#2e82be"));
+    palette.setColor(QPalette::HighlightedText, QColor("#ebebeb"));
     palette.setColor(QPalette::Disabled, QPalette::Text, Qt::darkGray);
     palette.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::darkGray);
-
-    qApp->setPalette(palette);
     qApp->setStyle(QString("fusion"));
+    qApp->setPalette(palette);
+
+    QSettings settings;
+    QFile styleFile(settings.value("stylesheet", NATRON_STYLE).toString());
+    if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QString stylesheet = styleFile.readAll();
+        styleFile.close();
+        qApp->setStyleSheet(stylesheet);
+    }
 }
 
 void NatronPluginManager::setupPlugins()
@@ -252,6 +200,7 @@ void NatronPluginManager::setupPlugins()
 void NatronPluginManager::setupMenu()
 {
     _menuBar = new QMenuBar(this);
+    _menuBar->setObjectName("MenuBar");
     setMenuWidget(_menuBar);
 
     QMenu *fileMenu = new QMenu(tr("File"), this);
@@ -286,7 +235,8 @@ void NatronPluginManager::setupMenu()
 void NatronPluginManager::setupStatusBar()
 {
     _statusBar = new QStatusBar(this);
-    _statusBar->setSizeGripEnabled(true);
+    _statusBar->setObjectName("StatusBar");
+    _statusBar->setSizeGripEnabled(false);
     connect(_plugins,
             SIGNAL(statusMessage(QString)),
             this,
@@ -295,6 +245,7 @@ void NatronPluginManager::setupStatusBar()
     setStatusBar(_statusBar);
 
     _progBar = new QProgressBar(this);
+    _progBar->setObjectName("ProgressBar");
     _progBar->setMaximumWidth(100);
     _progBar->setRange(0, 1);
     _progBar->setValue(1);
@@ -304,105 +255,52 @@ void NatronPluginManager::setupStatusBar()
     _statusBar->addPermanentWidget(_progBar);
 }
 
-void NatronPluginManager::setupButtons()
+void NatronPluginManager::setupPluginsComboBoxes()
 {
-    _installButton = new QPushButton(tr("Install"), this);
-    _installButton->setEnabled(false);
+    _comboStatus = new QComboBox(this);
+    _comboStatus->setObjectName("ComboStatus");
+    _comboStatus->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    _comboStatus->addItem(tr("All"), Plugins::NATRON_PLUGIN_TYPE_NONE);
+    _comboStatus->insertSeparator(1);
+    _comboStatus->addItem(tr("Available"), Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
+    _comboStatus->addItem(tr("Installed"), Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
+    //_comboStatus->addItem(tr("Updates"), Plugins::NATRON_PLUGIN_TYPE_UPDATE);
+    _comboStatus->setEnabled(false);
 
-    _removeButton = new QPushButton(tr("Remove"), this);
-    _removeButton->setEnabled(false);
+    _comboGroup = new QComboBox(this);
+    _comboGroup->setObjectName("ComboGroup");
+    _comboGroup->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    _comboGroup->setEnabled(false);
 
-    connect(_installButton,
-            SIGNAL(released()),
+    connect(_comboGroup,
+            SIGNAL(currentTextChanged(QString)),
             this,
-            SLOT(handleInstallButton()));
-    connect(_removeButton,
-            SIGNAL(released()),
-            this,
-            SLOT(handleRemoveButton()));
+            SLOT(handleComboGroupChanged(QString)));
 }
 
-void NatronPluginManager::setupTreeWidget(QTreeWidget *tree)
+void NatronPluginManager::setupPluginList()
 {
-    tree->setHeaderHidden(true);
-    tree->setFrameShape(QFrame::NoFrame);
-    connect(tree,
-            SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),
-            this,
-            SLOT(handleItemActivated(QTreeWidgetItem*,QTreeWidgetItem*)));
-}
-
-void NatronPluginManager::setupPluginsTab()
-{
-    _leftTab = new QTabWidget(this);
-    _leftTab->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    _leftTab->setTabPosition(QTabWidget::West);
-
-    QWidget *installTabWidget = new QWidget(this);
-    installTabWidget->setContentsMargins(0, 0, 0, 0);
-    QVBoxLayout *installTabLayout = new QVBoxLayout(installTabWidget);
-    installTabLayout->setContentsMargins(0, 0, 0, 0);
-    installTabLayout->setSpacing(0);
-
-    QWidget *installButtonWidget = new QWidget(this);
-    installButtonWidget->setContentsMargins(0, 0, 0, 0);
-    QHBoxLayout *installButtonLayout = new QHBoxLayout(installButtonWidget);
-    installButtonLayout->setContentsMargins(2, 2, 2, 2);
-
-    installButtonLayout->addWidget(_installButton);
-    installTabLayout->addWidget(_availablePluginsTree);
-    installTabLayout->addWidget(installButtonWidget);
-
-    QWidget *removeTabWidget = new QWidget(this);
-    removeTabWidget->setContentsMargins(0, 0, 0, 0);
-    QVBoxLayout *removeTabLayout = new QVBoxLayout(removeTabWidget);
-    removeTabLayout->setContentsMargins(0, 0, 0, 0);
-    removeTabLayout->setSpacing(0);
-
-    QWidget *removeButtonWidget = new QWidget(this);
-    removeButtonWidget->setContentsMargins(0, 0, 0, 0);
-    QHBoxLayout *removeButtonLayout = new QHBoxLayout(removeButtonWidget);
-    removeButtonLayout->setContentsMargins(2, 2, 2, 2);
-
-    removeButtonLayout->addWidget(_removeButton);
-    removeTabLayout->addWidget(_installedPluginsTree);
-    removeTabLayout->addWidget(removeButtonWidget);
-
-    _leftTab->addTab(installTabWidget, tr("Available"));
-    _leftTab->addTab(removeTabWidget, tr("Installed"));
-    //_leftTab->addTab(new QWidget(), tr("Updates"));
-}
-
-void NatronPluginManager::setupPluginInfo()
-{
-    _pluginLabel = new QLabel(this);
-    _pluginIcon = new QLabel(this);
-
-    _pluginDesc = new QTextBrowser(this);
-    _pluginDesc->setReadOnly(true);
-    _pluginDesc->setOpenLinks(true);
-    _pluginDesc->setOpenExternalLinks(true);
+    _pluginList = new QListWidget(this);
+    _pluginList->setObjectName("PluginList");
+    _pluginList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _pluginList->setFrameShape(QFrame::NoFrame);
+    _pluginList->setViewMode(QListView::IconMode);
+    _pluginList->setGridSize(getConfigPluginGridSize());
+    _pluginList->setResizeMode(QListView::Adjust);
+    _pluginList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 void NatronPluginManager::startup()
 {
-    QtConcurrent::run(this, &NatronPluginManager::loadRepositories);
-}
-
-void NatronPluginManager::loadRepositories()
-{
-    _plugins->loadRepositories();
+    QtConcurrent::run(_plugins, &Plugins::loadRepositories);
 }
 
 void NatronPluginManager::handleUpdatedPlugins()
 {
-    qDebug() << "AVAILABLE" << _plugins->getAvailablePlugins().size();
-    qDebug() << "INSTALLED" << _plugins->getInstalledPlugins().size();
+    qDebug() << "AVAILABLE PLUGINS" << _plugins->getAvailablePlugins().size();
+    qDebug() << "INSTALLED PLUGINS" << _plugins->getInstalledPlugins().size();
 
-    populatePluginsTree(Plugins::NATRON_PLUGIN_TYPE_INSTALLED,
-                        _installedPluginsTree);
-    populatePluginsTree(Plugins::NATRON_PLUGIN_TYPE_AVAILABLE,
-                        _availablePluginsTree);
+    populatePlugins();
 }
 
 void NatronPluginManager::handleAboutActionTriggered()
@@ -449,143 +347,107 @@ void NatronPluginManager::handleDownloadStatusMessage(const QString &message,
     if (value == total && _progBar->isVisible()) { _progBar->hide(); }
 }
 
-void NatronPluginManager::handleItemActivated(QTreeWidgetItem *item,
-                                              QTreeWidgetItem */*prev*/)
+void NatronPluginManager::populatePlugins()
 {
-    if (!item) { return; }
-    QString id = item->data(0, PLUGIN_TREE_ROLE_ID).toString();
-    Plugins::PluginSpecs specs;
-    int type = item->data(0, PLUGIN_TREE_ROLE_TYPE).toInt();
-    switch(type) {
-    case Plugins::NATRON_PLUGIN_TYPE_AVAILABLE:
-        specs = _plugins->getAvailablePlugin(id);
-        break;
-    case Plugins::NATRON_PLUGIN_TYPE_INSTALLED:
-        specs = _plugins->getInstalledPlugin(id);
-        break;
-    default:;
-    }
-    if (!_plugins->isValidPlugin(specs) || specs.id != id) { return; }
+    std::vector<Plugins::PluginSpecs> plugins =  _plugins->getPlugins();
+    QStringList groups = _plugins->getPluginGroups();
 
-    _pluginLabel->setText(QString("<h1 style=\"font-weight: normal;\">%1<br>"
-                                  "<span style=\"font-size: small;\">%2 v%4</span></h1>")
-                          .arg(specs.label,
-                               specs.id,
-                               QString::number(specs.version)));
-    if (specs.icon.isEmpty()) {
-        _pluginIcon->setPixmap(QIcon(QString(NATRON_ICON)).pixmap(48,
-                                                                  48).scaled(48,
-                                                                             48,
-                                                                             Qt::KeepAspectRatio,
-                                                                             Qt::SmoothTransformation));
-    } else {
-        _pluginIcon->setPixmap(QIcon(QString("%1/%2").arg(specs.path,
-                                                          specs.icon)).pixmap(48,
-                                                                              48).scaled(48,
-                                                                                         48,
-                                                                                         Qt::KeepAspectRatio,
-                                                                                         Qt::SmoothTransformation));
-    }
+    _comboGroup->clear();
+    _comboGroup->addItem(tr("All"));
+    _comboGroup->insertSeparator(1);
+    _comboGroup->addItems(groups);
+    _comboGroup->adjustSize();
 
-    QString desc = specs.desc.replace("\\n", "<br>").replace("\\", "").simplified();
-    if (desc.isEmpty()) {
-        desc = QString("<p>%1.</p>").arg(tr("No description available"));
-    }
+    _comboGroup->setEnabled(true);
+    _comboStatus->setEnabled(true);
 
-    desc = desc.replace(QRegExp("((?:https?|ftp)://\\S+)"),
-                        "<a href=\"\\1\">\\1</a>");
+    _pluginList->clear();
 
-    _pluginDesc->setHtml(desc);
-}
-
-void NatronPluginManager::handleInstallButton()
-{
-    QStringList plugins = getCheckedAvailablePlugins();
-    if (plugins.size() > 0) { installPlugins(); }
-    else {
-        QMessageBox::information(this,
-                                 tr("Install"),
-                                 tr("No plug-ins marked for installation."));
-    }
-}
-
-void NatronPluginManager::handleRemoveButton()
-{
-    QStringList plugins = getCheckedInstalledPlugins();
-    if (plugins.size() > 0) { removePlugins(); }
-    else {
-        QMessageBox::information(this,
-                                 tr("Install"),
-                                 tr("No plug-ins marked for removal."));
-    }
-}
-
-void NatronPluginManager::updatePlugins()
-{
-    _installButton->setEnabled(false);
-    _removeButton->setEnabled(false);
-    setDefaultPluginInfo();
-    _plugins->checkRepositories();
-}
-
-void NatronPluginManager::populatePluginsTree(Plugins::PluginType type,
-                                              QTreeWidget *tree)
-{
-    if (!tree) { return; }
-
-    std::vector<Plugins::PluginSpecs> plugins;
-    switch (type) {
-    case Plugins::NATRON_PLUGIN_TYPE_AVAILABLE:
-        plugins = _plugins->getAvailablePlugins();
-        break;
-    case Plugins::NATRON_PLUGIN_TYPE_INSTALLED:
-        plugins = _plugins->getInstalledPlugins();
-        break;
-    default:;
-    }
-    if (plugins.size() < 1) { return; }
-
-    tree->clear();
-
-    QStringList groups = _plugins->getPluginGroups(type);
-    for (int i = 0; i < groups.size(); ++i) {
-        QTreeWidgetItem *groupItem = new QTreeWidgetItem(tree);
-        groupItem->setText(0, groups.at(i));
-        QFont font = groupItem->font(0);
-        font.setBold(true);
-        groupItem->setFont(0, font);
-        tree->addTopLevelItem(groupItem);
-        std::vector<Plugins::PluginSpecs> plugins = _plugins->getPluginsInGroup(type, groups.at(i));
-        for (unsigned long y = 0; y < plugins.size(); ++y) {
-            Plugins::PluginSpecs specs = plugins.at(y);
-            if (specs.id.isEmpty()) { continue; }
-            QTreeWidgetItem *pluginItem = new QTreeWidgetItem();
-            QString iconPath = QString("%1/%2").arg(specs.path, specs.icon);
-            QIcon fallbackIcon = QIcon(NATRON_ICON);
-            QIcon pluginIcon;
-            if (QFile::exists(iconPath) && !specs.icon.isEmpty()) {
-                pluginIcon = QIcon(iconPath);
-            }
-            if (pluginIcon.isNull()) { pluginIcon = fallbackIcon; }
-            pluginItem->setIcon(0, pluginIcon);
-            pluginItem->setData(0, PLUGIN_TREE_ROLE_ID, specs.id);
-            pluginItem->setData(0, PLUGIN_TREE_ROLE_TYPE, type);
-            pluginItem->setText(0, specs.label);
-            pluginItem->setCheckState(0, Qt::Unchecked);
-
-            groupItem->addChild(pluginItem);
+    for (unsigned long i = 0; i< plugins.size(); ++i) {
+        QListWidgetItem *item = new QListWidgetItem(); // the list takes ownership
+        Plugins::PluginSpecs plugin = plugins.at(i);
+        item->setFlags(Qt::NoItemFlags);
+        item->setData(PLUGIN_LIST_ROLE_GROUP, plugin.group);
+        item->setData(PLUGIN_LIST_ROLE_ID, plugin.id);
+        Plugins::PluginType type = Plugins::NATRON_PLUGIN_TYPE_NONE;
+        if (_plugins->hasAvailablePlugin(plugin.id)) {
+            type = Plugins::NATRON_PLUGIN_TYPE_AVAILABLE;
+        } else if (_plugins->hasInstalledPlugin(plugin.id)) {
+            type = Plugins::NATRON_PLUGIN_TYPE_INSTALLED;
         }
-        tree->expandItem(groupItem); // add to settings?
+        PluginListWidget *pwidget = new PluginListWidget(plugin,
+                                                         type,
+                                                         _pluginList->gridSize(),
+                                                         getConfigPluginIconSize()); // the list takes ownership
+        connect(pwidget,
+                SIGNAL(pluginButtonReleased(QString,int)),
+                this,
+                SLOT(handlePluginButtonReleased(QString,int)));
+        connect(this,
+                SIGNAL(pluginStatusChanged(QString,int)),
+                pwidget,
+                SLOT(setPluginStatus(QString,int)));
+
+        item->setSizeHint(_pluginList->gridSize());
+        _pluginList->addItem(item);
+        _pluginList->setItemWidget(item, pwidget);
     }
 
+    _stack->setCurrentIndex(APP_STACK_PLUGINS);
+}
+
+void NatronPluginManager::handleComboGroupChanged(const QString &group)
+{
+    filterPluginsGroup(group);
+}
+
+void NatronPluginManager::filterPluginsGroup(const QString &group)
+{
+    for (int i = 0; i < _pluginList->count(); ++i) {
+        QListWidgetItem *item = _pluginList->item(i);
+        bool hasGroup = (item->data(PLUGIN_LIST_ROLE_GROUP).toString() == group || group == tr("All"));
+        item->setHidden(group.isEmpty() ? true : !hasGroup);
+    }
+}
+
+void NatronPluginManager::handlePluginButtonReleased(const QString &id,
+                                                     int type)
+{
+    if (!_plugins->hasPlugin(id)) { return; }
     switch (type) {
     case Plugins::NATRON_PLUGIN_TYPE_AVAILABLE:
-        _installButton->setEnabled(_availablePluginsTree->topLevelItemCount() > 0? true:false);
+        installPlugin(id);
         break;
     case Plugins::NATRON_PLUGIN_TYPE_INSTALLED:
-        _removeButton->setEnabled(_installedPluginsTree->topLevelItemCount() >  0? true:false);
+        removePlugin(id);
         break;
     default:;
+    }
+}
+
+void NatronPluginManager::installPlugin(const QString &id)
+{
+    Plugins::PluginStatus status = _plugins->installPlugin(id);
+    if (!status.success) {
+        QMessageBox::warning(this, tr("Install"), status.message);
+    } else {
+        emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
+        QtConcurrent::run(_plugins,
+                          &Plugins::checkRepositories,
+                          false);
+    }
+}
+
+void NatronPluginManager::removePlugin(const QString &id)
+{
+    Plugins::PluginStatus status = _plugins->removePlugin(id);
+    if (!status.success) {
+        QMessageBox::warning(this, tr("Remove"), status.message);
+    } else {
+        emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
+        QtConcurrent::run(_plugins,
+                          &Plugins::checkRepositories,
+                          false);
     }
 }
 
@@ -594,7 +456,7 @@ void NatronPluginManager::closeEvent(QCloseEvent *e)
     if (_plugins->isBusy()) {
         QMessageBox::warning(this,
                              tr("Unable to quit"),
-                             tr("The application is currently working, please try again later."));
+                             tr("The application is busy, please try again later."));
         e->ignore();
     } else {
         e->accept();
