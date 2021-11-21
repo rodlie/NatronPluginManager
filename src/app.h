@@ -31,7 +31,6 @@
 #include <QCloseEvent>
 #include <QListWidget>
 #include <QStackedWidget>
-#include <QToolBar>
 #include <QComboBox>
 
 class NatronPluginManager : public QMainWindow
@@ -45,22 +44,23 @@ public:
 
     const QSize getConfigPluginIconSize();
     const QSize getConfigPluginGridSize();
+    const QSize getConfigWindowSize();
 
 signals:
 
-    void pluginStatusChanged(const QString &id, int type);
+    void pluginStatusChanged(const QString &id,
+                             int type);
 
 private:
 
     QComboBox *_comboStatus;
     QComboBox *_comboGroup;
-    QToolBar *_toolBar;
     QStackedWidget *_stack;
     Plugins *_plugins;
     QStatusBar *_statusBar;
     QProgressBar *_progBar;
     QMenuBar *_menuBar;
-    QListWidget *_pluginsList;
+    QListWidget *_pluginList;
 
 private slots:
 
@@ -68,6 +68,8 @@ private slots:
     void setupPlugins();
     void setupMenu();
     void setupStatusBar();
+    void setupPluginsComboBoxes();
+    void setupPluginList();
 
     void startup();
     void handleUpdatedPlugins();
@@ -80,11 +82,13 @@ private slots:
                                      qint64 total);
     void populatePlugins();
 
-    void handleComboGroup(const QString &group);
+    void handleComboGroupChanged(const QString &group);
     void filterPluginsGroup(const QString &group);
 
-    void handlePluginButtonReleased(const QString &id, int type);
+    void handlePluginButtonReleased(const QString &id,
+                                    int type);
     void installPlugin(const QString &id);
+    void removePlugin(const QString &id);
 
 protected:
 

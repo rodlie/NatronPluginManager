@@ -68,7 +68,7 @@ void Plugins::scanForAvailablePlugins(const QString &path,
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _availablePlugins.clear(); }
-    emit statusMessage(tr("Scaning for plug-ins in %1").arg(path));
+    emit statusMessage(tr("Scanning for plug-ins ..."));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -83,7 +83,7 @@ void Plugins::scanForAvailablePlugins(const QString &path,
             _availablePlugins.push_back(plugin);
         }
     }
-    emit statusMessage(tr("Done"));
+    //emit statusMessage(tr("Done"));
     if (_availablePlugins.size() > 0 && emitChanges) { emit updatedPlugins(); }
 }
 
@@ -92,7 +92,7 @@ void Plugins::scanForInstalledPlugins(const QString &path,
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _installedPlugins.clear(); }
-    emit statusMessage(tr("Scaning for plug-ins in %1").arg(path));
+    emit statusMessage(tr("Scanning for plug-ins ..."));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -105,7 +105,7 @@ void Plugins::scanForInstalledPlugins(const QString &path,
             _installedPlugins.push_back(plugin);
         }
     }
-    emit statusMessage(tr("Done"));
+    //emit statusMessage(tr("Done"));
 }
 
 bool Plugins::hasPlugin(const QString &id)

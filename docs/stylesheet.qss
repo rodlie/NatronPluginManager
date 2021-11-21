@@ -125,5 +125,36 @@ QListWidget#PluginList .QScrollBar::sub-line:vertical {
 QLabel#ComboGroupLabel,
 QLabel#ComboStatusLabel {
     margin-right: 0.5em;
+}
+
+QLabel#ComboGroupLabel {
     margin-left: 0.5em;
+}
+
+QComboBox#ComboGroup,
+QComboBox#ComboStatus {
+    padding: 0.2em;
+    padding-left: 0.5em;
+    border: 2px solid #252525;
+    border-radius: 10%;
+    background-color: #191919;
+}
+
+QComboBox#ComboGroup::down-arrow,
+QComboBox#ComboStatus::down-arrow {
+    image: none;
+}
+
+QComboBox#ComboGroup::drop-down,
+QComboBox#ComboStatus::drop-down {
+    border: 0;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #101113;
+}
+
+QProgressBar#ProgressBar {
+    padding: 0.1em;
+    margin-right: 0.3em;
 }

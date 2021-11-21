@@ -42,103 +42,85 @@
 
 #define NATRON_STYLE ":/stylesheet.qss"
 
-#define PLUGIN_LIST_ROLE_ID Qt::UserRole+4
-#define PLUGIN_LIST_ROLE_GROUP Qt::UserRole+5
+#define PLUGIN_LIST_ROLE_ID Qt::UserRole+1
+#define PLUGIN_LIST_ROLE_GROUP Qt::UserRole+2
+
+#define APP_STACK_LOADING 0
+#define APP_STACK_PLUGINS 1
 
 NatronPluginManager::NatronPluginManager(QWidget *parent)
     : QMainWindow(parent)
     , _comboStatus(nullptr)
     , _comboGroup(nullptr)
-    , _toolBar(nullptr)
     , _stack(nullptr)
     , _plugins(nullptr)
     , _statusBar(nullptr)
     , _progBar(nullptr)
     , _menuBar(nullptr)
-    , _pluginsList(nullptr)
+    , _pluginList(nullptr)
 {
 
-    setMinimumWidth(350*2);
-    setMinimumHeight((160*3)+80);
+    setMinimumSize(getConfigWindowSize());
     setWindowIcon(QIcon(NATRON_ICON));
 
     setupStyle();
     setupPlugins();
     setupMenu();
     setupStatusBar();
+    setupPluginsComboBoxes();
+    setupPluginList();
 
-    _toolBar = new QToolBar(this);
-    _toolBar->setObjectName("ToolBar");
-    _toolBar->setMovable(false);
-    addToolBar(_toolBar);
+    QWidget *mainWidget = new QWidget(this);
+    mainWidget->setObjectName("MainWidget");
+    QHBoxLayout *mainLayout = new QHBoxLayout(mainWidget);
+    mainLayout->setSpacing(0);
+
+    setCentralWidget(mainWidget);
+
+    QWidget *pluginsWidget = new QWidget(this);
+    pluginsWidget->setObjectName("PluginsWidget");
+    QVBoxLayout *pluginsWidgetLayout = new QVBoxLayout(pluginsWidget);
+
+    QWidget *pluginsComboWidget = new QWidget(this);
+    pluginsComboWidget->setObjectName("PluginsComboWidget");
+    QHBoxLayout *pluginsComboWidgetLayout = new QHBoxLayout(pluginsComboWidget);
 
     QLabel *comboStatusLabel = new QLabel(tr("Status"), this);
     comboStatusLabel->setObjectName("ComboStatusLabel");
 
-    _comboStatus = new QComboBox(this);
-    _comboStatus->setObjectName("ComboStatus");
-    _comboStatus->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    _comboStatus->addItem(tr("All"), Plugins::NATRON_PLUGIN_TYPE_NONE);
-    _comboStatus->insertSeparator(1);
-    _comboStatus->addItem(tr("Available"), Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
-    _comboStatus->addItem(tr("Installed"), Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
-    //_comboStatus->addItem(tr("Updates"), Plugins::NATRON_PLUGIN_TYPE_UPDATE);
-
     QLabel *comboGroupLabel = new QLabel(tr("Groups"), this);
     comboGroupLabel->setObjectName("ComboGroupLabel");
 
-    _comboGroup = new QComboBox(this);
-    _comboGroup->setObjectName("ComboGroup");
-    _comboGroup->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    pluginsComboWidgetLayout->addWidget(comboStatusLabel);
+    pluginsComboWidgetLayout->addWidget(_comboStatus);
+    pluginsComboWidgetLayout->addWidget(comboGroupLabel);
+    pluginsComboWidgetLayout->addWidget(_comboGroup);
+    pluginsComboWidgetLayout->addStretch();
 
-    connect(_comboGroup, SIGNAL(currentTextChanged(QString)), this, SLOT(handleComboGroup(QString)));
+    pluginsWidgetLayout->addWidget(pluginsComboWidget);
+    pluginsWidgetLayout->addWidget(_pluginList);
 
-    QWidget *toolBarSpacer = new QWidget(this);
-    toolBarSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    _toolBar->addWidget(toolBarSpacer);
-    _toolBar->addWidget(comboStatusLabel);
-    _toolBar->addWidget(_comboStatus);
-    _toolBar->addWidget(comboGroupLabel);
-    _toolBar->addWidget(_comboGroup);
-
-    QWidget *mainWidget = new QWidget(this);
-    mainWidget->setObjectName("MainWidget");
-    //mainWidget->setContentsMargins(0, 0, 0, 0);
-    QHBoxLayout *mainLayout = new QHBoxLayout(mainWidget);
-    //mainLayout->setContentsMargins(0, 0, 0, 0);
-
-    mainLayout->setSpacing(0);
-    setCentralWidget(mainWidget);
-
-    _pluginsList = new QListWidget(this);
-    _pluginsList->setObjectName("PluginList");
-    _pluginsList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    _pluginsList->setFrameShape(QFrame::NoFrame);
-    _pluginsList->setViewMode(QListView::IconMode);
-    _pluginsList->setGridSize(QSize(330,160));
-    _pluginsList->setResizeMode(QListView::Adjust);
-    _pluginsList->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    QWidget *stackWidget1 = new QWidget(this);
-    QVBoxLayout *stackWidgetLayout1 = new QVBoxLayout(stackWidget1);
-    QLabel *stackLabel1 = new QLabel("<h1 style=\"text-align: center;\"><img src=\":/NatronPluginManager.png\"><br>Natron<br><span style=\"font-weight:normal;\">Plug-in Manager</span><br><br><span style=\"font-size:small;text-transform:uppercase;;\">Loading please wait ...</span></h1>", this);
-    stackWidgetLayout1->addStretch();
-    stackWidgetLayout1->addWidget(stackLabel1);
-    stackWidgetLayout1->addStretch();
+    QWidget *loadingWidget = new QWidget(this);
+    QVBoxLayout *loadingWidgetLayout = new QVBoxLayout(loadingWidget);
+    QLabel *loadingWidgetLabel = new QLabel("<h1 style=\"text-align: center;\">"
+                                            "<img src=\":/NatronPluginManager.png\">"
+                                            "<br>Natron<br>"
+                                            "<span style=\"font-weight:normal;\">Plug-in Manager</span>"
+                                            "</h1>", this);
+    loadingWidgetLayout->addStretch();
+    loadingWidgetLayout->addWidget(loadingWidgetLabel);
+    loadingWidgetLayout->addStretch();
 
     _stack = new QStackedWidget(this);
-    _stack->addWidget(stackWidget1);
-    _stack->addWidget(_pluginsList);
+    _stack->addWidget(loadingWidget);
+    _stack->addWidget(pluginsWidget);
 
-    _stack->setCurrentIndex(0);
+    _stack->setCurrentIndex(APP_STACK_LOADING);
     mainLayout->addWidget(_stack);
 
-
-
-
-
-
-    QTimer::singleShot(100, this, SLOT(startup()));
+    QTimer::singleShot(100,
+                       this,
+                       SLOT(startup()));
 }
 
 NatronPluginManager::~NatronPluginManager()
@@ -148,13 +130,22 @@ NatronPluginManager::~NatronPluginManager()
 const QSize NatronPluginManager::getConfigPluginIconSize()
 {
     QSettings settings;
-    return settings.value("PluginIconSize", QSize(48,48)).toSize();
+    return settings.value("PluginIconSize",
+                          QSize(48,48)).toSize();
 }
 
 const QSize NatronPluginManager::getConfigPluginGridSize()
 {
     QSettings settings;
-    return settings.value("PluginGridSize", QSize(330,160)).toSize();
+    return settings.value("PluginGridSize",
+                          QSize(330,160)).toSize();
+}
+
+const QSize NatronPluginManager::getConfigWindowSize()
+{
+    QSettings settings;
+    return settings.value("WindowSize",
+                          QSize(710,610)).toSize();
 }
 
 void NatronPluginManager::setupStyle()
@@ -262,6 +253,41 @@ void NatronPluginManager::setupStatusBar()
     _statusBar->addPermanentWidget(_progBar);
 }
 
+void NatronPluginManager::setupPluginsComboBoxes()
+{
+    _comboStatus = new QComboBox(this);
+    _comboStatus->setObjectName("ComboStatus");
+    _comboStatus->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    _comboStatus->addItem(tr("All"), Plugins::NATRON_PLUGIN_TYPE_NONE);
+    _comboStatus->insertSeparator(1);
+    _comboStatus->addItem(tr("Available"), Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
+    _comboStatus->addItem(tr("Installed"), Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
+    //_comboStatus->addItem(tr("Updates"), Plugins::NATRON_PLUGIN_TYPE_UPDATE);
+    _comboStatus->setEnabled(false);
+
+    _comboGroup = new QComboBox(this);
+    _comboGroup->setObjectName("ComboGroup");
+    _comboGroup->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    _comboGroup->setEnabled(false);
+
+    connect(_comboGroup,
+            SIGNAL(currentTextChanged(QString)),
+            this,
+            SLOT(handleComboGroupChanged(QString)));
+}
+
+void NatronPluginManager::setupPluginList()
+{
+    _pluginList = new QListWidget(this);
+    _pluginList->setObjectName("PluginList");
+    _pluginList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    _pluginList->setFrameShape(QFrame::NoFrame);
+    _pluginList->setViewMode(QListView::IconMode);
+    _pluginList->setGridSize(getConfigPluginGridSize());
+    _pluginList->setResizeMode(QListView::Adjust);
+    _pluginList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
 void NatronPluginManager::startup()
 {
     QtConcurrent::run(_plugins, &Plugins::loadRepositories);
@@ -321,7 +347,7 @@ void NatronPluginManager::handleDownloadStatusMessage(const QString &message,
 
 void NatronPluginManager::populatePlugins()
 {
-    std::vector<Plugins::PluginSpecs> myplugins =  _plugins->getPlugins();
+    std::vector<Plugins::PluginSpecs> plugins =  _plugins->getPlugins();
     QStringList groups = _plugins->getPluginGroups();
 
     _comboGroup->clear();
@@ -330,22 +356,26 @@ void NatronPluginManager::populatePlugins()
     _comboGroup->addItems(groups);
     _comboGroup->adjustSize();
 
-    _pluginsList->clear();
+    _comboGroup->setEnabled(true);
+    _comboStatus->setEnabled(true);
 
-    for (unsigned long i = 0; i< myplugins.size(); ++i) {
+    _pluginList->clear();
+
+    for (unsigned long i = 0; i< plugins.size(); ++i) {
         QListWidgetItem *item = new QListWidgetItem(); // the list takes ownership
+        Plugins::PluginSpecs plugin = plugins.at(i);
         item->setFlags(Qt::NoItemFlags);
-        item->setData(PLUGIN_LIST_ROLE_GROUP, myplugins.at(i).group);
-        item->setData(PLUGIN_LIST_ROLE_ID, myplugins.at(i).id);
+        item->setData(PLUGIN_LIST_ROLE_GROUP, plugin.group);
+        item->setData(PLUGIN_LIST_ROLE_ID, plugin.id);
         Plugins::PluginType type = Plugins::NATRON_PLUGIN_TYPE_NONE;
-        if (_plugins->hasAvailablePlugin(myplugins.at(i).id)) {
+        if (_plugins->hasAvailablePlugin(plugin.id)) {
             type = Plugins::NATRON_PLUGIN_TYPE_AVAILABLE;
-        } else if (_plugins->hasInstalledPlugin(myplugins.at(i).id)) {
+        } else if (_plugins->hasInstalledPlugin(plugin.id)) {
             type = Plugins::NATRON_PLUGIN_TYPE_INSTALLED;
         }
-        PluginListWidget *pwidget = new PluginListWidget(myplugins.at(i),
+        PluginListWidget *pwidget = new PluginListWidget(plugin,
                                                          type,
-                                                         _pluginsList->gridSize(),
+                                                         _pluginList->gridSize(),
                                                          getConfigPluginIconSize()); // the list takes ownership
         connect(pwidget,
                 SIGNAL(pluginButtonReleased(QString,int)),
@@ -356,22 +386,23 @@ void NatronPluginManager::populatePlugins()
                 pwidget,
                 SLOT(setPluginStatus(QString,int)));
 
-        item->setSizeHint(_pluginsList->gridSize());
-        _pluginsList->addItem(item);
-        _pluginsList->setItemWidget(item, pwidget);
+        item->setSizeHint(_pluginList->gridSize());
+        _pluginList->addItem(item);
+        _pluginList->setItemWidget(item, pwidget);
     }
-    _stack->setCurrentIndex(1);
+
+    _stack->setCurrentIndex(APP_STACK_PLUGINS);
 }
 
-void NatronPluginManager::handleComboGroup(const QString &group)
+void NatronPluginManager::handleComboGroupChanged(const QString &group)
 {
     filterPluginsGroup(group);
 }
 
 void NatronPluginManager::filterPluginsGroup(const QString &group)
 {
-    for (int i = 0; i < _pluginsList->count(); ++i) {
-        QListWidgetItem *item = _pluginsList->item(i);
+    for (int i = 0; i < _pluginList->count(); ++i) {
+        QListWidgetItem *item = _pluginList->item(i);
         bool hasGroup = (item->data(PLUGIN_LIST_ROLE_GROUP).toString() == group || group == tr("All"));
         item->setHidden(group.isEmpty() ? true : !hasGroup);
     }
@@ -385,6 +416,9 @@ void NatronPluginManager::handlePluginButtonReleased(const QString &id,
     case Plugins::NATRON_PLUGIN_TYPE_AVAILABLE:
         installPlugin(id);
         break;
+    case Plugins::NATRON_PLUGIN_TYPE_INSTALLED:
+        removePlugin(id);
+        break;
     default:;
     }
 }
@@ -396,7 +430,22 @@ void NatronPluginManager::installPlugin(const QString &id)
         QMessageBox::warning(this, tr("Install"), status.message);
     } else {
         emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
-        QtConcurrent::run(_plugins, &Plugins::checkRepositories, false);
+        QtConcurrent::run(_plugins,
+                          &Plugins::checkRepositories,
+                          false);
+    }
+}
+
+void NatronPluginManager::removePlugin(const QString &id)
+{
+    Plugins::PluginStatus status = _plugins->removePlugin(id);
+    if (!status.success) {
+        QMessageBox::warning(this, tr("Remove"), status.message);
+    } else {
+        emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
+        QtConcurrent::run(_plugins,
+                          &Plugins::checkRepositories,
+                          false);
     }
 }
 
@@ -405,7 +454,7 @@ void NatronPluginManager::closeEvent(QCloseEvent *e)
     if (_plugins->isBusy()) {
         QMessageBox::warning(this,
                              tr("Unable to quit"),
-                             tr("The application is currently working, please try again later."));
+                             tr("The application is busy, please try again later."));
         e->ignore();
     } else {
         e->accept();
