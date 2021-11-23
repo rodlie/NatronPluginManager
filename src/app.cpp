@@ -283,6 +283,10 @@ void NatronPluginManager::setupPluginsComboBoxes()
             SIGNAL(currentTextChanged(QString)),
             this,
             SLOT(handleComboGroupChanged(QString)));
+    connect(_comboStatus,
+            SIGNAL(currentTextChanged(QString)),
+            this,
+            SLOT(handleComboStatusChanged(QString)));
 }
 
 void NatronPluginManager::setupPluginList()
@@ -403,9 +407,28 @@ void NatronPluginManager::populatePlugins()
     _stack->setCurrentIndex(APP_STACK_PLUGINS);
 }
 
+void NatronPluginManager::handleComboStatusChanged(const QString &status)
+{
+    filterPluginsStatus(status);
+}
+
 void NatronPluginManager::handleComboGroupChanged(const QString &group)
 {
     filterPluginsGroup(group);
+}
+
+void NatronPluginManager::filterPluginsStatus(const QString &status)
+{
+    for (int i = 0; i < _pluginList->count(); ++i) {
+        QListWidgetItem *item = _pluginList->item(i);
+        bool visible = true;
+        if (status == tr("Available")) {
+            visible = _plugins->hasAvailablePlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
+        } else if (status == tr("Installed")) {
+            visible = _plugins->hasInstalledPlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
+        }
+        item->setHidden(!visible);
+    }
 }
 
 void NatronPluginManager::filterPluginsGroup(const QString &group)

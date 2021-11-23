@@ -82,7 +82,10 @@ private slots:
                                      qint64 total);
     void populatePlugins();
 
+    void handleComboStatusChanged(const QString &status);
     void handleComboGroupChanged(const QString &group);
+
+    void filterPluginsStatus(const QString &status);
     void filterPluginsGroup(const QString &group);
 
     void handlePluginButtonReleased(const QString &id,
