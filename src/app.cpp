@@ -59,8 +59,6 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     , _menuBar(nullptr)
     , _pluginList(nullptr)
 {
-
-    setMinimumSize(getConfigWindowSize());
     setWindowIcon(QIcon(NATRON_ICON));
 
     setupStyle();
@@ -120,13 +118,14 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     _stack->setCurrentIndex(APP_STACK_LOADING);
     mainLayout->addWidget(_stack);
 
-    QTimer::singleShot(100,
+    QTimer::singleShot(0,
                        this,
                        SLOT(startup()));
 }
 
 NatronPluginManager::~NatronPluginManager()
 {
+    saveWindowConfig();
 }
 
 const QSize NatronPluginManager::getConfigPluginIconSize()
@@ -143,11 +142,31 @@ const QSize NatronPluginManager::getConfigPluginGridSize()
                           QSize(330,160)).toSize();
 }
 
-const QSize NatronPluginManager::getConfigWindowSize()
+const QByteArray NatronPluginManager::getConfigWindowGeometry()
 {
     QSettings settings;
-    return settings.value("WindowSize",
-                          QSize(710,610)).toSize();
+    return settings.value("WindowGeometry").toByteArray();
+}
+
+const QByteArray NatronPluginManager::getConfigWindowState()
+{
+    QSettings settings;
+    return settings.value("WindowState").toByteArray();
+}
+
+bool NatronPluginManager::getConfigWindowIsMaximized()
+{
+    QSettings settings;
+    return settings.value("WindowMaximized", false).toBool();
+}
+
+void NatronPluginManager::saveWindowConfig()
+{
+    QSettings settings;
+    settings.setValue("WindowGeometry", saveGeometry());
+    settings.setValue("WindowState", saveState());
+    settings.setValue("WindowMaximized", isMaximized());
+    settings.sync();
 }
 
 void NatronPluginManager::setupStyle()
@@ -303,6 +322,13 @@ void NatronPluginManager::setupPluginList()
 
 void NatronPluginManager::startup()
 {
+    QByteArray geo = getConfigWindowGeometry();
+    if (!geo.isNull()) { restoreGeometry(getConfigWindowGeometry()); }
+    QByteArray state = getConfigWindowState();
+    if (!state.isEmpty()) { restoreState(state); }
+    if (getConfigWindowIsMaximized()) {
+        showMaximized();
+    }
     QtConcurrent::run(_plugins, &Plugins::loadRepositories);
 }
 

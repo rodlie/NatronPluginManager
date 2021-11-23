@@ -32,6 +32,8 @@
 #include <QListWidget>
 #include <QStackedWidget>
 #include <QComboBox>
+#include <QSize>
+#include <QByteArray>
 
 class NatronPluginManager : public QMainWindow
 {
@@ -44,7 +46,11 @@ public:
 
     const QSize getConfigPluginIconSize();
     const QSize getConfigPluginGridSize();
-    const QSize getConfigWindowSize();
+    const QByteArray getConfigWindowGeometry();
+    const QByteArray getConfigWindowState();
+    bool getConfigWindowIsMaximized();
+
+    void saveWindowConfig();
 
 signals:
 
