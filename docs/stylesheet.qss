@@ -53,9 +53,10 @@ QListWidget#PluginList .QPushButton {
     color: #ebebeb;
 }
 
-QListWidget#PluginList .QPushButton:hover {
+/* this looks ugly on windows */
+/*QListWidget#PluginList .QPushButton:hover {
     font-weight: bold;
-}
+}*/
 
 QListWidget#PluginList .QPushButton[InstallButton=true]:pressed,
 QListWidget#PluginList .QPushButton[RemoveButton=true]:pressed,
