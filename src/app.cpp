@@ -171,12 +171,19 @@ void NatronPluginManager::setupStyle()
     qApp->setStyle(QString("fusion"));
     qApp->setPalette(palette);
 
+    double pluginTitleFontSize = 16;
+    double pluginGroupFontSize = 11;
+#ifndef Q_OS_MAC
+    pluginTitleFontSize = 12;
+    pluginGroupFontSize = 9;
+#endif
+
     QSettings settings;
     QFile styleFile(settings.value("stylesheet", NATRON_STYLE).toString());
     if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QString stylesheet = styleFile.readAll();
         styleFile.close();
-        qApp->setStyleSheet(stylesheet);
+        qApp->setStyleSheet(stylesheet.arg(pluginTitleFontSize).arg(pluginGroupFontSize));
     }
 }
 

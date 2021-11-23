@@ -88,14 +88,14 @@ QListWidget#PluginList .QPushButton[UpdateButton=true]:hover {
 }
 
 QListWidget#PluginList .QLabel[TitleLabel=true] {
-    font-size: 16pt;
+    font-size: %1pt;
     padding: 0;
     margin: 0;
     color: #ebebeb;
 }
 
 QListWidget#PluginList .QLabel[GroupLabel=true] {
-    font-size: 11pt;
+    font-size: %2pt;
     padding: 0;
     margin: 0;
     color: #767776;
@@ -159,6 +159,6 @@ QComboBox QAbstractItemView {
 }
 
 QProgressBar#ProgressBar {
-    padding: 0.1em;
+    /*padding: 0.1em;*/
     margin-right: 0.3em;
 }
