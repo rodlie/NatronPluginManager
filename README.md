@@ -15,10 +15,3 @@ mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make
 make DESTDIR=<PACKAGE> install
 ```
-
-## Downloads
-
-### Artifacts
-
-* [Windows](https://github.com/rodlie/NatronPluginManager/actions/workflows/mingw.yml)
-* [macOS](https://github.com/rodlie/NatronPluginManager/actions/workflows/macos.yml)
