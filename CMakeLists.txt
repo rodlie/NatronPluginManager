@@ -73,18 +73,18 @@ if(WIN32)
     set(PRODUCT_ORIGINAL_FILENAME "${PROJECT_NAME}.exe")
     set(PRODUCT_BUNDLE ${PROJECT_NAME})
     set(WINDOWS_RESOURCE_FILE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.rc)
-    configure_file(docs/${PROJECT_NAME}.rc.in
+    configure_file(share/${PROJECT_NAME}.rc.in
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.rc
         @ONLY
     )
-    configure_file(docs/${PROJECT_NAME}.ico
+    configure_file(share/${PROJECT_NAME}.ico
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.ico
         COPYONLY
     )
 endif()
 
 if(APPLE)
-    set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/docs/${PROJECT_NAME}.icns)
+    set(ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/share/${PROJECT_NAME}.icns)
     set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
     set(MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION})
     set(MACOSX_BUNDLE_LONG_VERSION_STRING ${PROJECT_VERSION})
@@ -104,7 +104,7 @@ set(SRC
     src/pluginlistwidget.h
     src/app.cpp
     src/app.h
-    docs/assets.qrc
+    share/assets.qrc
 )
 
 if(WIN32)
@@ -139,7 +139,7 @@ if(UNIX AND NOT APPLE)
         ${CMAKE_INSTALL_BINDIR}
     )
     install(FILES
-        docs/${PROJECT_NAME}.desktop
+        share/${PROJECT_NAME}.desktop
         DESTINATION
         ${CMAKE_INSTALL_DATAROOTDIR}/applications
     )
@@ -151,7 +151,7 @@ if(UNIX AND NOT APPLE)
     )
     install(
         DIRECTORY
-        docs/hicolor
+        share/hicolor
         DESTINATION
         ${CMAKE_INSTALL_DATAROOTDIR}/icons/
     )

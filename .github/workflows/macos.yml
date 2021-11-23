@@ -3,7 +3,7 @@ name: macOS
 on: [push, pull_request]
 
 jobs:
-  build1:
+  catalina:
     runs-on: macos-10.15
     steps:
     - uses: actions/checkout@v2
@@ -14,14 +14,14 @@ jobs:
     - name: Setup local
       run: sudo mkdir -p /opt/local/lib && sudo cp -a /opt/libzip/lib/* /opt/local/lib/
     - name: Build
-      run: CMAKE=cmake sh docs/macos.sh
+      run: CMAKE=cmake sh share/macos.sh
     - name: Artifact
       run: sudo cp build/NatronPluginManager.dmg /opt/
     - uses: actions/upload-artifact@v2
       with:
-        name: NatronPluginManager-${{github.sha}}-macOS.zip
+        name: NatronPluginManager-${{github.sha}}-macOS
         path: /opt/NatronPluginManager.dmg
-  build2:
+  bigsur:
     runs-on: macos-11
     steps:
     - uses: actions/checkout@v2
@@ -32,4 +32,4 @@ jobs:
     - name: Setup local
       run: sudo mkdir -p /opt/local/lib && sudo cp -a /opt/libzip/lib/* /opt/local/lib/
     - name: Build
-      run: CMAKE=cmake sh docs/macos.sh
+      run: CMAKE=cmake sh share/macos.sh
