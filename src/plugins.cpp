@@ -64,11 +64,12 @@ Plugins::~Plugins()
 
 void Plugins::scanForAvailablePlugins(const QString &path,
                                       bool append,
-                                      bool emitChanges)
+                                      bool emitChanges,
+                                      bool emitCache)
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _availablePlugins.clear(); }
-    emit statusMessage(tr("Scanning for plug-ins ..."));
+    emit statusMessage(tr("Scanning %1 ...").arg(path));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -85,6 +86,8 @@ void Plugins::scanForAvailablePlugins(const QString &path,
     }
     //emit statusMessage(tr("Done"));
     if (_availablePlugins.size() > 0 && emitChanges) { emit updatedPlugins(); }
+
+    if (emitCache) { emit updatedCache(); }
 }
 
 void Plugins::scanForInstalledPlugins(const QString &path,
@@ -92,7 +95,7 @@ void Plugins::scanForInstalledPlugins(const QString &path,
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _installedPlugins.clear(); }
-    emit statusMessage(tr("Scanning for plug-ins ..."));
+    emit statusMessage(tr("Scanning %1 ...").arg(path));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -612,7 +615,8 @@ void Plugins::saveRepositories(const std::vector<Plugins::RepoSpecs> &repos)
     settings.sync();
 }
 
-void Plugins::checkRepositories(bool emitChanges)
+void Plugins::checkRepositories(bool emitChanges,
+                                bool emitCache)
 {
     emit statusMessage(tr("Checking repositories ..."));
     scanForInstalledPlugins(getUserPluginPath());
@@ -632,7 +636,7 @@ void Plugins::checkRepositories(bool emitChanges)
             emit statusMessage(tr("Need to download %1 repository").arg(repo.label));
             _downloadQueue.push_back(repo.archive);
         } else {
-            scanForAvailablePlugins(repoPath, true, emitChanges);
+            scanForAvailablePlugins(repoPath, true, emitChanges, emitCache);
         }
     }
     if (_downloadQueue.size() > 0) { emit downloadRequired(); }

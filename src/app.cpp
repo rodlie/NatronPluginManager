@@ -202,6 +202,10 @@ void NatronPluginManager::setupPlugins()
             this,
             SLOT(handleUpdatedPlugins()));
     connect(_plugins,
+            SIGNAL(updatedCache()),
+            this,
+            SLOT(updateFilterPlugins()));
+    connect(_plugins,
             SIGNAL(statusError(QString)),
             this,
             SLOT(handlePluginsStatusError(QString)));
@@ -403,6 +407,11 @@ void NatronPluginManager::handleComboGroupChanged(const QString &group)
     filterPluginsGroup(group);
 }
 
+void NatronPluginManager::updateFilterPlugins()
+{
+    filterPluginsStatus(_comboStatus->currentText());
+}
+
 void NatronPluginManager::filterPluginsStatus(const QString &status)
 {
     for (int i = 0; i < _pluginList->count(); ++i) {
@@ -450,7 +459,8 @@ void NatronPluginManager::installPlugin(const QString &id)
         emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
         QtConcurrent::run(_plugins,
                           &Plugins::checkRepositories,
-                          false);
+                          false,
+                          true);
     }
 }
 
@@ -463,7 +473,8 @@ void NatronPluginManager::removePlugin(const QString &id)
         emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
         QtConcurrent::run(_plugins,
                           &Plugins::checkRepositories,
-                          false);
+                          false,
+                          true);
     }
 }
 

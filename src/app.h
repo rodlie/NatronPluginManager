@@ -89,6 +89,7 @@ private slots:
     void handleComboStatusChanged(const QString &status);
     void handleComboGroupChanged(const QString &group);
 
+    void updateFilterPlugins();
     void filterPluginsStatus(const QString &status);
     void filterPluginsGroup(const QString &group);
 

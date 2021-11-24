@@ -73,7 +73,8 @@ public:
 
     void scanForAvailablePlugins(const QString &path,
                                  bool append = false,
-                                 bool emitChanges = true);
+                                 bool emitChanges = true,
+                                 bool emitCache = false);
     void scanForInstalledPlugins(const QString &path,
                                  bool append = false);
 
@@ -118,7 +119,8 @@ public:
     bool isValidRepository(const RepoSpecs &repo);
     void loadRepositories();
     void saveRepositories(const std::vector<RepoSpecs> &repos);
-    void checkRepositories(bool emitChanges = true);
+    void checkRepositories(bool emitChanges = true,
+                           bool emitCache = false);
     std::vector<Plugins::RepoSpecs> getAvailableRepositories();
     Plugins::RepoSpecs getRepoFromUrl(const QUrl &url);
 
@@ -129,6 +131,7 @@ public:
 signals:
 
     void updatedPlugins();
+    void updatedCache();
     void statusMessage(const QString &message);
     void statusDownload(const QString &message,
                         qint64 value,
