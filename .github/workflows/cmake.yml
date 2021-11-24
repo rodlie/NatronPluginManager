@@ -20,7 +20,7 @@ jobs:
     - name: Install
       run: cd ${{github.workspace}}/build; sudo make install
     - name: Package
-      run: cd ${{github.workspace}}/build; make package
+      run: cd ${{github.workspace}}/build; sudo make package
     - name: Artifact
       run: sudo cp ${{github.workspace}}/build/NatronPluginManager.deb /opt/
     - uses: actions/upload-artifact@v2
