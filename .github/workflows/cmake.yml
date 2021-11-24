@@ -1,4 +1,4 @@
-name: Ubuntu
+name: Ubuntu Focal
 
 on: [push, pull_request]
 
@@ -7,13 +7,23 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v2
     - name: apt install
       run: sudo apt-get update && sudo apt-get install qt5-default qtbase5-dev libzip-dev
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=/usr
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+    - name: Install
+      run: cd ${{github.workspace}}/build; sudo make install
+    - name: Package
+      run: cd ${{github.workspace}}/build; make package
+    - name: Artifact
+      run: sudo cp ${{github.workspace}}/build/NatronPluginManager.deb /opt/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: NatronPluginManager-${{github.sha}}-Ubuntu-Focal
+        path: /opt/NatronPluginManager.deb
