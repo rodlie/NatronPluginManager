@@ -12,10 +12,27 @@ A plug-in ([PyPlug](https://github.com/NatronGitHub/natron-plugins)) manager for
 
 This application requires CMake, Qt 5.10+ (Concurrent/Network/Widgets) and libzip to build.
 
+### Checkout
+```
+git clone https://github.com/rodlie/NatronPluginManager
+cd NatronPluginManager
+```
+
+### Build
 ```
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make
-make DESTDIR=<PACKAGE> install
+```
+
+### Run
+
+```
+./NatronPluginManager
+```
+
+### Package (DEB)
+```
+make package
 ```
 
 ## License
