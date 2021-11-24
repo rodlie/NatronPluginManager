@@ -25,8 +25,6 @@
 #include "plugins.h"
 
 #include <QMainWindow>
-#include <QStatusBar>
-#include <QProgressBar>
 #include <QMenuBar>
 #include <QCloseEvent>
 #include <QListWidget>
@@ -34,6 +32,8 @@
 #include <QComboBox>
 #include <QSize>
 #include <QByteArray>
+
+#include "statuswidget.h"
 
 class NatronPluginManager : public QMainWindow
 {
@@ -63,17 +63,15 @@ private:
     QComboBox *_comboGroup;
     QStackedWidget *_stack;
     Plugins *_plugins;
-    QStatusBar *_statusBar;
-    QProgressBar *_progBar;
     QMenuBar *_menuBar;
     QListWidget *_pluginList;
+    StatusWidget *_status;
 
 private slots:
 
     void setupStyle();
     void setupPlugins();
     void setupMenu();
-    void setupStatusBar();
     void setupPluginsComboBoxes();
     void setupPluginList();
 

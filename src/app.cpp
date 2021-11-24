@@ -45,7 +45,7 @@
 #define PLUGIN_LIST_ROLE_ID Qt::UserRole+1
 #define PLUGIN_LIST_ROLE_GROUP Qt::UserRole+2
 
-#define APP_STACK_LOADING 0
+#define APP_STACK_STATUS 0
 #define APP_STACK_PLUGINS 1
 
 NatronPluginManager::NatronPluginManager(QWidget *parent)
@@ -54,17 +54,15 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     , _comboGroup(nullptr)
     , _stack(nullptr)
     , _plugins(nullptr)
-    , _statusBar(nullptr)
-    , _progBar(nullptr)
     , _menuBar(nullptr)
     , _pluginList(nullptr)
+    , _status(nullptr)
 {
     setWindowIcon(QIcon(NATRON_ICON));
 
     setupStyle();
     setupPlugins();
     setupMenu();
-    setupStatusBar();
     setupPluginsComboBoxes();
     setupPluginList();
 
@@ -100,22 +98,12 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     pluginsWidgetLayout->addWidget(pluginsComboWidget);
     pluginsWidgetLayout->addWidget(_pluginList);
 
-    QWidget *loadingWidget = new QWidget(this);
-    QVBoxLayout *loadingWidgetLayout = new QVBoxLayout(loadingWidget);
-    QLabel *loadingWidgetLabel = new QLabel("<h1 style=\"text-align: center;\">"
-                                            "<img src=\":/NatronPluginManager.png\">"
-                                            "<br>Natron<br>"
-                                            "<span style=\"font-weight:normal;\">Plug-in Manager</span>"
-                                            "</h1>", this);
-    loadingWidgetLayout->addStretch();
-    loadingWidgetLayout->addWidget(loadingWidgetLabel);
-    loadingWidgetLayout->addStretch();
-
+    _status = new StatusWidget(this);
     _stack = new QStackedWidget(this);
-    _stack->addWidget(loadingWidget);
+    _stack->addWidget(_status);
     _stack->addWidget(pluginsWidget);
 
-    _stack->setCurrentIndex(APP_STACK_LOADING);
+    _stack->setCurrentIndex(APP_STACK_STATUS);
     mainLayout->addWidget(_stack);
 
     QTimer::singleShot(0,
@@ -258,29 +246,6 @@ void NatronPluginManager::setupMenu()
             SLOT(handleAboutQtActionTriggered()));
 }
 
-void NatronPluginManager::setupStatusBar()
-{
-    _statusBar = new QStatusBar(this);
-    _statusBar->setObjectName("StatusBar");
-    _statusBar->setSizeGripEnabled(false);
-    connect(_plugins,
-            SIGNAL(statusMessage(QString)),
-            this,
-            SLOT(handlePluginsStatusMessage(QString)));
-
-    setStatusBar(_statusBar);
-
-    _progBar = new QProgressBar(this);
-    _progBar->setObjectName("ProgressBar");
-    _progBar->setMaximumWidth(100);
-    _progBar->setRange(0, 1);
-    _progBar->setValue(1);
-    _progBar->setFormat("");
-    _progBar->hide();
-
-    _statusBar->addPermanentWidget(_progBar);
-}
-
 void NatronPluginManager::setupPluginsComboBoxes()
 {
     _comboStatus = new QComboBox(this);
@@ -369,19 +334,14 @@ void NatronPluginManager::handlePluginsStatusError(const QString &message)
 
 void NatronPluginManager::handlePluginsStatusMessage(const QString &message)
 {
-    if (!_statusBar) { return; }
-    _statusBar->showMessage(message, 1000);
+    _status->showMessage(message);
 }
 
 void NatronPluginManager::handleDownloadStatusMessage(const QString &message,
                                                       qint64 value,
                                                       qint64 total)
 {
-    if (_progBar->isHidden()) { _progBar->show(); }
-    _statusBar->showMessage(message, 1000);
-    _progBar->setRange(0, total);
-    _progBar->setValue(value);
-    if (value == total && _progBar->isVisible()) { _progBar->hide(); }
+    _status->showProgress(message, value, total);
 }
 
 void NatronPluginManager::populatePlugins()

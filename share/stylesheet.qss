@@ -158,8 +158,3 @@ QComboBox#ComboStatus::drop-down {
 QComboBox QAbstractItemView {
     background-color: #101113;
 }
-
-QProgressBar#ProgressBar {
-    /*padding: 0.1em;*/
-    margin-right: 0.3em;
-}

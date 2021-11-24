@@ -102,6 +102,8 @@ set(SRC
     src/plugins.h
     src/pluginlistwidget.cpp
     src/pluginlistwidget.h
+    src/statuswidget.cpp
+    src/statuswidget.h
     src/app.cpp
     src/app.h
     share/assets.qrc
