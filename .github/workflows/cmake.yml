@@ -17,10 +17,8 @@ jobs:
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=/usr
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-    - name: Install
-      run: cd ${{github.workspace}}/build; sudo make install
     - name: Package
-      run: cd ${{github.workspace}}/build; sudo make package
+      run: cd ${{github.workspace}}/build; make package
     - name: Artifact
       run: sudo cp ${{github.workspace}}/build/NatronPluginManager.deb /opt/
     - uses: actions/upload-artifact@v2
