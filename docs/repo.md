@@ -13,6 +13,7 @@ All repositories should implement ``manifest.xml``.
     <version>1.0</version>
     <title>A repository</title>
     <url>https://repository.org</url>
+    <manifest>https://repository.org/manifest.xml</manifest>
     <logo>https://repository.org/logo.png</logo>
     <zip>https://repository.org/download.zip</zip>
     <checksum>3cf24664724862401fce453e9020c3cd6727665b939c5b0bb8bd55bb1a8286eb</checksum>
@@ -21,7 +22,7 @@ All repositories should implement ``manifest.xml``.
 </repo>
 ```
 
-**NOTE:** the filename ``manifest.xml`` is not an requirement. The end-user adds a new repository by providing a direct url to the XML file *(``https://repository.org/manifest.xml``)*. This url is also used to check for updates.
+**NOTE:** the filename ``manifest.xml`` is not an requirement. The end-user adds a new repository by providing a direct url to the XML file.
 
 ### ``version``
 
@@ -34,6 +35,10 @@ Title/Name of the repository.
 ### ``url``
 
 Url to the homepage of the repository. This is optional.
+
+### ``manifest``
+
+Direct url to the manifest XML file.
 
 ### ``logo``
 
