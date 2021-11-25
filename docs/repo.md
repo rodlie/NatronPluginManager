@@ -21,6 +21,8 @@ All repositories should implement ``manifest.xml``.
 </repo>
 ```
 
+**NOTE:** the filename ``manifest.xml`` is not an requirement. The end-user adds a new repository by providing a direct url to the XML file *(``https://repository.org/manifest.xml``)*. This url is also used to check for updates.
+
 ### ``version``
 
 Natron Plug-in Repository Standard version compatibility.
@@ -35,7 +37,7 @@ Url to the homepage of the repository. This is optional.
 
 ### ``logo``
 
-Direct url to a PNG image for the repository. The image is downloaded once. This is optional.
+Direct url to a PNG image for the repository, should be at least 128x128 px. The image is downloaded once. This is optional.
 
 ### ``zip``
 
@@ -47,7 +49,7 @@ Direct url to a ZIP file containing the plug-ins.
 
 ### ``changelog``
 
-Direct url to a text file in markdown. No external assets are allowed. This is optional.
+Direct url to a text file in markdown listing changes done in the repository. No external assets are allowed. This is optional.
 
 ### ``modified``
 
@@ -63,6 +65,8 @@ Each plug-in must have it's own folder, including a minimum of one valid PyPlug 
     └── MyPlugin.py
 ```
 
-The folder can contains any amount of files.
+The folder may contain any amount of files.
 
-If the folder contains a ``README.md`` file it will be used instead of the description found in the ``.py`` file.
+If the folder contains a ``README.md`` file it will be used instead of the description found in the ``.py`` file. External assets contained in the folder is allowed.
+
+If the folder contains a ``ChangeLog.md`` file it will be used to display specific changes for the plug-in. External assets contained in the folder is allowed.
