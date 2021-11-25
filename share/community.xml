@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<repo>
+    <version>1.0</version>
+    <title>Natron Community Plug-ins</title>
+    <url>https://github.com/NatronGitHub/natron-plugins</url>
+    <manifest>https://raw.githubusercontent.com/rodlie/NatronPluginManager/main/share/community.xml</manifest>
+    <logo>https://raw.githubusercontent.com/rodlie/NatronPluginManager/main/share/NatronPluginManager.png</logo>
+    <zip>https://github.com/NatronGitHub/natron-plugins/archive/refs/heads/master.zip</zip>
+    <checksum></checksum>
+    <changelog>https://raw.githubusercontent.com/rodlie/NatronPluginManager/main/share/community.md</changelog>
+    <modified>2021-11-25 19:00</modified>
+</repo>

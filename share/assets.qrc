@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>NatronPluginManager.png</file>
         <file>stylesheet.qss</file>
+        <file>community.md</file>
+        <file>community.xml</file>
     </qresource>
 </RCC>

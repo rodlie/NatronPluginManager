@@ -3,9 +3,9 @@
 **DRAFT, NOT IMPLEMENTED IN CLIENT YET**
 
 
-# manifest.xml
+# Manifest
 
-All repositories should implement ``manifest.xml``.
+All repositories must implement a manifest XML file.
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
@@ -22,7 +22,7 @@ All repositories should implement ``manifest.xml``.
 </repo>
 ```
 
-**NOTE:** the filename ``manifest.xml`` is not an requirement. The end-user adds a new repository by providing a direct url to the XML file.
+The client adds a new repository by providing a direct url to the XML file.
 
 ### ``version``
 
@@ -63,7 +63,7 @@ Last modified repository date. Bump this when something changes in the repositor
 
 # PyPlug
 
-Each plug-in must have it's own folder, including a minimum of one valid PyPlug .``py`` file, the filename must match the parent folder.
+Each PyPlug plug-in must have it's own folder, including a minimum of one valid PyPlug .``py`` file, the filename must match the parent folder.
 
 ```
 └── MyPlugin
