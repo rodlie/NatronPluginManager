@@ -27,6 +27,7 @@
 #include <QUrl>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QDateTime>
 
 #include <vector>
 
@@ -50,10 +51,15 @@ public:
     };
 
     struct RepoSpecs {
+        double version = 1.0;
         QString label;
         QString folder;
-        QUrl archive;
+        QUrl url;
         QUrl manifest;
+        QUrl logo;
+        QUrl zip;
+        QString checksum;
+        QDateTime modified;
     };
 
     struct PluginStatus {
@@ -114,7 +120,8 @@ public:
     Plugins::PluginStatus removePlugin(const QString &id);
 
     Plugins::PluginStatus extractPluginArchive(const QString &filename,
-                                               const QString &folder);
+                                               const QString &folder,
+                                               const QString &checksum = QString());
 
     bool isValidRepository(const RepoSpecs &repo);
     void loadRepositories();
@@ -127,6 +134,10 @@ public:
     bool isBusy();
 
     void removeFromDownloadQueue(const QUrl &url);
+
+    bool isValidManifest(const QString &manifest);
+    Plugins::RepoSpecs readManifest(const QString &manifest);
+    Plugins::RepoSpecs openManifest(const QString &filename);
 
 signals:
 

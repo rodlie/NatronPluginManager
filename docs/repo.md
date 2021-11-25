@@ -17,7 +17,6 @@ All repositories must implement a manifest XML file.
     <logo>https://repository.org/logo.png</logo>
     <zip>https://repository.org/download.zip</zip>
     <checksum>3cf24664724862401fce453e9020c3cd6727665b939c5b0bb8bd55bb1a8286eb</checksum>
-    <changelog>https://repository.org/changelog.md</changelog>
     <modified>2021-11-25 19:00</modified>
 </repo>
 ```
@@ -52,14 +51,9 @@ Direct url to a ZIP file containing the plug-ins. Must be ``http://``, ``https:/
 
 ``SHA-256`` checksum of the ZIP file. This is optional.
 
-### ``changelog``
-
-Direct url to a text file in markdown listing changes done in the repository. No external assets are allowed. Must be ``http://``, ``https://`` or ``file://``. This is optional.
-
 ### ``modified``
 
 Last modified repository date. Bump this when something changes in the repository. Must be formated as `yyyy-mm-dd hh:mm`. This is optional.
-
 
 # PyPlug
 
@@ -75,3 +69,5 @@ The folder may contain any amount of files.
 If the folder contains a ``README.md`` file it will be used instead of the description found in the ``.py`` file. External assets contained in the folder is allowed.
 
 If the folder contains a ``ChangeLog.md`` file it will be used to display specific changes for the plug-in. External assets contained in the folder is allowed.
+
+If the folder contains a ``AUTHORS.md`` file it will be used to display the author(s) of the plug-in. External assets are not allowed.

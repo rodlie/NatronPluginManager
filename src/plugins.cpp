@@ -34,6 +34,7 @@
 #include <QHash>
 #include <QHashIterator>
 #include <QNetworkRequest>
+#include <QXmlStreamReader>
 
 #include <zip.h>
 
@@ -471,7 +472,8 @@ Plugins::PluginStatus Plugins::removePlugin(const QString &id)
 }
 
 Plugins::PluginStatus Plugins::extractPluginArchive(const QString &filename,
-                                                    const QString &folder)
+                                                    const QString &folder,
+                                                    const QString &checksum)
 {
     PluginStatus status;
     status.success = true;
@@ -488,6 +490,8 @@ Plugins::PluginStatus Plugins::extractPluginArchive(const QString &filename,
         status.success = false;
         return status;
     }
+
+    qDebug() << "checksum?" << checksum;
 
     struct zip* p_zip = NULL;
     zip_int64_t n_entries;
@@ -564,7 +568,7 @@ Plugins::PluginStatus Plugins::extractPluginArchive(const QString &filename,
 
 bool Plugins::isValidRepository(const Plugins::RepoSpecs &repo)
 {
-    if (repo.label.isEmpty() || repo.archive.isEmpty()) { return false; }
+    if (repo.label.isEmpty() || repo.zip.isEmpty()) { return false; }
     return true;
 }
 
@@ -583,7 +587,7 @@ void Plugins::loadRepositories()
             if (label.isEmpty() || options.size() < 1) { continue; }
             RepoSpecs repo;
             repo.label = label;
-            repo.archive = QUrl::fromUserInput(options.at(0));
+            repo.zip = QUrl::fromUserInput(options.at(0));
             if (options.size() > 1) { repo.folder = options.at(1); }
             if (isValidRepository(repo)) {
                 //emit statusMessage(tr("Found repository %1").arg(repo.label));
@@ -593,7 +597,7 @@ void Plugins::loadRepositories()
     } else {
         RepoSpecs repo;
         repo.label = "Community";
-        repo.archive = QUrl::fromUserInput(NATRON_COMMUNITY_PLUGINS_URL);
+        repo.zip = QUrl::fromUserInput(NATRON_COMMUNITY_PLUGINS_URL);
         _availableRepositories.push_back(repo);
     }
 
@@ -609,7 +613,7 @@ void Plugins::saveRepositories(const std::vector<Plugins::RepoSpecs> &repos)
     for (unsigned long i = 0; i < repos.size(); ++i) {
         if (list.contains(repos.at(i).label)) { continue; }
         list.insert(repos.at(i).label,
-                    QStringList() << repos.at(i).archive.toString() << repos.at(i).folder);
+                    QStringList() << repos.at(i).zip.toString() << repos.at(i).folder);
     }
     settings.setValue("repos", list);
     settings.sync();
@@ -634,7 +638,7 @@ void Plugins::checkRepositories(bool emitChanges,
         if (folderHasPlugins(repoPath) > 0) { hasFolder = true; }
         if (!hasFolder) {
             emit statusMessage(tr("Need to download %1 repository").arg(repo.label));
-            _downloadQueue.push_back(repo.archive);
+            _downloadQueue.push_back(repo.zip);
         } else {
             scanForAvailablePlugins(repoPath, true, emitChanges, emitCache);
         }
@@ -650,7 +654,7 @@ std::vector<Plugins::RepoSpecs> Plugins::getAvailableRepositories()
 Plugins::RepoSpecs Plugins::getRepoFromUrl(const QUrl &url)
 {
     for (unsigned long i = 0; i < _availableRepositories.size(); ++i) {
-        QUrl repoUrl = _availableRepositories.at(i).archive;
+        QUrl repoUrl = _availableRepositories.at(i).zip;
         if (!url.isEmpty() && url == repoUrl) { return _availableRepositories.at(i); }
     }
     return RepoSpecs();
@@ -670,7 +674,7 @@ void Plugins::startDownloads()
     QNetworkRequest request(url);
     request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
     QNetworkReply *reply = _nam->get(request);
-    reply->setObjectName(url.toString());
+    reply->setProperty("url", url.toString());
     connect(reply,
             SIGNAL(readyRead()),
             this,
@@ -697,11 +701,72 @@ void Plugins::removeFromDownloadQueue(const QUrl &url)
     if (pos > -1) { _downloadQueue.erase(_downloadQueue.begin()+pos); }
 }
 
+bool Plugins::isValidManifest(const QString &manifest)
+{
+    RepoSpecs repo = readManifest(manifest);
+    if (repo.version >= 1.0 &&
+        !repo.zip.isEmpty() &&
+        !repo.label.isEmpty() &&
+        !repo.manifest.isEmpty()) { return true; }
+    return false;
+}
+
+Plugins::RepoSpecs Plugins::readManifest(const QString &manifest)
+{
+    RepoSpecs repo;
+    QXmlStreamReader xml(manifest);
+    if (xml.readNextStartElement()) {
+        if (xml.name() == "repo") {
+            while(xml.readNextStartElement()) {
+                if (xml.name() == "version") {
+                    QString version = xml.readElementText();
+                    repo.version = version.toDouble();
+                } else if (xml.name() == "title") {
+                    QString title = xml.readElementText();
+                    repo.label = title;
+                } else if (xml.name() == "url") {
+                    QString url = xml.readElementText();
+                    repo.url = QUrl::fromUserInput(url);
+                } else if (xml.name() == "manifest") {
+                    QString manifest = xml.readElementText();
+                    repo.manifest = QUrl::fromUserInput(manifest);
+                } else if (xml.name() == "logo") {
+                    QString logo = xml.readElementText();
+                    repo.logo = QUrl::fromUserInput(logo);
+                } else if (xml.name() == "zip") {
+                    QString zip = xml.readElementText();
+                    repo.zip = QUrl::fromUserInput(zip);
+                } else if (xml.name() == "checksum") {
+                    QString checksum = xml.readElementText();
+                    repo.checksum = checksum;
+                } else if (xml.name() == "modified") {
+                    QString modified = xml.readElementText();
+                    repo.modified = QDateTime::fromString(modified,
+                                                          "yyyy-MM-dd HH:mm");
+                } else { xml.skipCurrentElement(); }
+            }
+        }
+    }
+    if (xml.hasError()) { qWarning() << xml.errorString(); }
+    return repo;
+}
+
+Plugins::RepoSpecs Plugins::openManifest(const QString &filename)
+{
+    QFile file(filename);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QString manifest = file.readAll();
+        file.close();
+        return readManifest(manifest);
+    }
+    return RepoSpecs();
+}
+
 void Plugins::handleFileDownloaded(QNetworkReply *reply)
 {
     emit statusMessage(tr("Done"));
     if (!reply) { return; }
-    QUrl url = reply->objectName().isEmpty() ? reply->url() : QUrl::fromUserInput(reply->objectName());
+    QUrl url = reply->property("url").toString().isEmpty() ? reply->url() : QUrl::fromUserInput(reply->property("url").toString());
     QByteArray fileData = reply->readAll();
     reply->deleteLater();
     _isDownloading = false;
@@ -745,7 +810,7 @@ void Plugins::handleDownloadError(QNetworkReply::NetworkError /*error*/)
     _isDownloading = false;
     QNetworkReply *reply = qobject_cast<QNetworkReply*>(QObject::sender());
     if (!reply) { return; }
-    QUrl url = reply->objectName().isEmpty() ? reply->url() : QUrl::fromUserInput(reply->objectName());
+    QUrl url = reply->property("url").toString().isEmpty() ? reply->url() : QUrl::fromUserInput(reply->property("url").toString());
     removeFromDownloadQueue(url);
     reply->deleteLater();
 }
