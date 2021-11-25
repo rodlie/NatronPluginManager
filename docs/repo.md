@@ -34,19 +34,19 @@ Title/Name of the repository.
 
 ### ``url``
 
-Url to the homepage of the repository. This is optional.
+Url to the homepage of the repository. Must be ``http://`` or ``https://``. This is optional.
 
 ### ``manifest``
 
-Direct url to the manifest XML file.
+Direct url to the manifest XML file. Must be ``http://``, ``https://`` or ``file://``.
 
 ### ``logo``
 
-Direct url to a PNG image for the repository, should be at least 128x128 px. The image is downloaded once. This is optional.
+Direct url to a PNG image for the repository, should be at least 128x128 px. The image is downloaded once. Must be ``http://``, ``https://`` or ``file://``. This is optional.
 
 ### ``zip``
 
-Direct url to a ZIP file containing the plug-ins.
+Direct url to a ZIP file containing the plug-ins. Must be ``http://``, ``https://`` or ``file://``.
 
 ### ``checksum``
 
@@ -54,14 +54,14 @@ Direct url to a ZIP file containing the plug-ins.
 
 ### ``changelog``
 
-Direct url to a text file in markdown listing changes done in the repository. No external assets are allowed. This is optional.
+Direct url to a text file in markdown listing changes done in the repository. No external assets are allowed. Must be ``http://``, ``https://`` or ``file://``. This is optional.
 
 ### ``modified``
 
-Last modified repository date. Bump this when something changes in the repository. Must be formated as `yyyy-mm-dd hh:mm`.
+Last modified repository date. Bump this when something changes in the repository. Must be formated as `yyyy-mm-dd hh:mm`. This is optional.
 
 
-# PyPlug structure
+# PyPlug
 
 Each plug-in must have it's own folder, including a minimum of one valid PyPlug .``py`` file, the filename must match the parent folder.
 
