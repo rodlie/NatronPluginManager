@@ -72,9 +72,9 @@ PluginListWidget::PluginListWidget(const Plugins::PluginSpecs &plugin,
     pluginIconLabel->setMinimumSize(iconSize);
     pluginIconLabel->setMaximumSize(iconSize);
 
-    pluginIconLabel->setPixmap(QIcon(QString(NATRON_ICON)).pixmap(iconSize).scaled(iconSize,
-                                                                                   Qt::KeepAspectRatio,
-                                                                                   Qt::SmoothTransformation));
+    pluginIconLabel->setPixmap(QIcon(QString(DEFAULT_ICON)).pixmap(iconSize).scaled(iconSize,
+                                                                                    Qt::KeepAspectRatio,
+                                                                                    Qt::SmoothTransformation));
 
     QString pluginIconPath = QString("%1/%2").arg(_plugin.path, _plugin.icon);
     if (!_plugin.icon.isEmpty() && QFile::exists(pluginIconPath)) {

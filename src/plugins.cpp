@@ -339,6 +339,13 @@ const QString Plugins::getUserPluginPath()
     return folder;
 }
 
+const QStringList Plugins::getSystemPluginPaths()
+{
+    QStringList paths;
+
+    return paths;
+}
+
 const QString Plugins::getCachePath()
 {
     QString folder = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
@@ -373,9 +380,20 @@ const QString Plugins::getRepoPath(const QString &uid)
     return cache;
 }
 
-const QString Plugins::getRandom()
+const QString Plugins::getRandom(const QString &path,
+                                 const QString &suffix)
 {
-    return QString::number(QRandomGenerator::global()->generate64());
+    QString uid = QString::number(QRandomGenerator::global()->generate64());
+    if (!path.isEmpty() && QFile::exists(path)) {
+        int trys = 0;
+        while (QFile::exists(QString("%1/%2%3").arg(path, uid, suffix))) {
+            uid = QString::number(QRandomGenerator::global()->generate64());
+            qDebug() << "gen new folder id" << uid;
+            if (trys > 10) { return QString(); }
+            trys++;
+        }
+    }
+    return uid;
 }
 
 const QString Plugins::getTempPath()
@@ -388,6 +406,21 @@ const QString Plugins::getTempPath()
         dir.mkpath(cache);
     }
     return cache;
+}
+
+const QString Plugins::genNewRepoID()
+{
+    QString repoPath = getRepoPath();
+    QString uid = getRandom();
+    int trys = 0;
+    while (QFile::exists(QString("%1/%2.xml").arg(repoPath, uid)) ||
+           QFile::exists(QString("%1/%2").arg(repoPath, uid)))
+    {
+        uid = getRandom();
+        if (trys > 10) { return QString(); }
+        trys++;
+    }
+    return uid;
 }
 
 Plugins::PluginStatus Plugins::installPlugin(const QString &id)
@@ -568,7 +601,10 @@ Plugins::PluginStatus Plugins::extractPluginArchive(const QString &filename,
 
 bool Plugins::isValidRepository(const Plugins::RepoSpecs &repo)
 {
-    if (repo.label.isEmpty() || repo.zip.isEmpty()) { return false; }
+    if (repo.label.isEmpty() ||
+        repo.zip.isEmpty() ||
+        repo.manifest.isEmpty())
+    { return false; }
     return true;
 }
 
@@ -577,28 +613,40 @@ void Plugins::loadRepositories()
     emit statusMessage(tr("Loading repositories ..."));
     _availableRepositories.clear();
     QSettings settings;
-    if (settings.value("repos").isValid()) {
-        QHashIterator<QString, QVariant> i(settings.value("repos").toHash());
+    if (settings.value(PLUGINS_SETTINGS_KEY_REPOS).isValid()) {
+        QHashIterator<QString, QVariant> i(settings.value(PLUGINS_SETTINGS_KEY_REPOS).toHash());
         while (i.hasNext()) {
             i.next();
-            qDebug() << "repo" << i.key() << i.value();
-            QString label = i.key();
-            QStringList options = i.value().toStringList();
-            if (label.isEmpty() || options.size() < 1) { continue; }
-            RepoSpecs repo;
-            repo.label = label;
-            repo.zip = QUrl::fromUserInput(options.at(0));
-            if (options.size() > 1) { repo.folder = options.at(1); }
+            QString repoID = i.key();
+            bool repoEnabled = i.value().toBool();
+            QString manifest = getRepoPath(QString("%1.xml").arg(repoID));
+            qDebug() << "load repo?" << repoID << repoEnabled << manifest;
+            if (!QFile::exists(manifest)) { continue; }
+            RepoSpecs repo = openManifest(manifest);
+            repo.id = repoID;
+            repo.enabled = repoEnabled;
             if (isValidRepository(repo)) {
-                //emit statusMessage(tr("Found repository %1").arg(repo.label));
+                qDebug() << "added repo" << repo.label << repo.id;
                 _availableRepositories.push_back(repo);
             }
         }
-    } else {
-        RepoSpecs repo;
-        repo.label = "Community";
-        repo.zip = QUrl::fromUserInput(NATRON_COMMUNITY_PLUGINS_URL);
-        _availableRepositories.push_back(repo);
+    }
+    if (_availableRepositories.size() < 1) {
+        qDebug() << "no repos found, adding fallback!";
+        RepoSpecs repo = openManifest(":/community.xml");
+        if (isValidRepository(repo)) {
+            repo.id = genNewRepoID();
+            repo.enabled = true;
+            if (!repo.id.isEmpty()) {
+                QFile manifestFile(":/community.xml");
+                if (manifestFile.copy(QString("%1/%2.xml").arg(getRepoPath(),
+                                                               repo.id)))
+                {
+                    qDebug() << "added community repo";
+                    _availableRepositories.push_back(repo);
+                }
+            }
+        }
     }
 
     checkRepositories();
@@ -611,11 +659,13 @@ void Plugins::saveRepositories(const std::vector<Plugins::RepoSpecs> &repos)
     QSettings settings;
     QHash<QString,QVariant> list;
     for (unsigned long i = 0; i < repos.size(); ++i) {
-        if (list.contains(repos.at(i).label)) { continue; }
+        /*if (list.contains(repos.at(i).label)) { continue; }
         list.insert(repos.at(i).label,
-                    QStringList() << repos.at(i).zip.toString() << repos.at(i).folder);
+                    QStringList() << repos.at(i).zip.toString() << repos.at(i).folder);*/
+        if (list.contains(repos.at(i).id)) { continue; }
+        list.insert(repos.at(i).id, repos.at(i).enabled);
     }
-    settings.setValue("repos", list);
+    settings.setValue(PLUGINS_SETTINGS_KEY_REPOS, list);
     settings.sync();
 }
 
@@ -626,17 +676,18 @@ void Plugins::checkRepositories(bool emitChanges,
     scanForInstalledPlugins(getUserPluginPath());
     _availablePlugins.clear();
     _downloadQueue.clear();
+    if (_availableRepositories.size() < 1) {
+        qDebug() << "got no repos!!!";
+        emit updatedPlugins();
+        return;
+    }
     for (unsigned long i = 0; i < _availableRepositories.size(); ++i) {
         RepoSpecs repo = _availableRepositories.at(i);
-        if (!isValidRepository(repo)) { continue; }
-        bool hasFolder = false;
-        if (repo.folder.isEmpty()) {
-            repo.folder = getRandom();
-            _availableRepositories.at(i).folder = repo.folder;
-        }
-        QString repoPath = getRepoPath(repo.folder);
-        if (folderHasPlugins(repoPath) > 0) { hasFolder = true; }
-        if (!hasFolder) {
+        if (!isValidRepository(repo) || !repo.enabled) { continue; }
+        QString repoPath = getRepoPath(repo.id);
+        qDebug() << "repo path?" << repoPath;
+        if (folderHasPlugins(repoPath) < 1) {
+            qDebug() << "repo has no plugins, try downloading zip";
             emit statusMessage(tr("Need to download %1 repository").arg(repo.label));
             _downloadQueue.push_back(repo.zip);
         } else {
@@ -658,6 +709,27 @@ Plugins::RepoSpecs Plugins::getRepoFromUrl(const QUrl &url)
         if (!url.isEmpty() && url == repoUrl) { return _availableRepositories.at(i); }
     }
     return RepoSpecs();
+}
+
+bool Plugins::isRepoManifest(const Plugins::RepoSpecs &repo,
+                             const QUrl &url)
+{
+    if (!repo.manifest.isEmpty() && repo.url == url) { return true; }
+    return false;
+}
+
+bool Plugins::isRepoZip(const Plugins::RepoSpecs &repo,
+                        const QUrl &url)
+{
+    if (!repo.zip.isEmpty() && repo.zip == url) { return true; }
+    return false;
+}
+
+bool Plugins::isRepoLogo(const Plugins::RepoSpecs &repo,
+                         const QUrl &url)
+{
+    if (!repo.logo.isEmpty() && repo.logo == url) { return true; }
+    return false;
 }
 
 bool Plugins::isBusy()
@@ -684,9 +756,9 @@ void Plugins::startDownloads()
             this,
             SLOT(handleDownloadError(QNetworkReply::NetworkError)));
     connect(reply,
-            SIGNAL(downloadProgress(qint64, qint64)),
+            SIGNAL(downloadProgress(qint64,qint64)),
             this,
-            SLOT(handleDownloadProgress(qint64, qint64)));
+            SLOT(handleDownloadProgress(qint64,qint64)));
 }
 
 void Plugins::removeFromDownloadQueue(const QUrl &url)
@@ -747,7 +819,10 @@ Plugins::RepoSpecs Plugins::readManifest(const QString &manifest)
             }
         }
     }
-    if (xml.hasError()) { qWarning() << xml.errorString(); }
+    if (xml.hasError()) {
+        qWarning() << xml.errorString();
+        return RepoSpecs();
+    }
     return repo;
 }
 
@@ -773,51 +848,61 @@ void Plugins::handleFileDownloaded(QNetworkReply *reply)
     removeFromDownloadQueue(url);
 
     RepoSpecs repo = getRepoFromUrl(url);
-    if (fileData.size() > 0 && isValidRepository(repo)) {
-        QFile tempFile(QString("%1/%2.zip").arg(getTempPath(), getRandom()));
-        if (tempFile.open(QIODevice::WriteOnly)) {
-            tempFile.write(fileData);
-            tempFile.close();
-        }
-        QString destFolder = getRepoPath(repo.folder);
-        if (!destFolder.isEmpty() && !QFile::exists(destFolder)) {
-            QDir dir;
-            dir.mkpath(destFolder);
-        }
-        if (tempFile.exists() && QFile::exists(destFolder)) {
-            emit statusMessage(tr("Extracting repository %1 ...").arg(repo.label));
-            PluginStatus res = extractPluginArchive(tempFile.fileName(), destFolder);
-            if (res.success) {
-                emit statusMessage(tr("Done"));
-                scanForAvailablePlugins(destFolder, true);
-            } else {
-                emit statusError(res.message);
+    qDebug() << "download finished for repo" << repo.label << repo.id << fileData.size() << url;
+    if (fileData.size() > 0 && isValidRepository(repo)) { // we have data and a valid repo
+        if (isRepoZip(repo, url)) { // repo zip
+            QFile tempFile(QString("%1/%2.zip").arg(getTempPath(), getRandom()));
+            if (tempFile.open(QIODevice::WriteOnly)) {
+                tempFile.write(fileData);
+                tempFile.close();
             }
-            tempFile.remove();
-        } else {
-            emit statusError(tr("Failed to read/extract repository %1 archive").arg(repo.label));
+            QString destFolder = getRepoPath(repo.id);
+            qDebug() << "dest folder" << destFolder;
+            if (!destFolder.isEmpty() && !QFile::exists(destFolder)) {
+                QDir dir;
+                dir.mkpath(destFolder);
+            }
+            if (tempFile.exists() && QFile::exists(destFolder)) {
+                emit statusMessage(tr("Extracting repository %1 ...").arg(repo.label));
+                PluginStatus res = extractPluginArchive(tempFile.fileName(), destFolder);
+                if (res.success) {
+                    emit statusMessage(tr("Done"));
+                    scanForAvailablePlugins(destFolder, true);
+                } else {
+                    emit statusError(res.message);
+                }
+                tempFile.remove();
+            } else {
+                emit statusError(tr("Failed to read/extract repository %1 archive").arg(repo.label));
+            }
+        } else if (isRepoManifest(repo, url)) { // repo manifest
+            // TODO
+            qDebug() << "downloaded repo manifest" << fileData;
+        } else if (isRepoLogo(repo, url)) { // repo logo
+            // TODO
+            qDebug() << "downloaded repo logo" << fileData.size();
+        } else { // unknown download
+            qWarning() << "Download is unknown and will be ignored" << fileData.size() << url;
         }
     }
-    if (_downloadQueue.size() > 0) {
-        qDebug() << "more to download";
-        emit downloadRequired();
-    }
+    if (_downloadQueue.size() > 0) { emit downloadRequired(); }
 }
 
 void Plugins::handleDownloadError(QNetworkReply::NetworkError /*error*/)
 {
-    emit statusError(tr("Failed to download repository"));
+    emit statusError(tr("Failed to download"));
     _isDownloading = false;
     QNetworkReply *reply = qobject_cast<QNetworkReply*>(QObject::sender());
     if (!reply) { return; }
     QUrl url = reply->property("url").toString().isEmpty() ? reply->url() : QUrl::fromUserInput(reply->property("url").toString());
     removeFromDownloadQueue(url);
     reply->deleteLater();
+    if (_downloadQueue.size() > 0) { emit downloadRequired(); }
 }
 
 void Plugins::handleDownloadProgress(qint64 value, qint64 total)
 {
-    emit statusDownload(tr("Downloading repository, please wait ..."), value, total);
+    emit statusDownload(tr("Downloading, please wait ..."), value, total);
 }
 
 void Plugins::handleDownloadReadyRead()

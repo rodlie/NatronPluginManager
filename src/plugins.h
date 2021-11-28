@@ -31,7 +31,9 @@
 
 #include <vector>
 
-#define NATRON_ICON ":/NatronPluginManager.png"
+#define DEFAULT_ICON ":/NatronPluginManager.png"
+
+#define PLUGINS_SETTINGS_KEY_REPOS "repositories"
 
 class Plugins : public QObject
 {
@@ -42,24 +44,26 @@ public:
     struct PluginSpecs {
         QString id;
         QString label;
-        double version = 0;
+        double version = 0.0;
         QString icon;
         QString group;
         QString desc;
         QString path;
         QString folder;
+        bool writable = true;
     };
 
     struct RepoSpecs {
         double version = 1.0;
         QString label;
-        QString folder;
+        QString id;
         QUrl url;
         QUrl manifest;
         QUrl logo;
         QUrl zip;
         QString checksum;
         QDateTime modified;
+        bool enabled = false;
     };
 
     struct PluginStatus {
@@ -110,11 +114,15 @@ public:
     int folderHasPlugins(const QString &path);
 
     const QString getUserPluginPath();
+    const QStringList getSystemPluginPaths();
     const QString getCachePath();
     const QString getRepoPath();
     const QString getRepoPath(const QString &uid);
-    const QString getRandom();
+    const QString getRandom(const QString &path = QString(),
+                            const QString &suffix = QString());
     const QString getTempPath();
+
+    const QString genNewRepoID();
 
     Plugins::PluginStatus installPlugin(const QString &id);
     Plugins::PluginStatus removePlugin(const QString &id);
@@ -130,6 +138,12 @@ public:
                            bool emitCache = false);
     std::vector<Plugins::RepoSpecs> getAvailableRepositories();
     Plugins::RepoSpecs getRepoFromUrl(const QUrl &url);
+    bool isRepoManifest(const Plugins::RepoSpecs &repo,
+                        const QUrl &url);
+    bool isRepoZip(const Plugins::RepoSpecs &repo,
+                   const QUrl &url);
+    bool isRepoLogo(const Plugins::RepoSpecs &repo,
+                    const QUrl &url);
 
     bool isBusy();
 

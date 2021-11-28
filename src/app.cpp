@@ -58,7 +58,7 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     , _pluginList(nullptr)
     , _status(nullptr)
 {
-    setWindowIcon(QIcon(NATRON_ICON));
+    setWindowIcon(QIcon(DEFAULT_ICON));
 
     setupStyle();
     setupPlugins();
