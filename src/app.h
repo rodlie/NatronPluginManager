@@ -98,6 +98,8 @@ private slots:
     void installPlugin(const QString &id);
     void removePlugin(const QString &id);
 
+    void openAddRepoDialog();
+
 protected:
 
      void closeEvent(QCloseEvent *e);

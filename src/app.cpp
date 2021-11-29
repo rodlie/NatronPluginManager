@@ -39,6 +39,7 @@
 #include <QSettings>
 
 #include "pluginlistwidget.h"
+#include "addrepodialog.h"
 
 #define NATRON_STYLE ":/stylesheet.qss"
 
@@ -223,6 +224,14 @@ void NatronPluginManager::setupMenu()
 
     QMenu *fileMenu = new QMenu(tr("File"), this);
     _menuBar->addMenu(fileMenu);
+
+    QAction *addRepoAction = new QAction(tr("Add repository"), this);
+    addRepoAction->setShortcut(QKeySequence(tr("Ctrl+A")));
+    fileMenu->addAction(addRepoAction);
+    connect(addRepoAction,
+            SIGNAL(triggered()),
+            this,
+            SLOT(openAddRepoDialog()));
 
     QAction *fileQuitAction = new QAction(tr("Quit"), this);
     fileQuitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));
@@ -480,6 +489,12 @@ void NatronPluginManager::removePlugin(const QString &id)
                           false,
                           true);
     }
+}
+
+void NatronPluginManager::openAddRepoDialog()
+{
+    AddRepoDialog dialog(this, _plugins);
+    dialog.exec();
 }
 
 void NatronPluginManager::closeEvent(QCloseEvent *e)

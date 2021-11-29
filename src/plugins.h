@@ -168,6 +168,8 @@ public:
 
     Plugins::RepoSpecs parseManifestV1(const QString &manifest);
 
+    void addDownloadUrl(const QUrl &url);
+
 signals:
 
     void updatedPlugins();

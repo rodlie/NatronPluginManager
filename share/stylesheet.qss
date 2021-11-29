@@ -46,7 +46,8 @@ QListWidget#PluginList .QFrame:hover {
     border-color: #ebebeb;
 }
 
-QListWidget#PluginList .QPushButton {
+QListWidget#PluginList .QPushButton,
+QDialog#AddRepoDialog .QPushButton {
     padding: 0.5em;
     border: 2px solid #ebebeb;
     border-radius: 10%;
@@ -60,23 +61,29 @@ QListWidget#PluginList .QPushButton {
 
 QListWidget#PluginList .QPushButton[InstallButton=true]:pressed,
 QListWidget#PluginList .QPushButton[RemoveButton=true]:pressed,
-QListWidget#PluginList .QPushButton[UpdateButton=true]:pressed {
+QListWidget#PluginList .QPushButton[UpdateButton=true]:pressed,
+QDialog#AddRepoDialog .QPushButton[InstallButton=true]:pressed,
+QDialog#AddRepoDialog .QPushButton[RemoveButton=true]:pressed {
     border-color: #ebebeb;
 }
 
-QListWidget#PluginList .QPushButton[InstallButton=true] {
+QListWidget#PluginList .QPushButton[InstallButton=true],
+QDialog#AddRepoDialog .QPushButton[InstallButton=true] {
     border-color: #2e82be;
 }
 
-QListWidget#PluginList .QPushButton[InstallButton=true]:hover {
+QListWidget#PluginList .QPushButton[InstallButton=true]:hover,
+QDialog#AddRepoDialog .QPushButton[InstallButton=true]:hover {
     background-color: #2e82be;
 }
 
-QListWidget#PluginList .QPushButton[RemoveButton=true] {
+QListWidget#PluginList .QPushButton[RemoveButton=true],
+QDialog#AddRepoDialog .QPushButton[RemoveButton=true] {
     border-color: #be2e44;
 }
 
-QListWidget#PluginList .QPushButton[RemoveButton=true]:hover {
+QListWidget#PluginList .QPushButton[RemoveButton=true]:hover,
+QDialog#AddRepoDialog .QPushButton[RemoveButton=true]:hover {
     background-color: #be2e44;
 }
 
@@ -137,12 +144,17 @@ QLabel#ComboGroupLabel {
 }
 
 QComboBox#ComboGroup,
-QComboBox#ComboStatus {
+QComboBox#ComboStatus,
+QDialog#AddRepoDialog .QLineEdit {
     padding: 0.2em;
     padding-left: 0.5em;
     border: 2px solid #252525;
     border-radius: 10%;
     background-color: #191919;
+}
+
+QDialog#AddRepoDialog .QLineEdit {
+    border-color: #767776;
 }
 
 QComboBox#ComboGroup::down-arrow,

@@ -707,6 +707,8 @@ Plugins::RepoSpecs Plugins::getRepoFromUrl(const QUrl &url)
     for (unsigned long i = 0; i < _availableRepositories.size(); ++i) {
         QUrl repoUrl = _availableRepositories.at(i).zip;
         if (!url.isEmpty() && url == repoUrl) { return _availableRepositories.at(i); }
+        repoUrl = _availableRepositories.at(i).manifest;
+        if (!url.isEmpty() && url == repoUrl) { return _availableRepositories.at(i); }
     }
     return RepoSpecs();
 }
@@ -714,7 +716,7 @@ Plugins::RepoSpecs Plugins::getRepoFromUrl(const QUrl &url)
 bool Plugins::isRepoManifest(const Plugins::RepoSpecs &repo,
                              const QUrl &url)
 {
-    if (!repo.manifest.isEmpty() && repo.url == url) { return true; }
+    if (!repo.manifest.isEmpty() && repo.manifest == url) { return true; }
     return false;
 }
 
@@ -861,6 +863,14 @@ Plugins::RepoSpecs Plugins::parseManifestV1(const QString &manifest)
     return repo;
 }
 
+void Plugins::addDownloadUrl(const QUrl &url)
+{
+    qDebug() << "add download" << url;
+    if (url.isEmpty() || !url.isValid()) { return; }
+    _downloadQueue.push_back(url);
+    emit downloadRequired();
+}
+
 void Plugins::handleFileDownloaded(QNetworkReply *reply)
 {
     emit statusMessage(tr("Done"));
@@ -873,7 +883,7 @@ void Plugins::handleFileDownloaded(QNetworkReply *reply)
 
     RepoSpecs repo = getRepoFromUrl(url);
     qDebug() << "download finished for repo" << repo.label << repo.id << fileData.size() << url;
-    if (fileData.size() > 0 && isValidRepository(repo)) { // we have data and a valid repo
+    if (fileData.size() > 0 && isValidRepository(repo)) { // we have data for a valid repo
         if (isRepoZip(repo, url)) { // repo zip
             QFile tempFile(QString("%1/%2.zip").arg(getTempPath(), getRandom()));
             if (tempFile.open(QIODevice::WriteOnly)) {
@@ -908,6 +918,9 @@ void Plugins::handleFileDownloaded(QNetworkReply *reply)
         } else { // unknown download
             qWarning() << "Download is unknown and will be ignored" << fileData.size() << url;
         }
+    } else if (isValidManifest(fileData)) { // new manifest
+        // TODO
+        qDebug() << "new manifest downloaded!";
     }
     if (_downloadQueue.size() > 0) { emit downloadRequired(); }
 }
