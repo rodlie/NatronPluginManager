@@ -786,42 +786,8 @@ bool Plugins::isValidManifest(const QString &manifest)
 Plugins::RepoSpecs Plugins::readManifest(const QString &manifest)
 {
     RepoSpecs repo;
-    QXmlStreamReader xml(manifest);
-    if (xml.readNextStartElement()) {
-        if (xml.name() == "repo") {
-            while(xml.readNextStartElement()) {
-                if (xml.name() == "version") {
-                    QString version = xml.readElementText();
-                    repo.version = version.toDouble();
-                } else if (xml.name() == "title") {
-                    QString title = xml.readElementText();
-                    repo.label = title;
-                } else if (xml.name() == "url") {
-                    QString url = xml.readElementText();
-                    repo.url = QUrl::fromUserInput(url);
-                } else if (xml.name() == "manifest") {
-                    QString manifest = xml.readElementText();
-                    repo.manifest = QUrl::fromUserInput(manifest);
-                } else if (xml.name() == "logo") {
-                    QString logo = xml.readElementText();
-                    repo.logo = QUrl::fromUserInput(logo);
-                } else if (xml.name() == "zip") {
-                    QString zip = xml.readElementText();
-                    repo.zip = QUrl::fromUserInput(zip);
-                } else if (xml.name() == "checksum") {
-                    QString checksum = xml.readElementText();
-                    repo.checksum = checksum;
-                } else if (xml.name() == "modified") {
-                    QString modified = xml.readElementText();
-                    repo.modified = QDateTime::fromString(modified,
-                                                          "yyyy-MM-dd HH:mm");
-                } else { xml.skipCurrentElement(); }
-            }
-        }
-    }
-    if (xml.hasError()) {
-        qWarning() << xml.errorString();
-        return RepoSpecs();
+    if (getManifestVersion(manifest) >= 1.0) {
+        return parseManifestV1(manifest);
     }
     return repo;
 }
@@ -835,6 +801,64 @@ Plugins::RepoSpecs Plugins::openManifest(const QString &filename)
         return readManifest(manifest);
     }
     return RepoSpecs();
+}
+
+double Plugins::getManifestVersion(const QString &manifest)
+{
+    QXmlStreamReader xml(manifest);
+    if (xml.readNextStartElement()) {
+        if (xml.name() == MANIFEST_TAG_ROOT) {
+            while(xml.readNextStartElement()) {
+                if (xml.name() == MANIFEST_TAG_VERSION) {
+                    return xml.readElementText().toDouble();
+                }  else { xml.skipCurrentElement(); }
+            }
+        }
+    }
+    return 0.0;
+}
+
+Plugins::RepoSpecs Plugins::parseManifestV1(const QString &manifest)
+{
+    RepoSpecs repo;
+    QXmlStreamReader xml(manifest);
+    if (xml.readNextStartElement()) {
+        if (xml.name() == MANIFEST_TAG_ROOT) {
+            while(xml.readNextStartElement()) {
+                if (xml.name() == MANIFEST_TAG_VERSION) {
+                    QString version = xml.readElementText();
+                    repo.version = version.toDouble();
+                } else if (xml.name() == MANIFEST_TAG_TITLE) {
+                    QString title = xml.readElementText();
+                    repo.label = title;
+                } else if (xml.name() == MANIFEST_TAG_URL) {
+                    QString url = xml.readElementText();
+                    repo.url = QUrl::fromUserInput(url);
+                } else if (xml.name() == MANIFEST_TAG_MANIFEST) {
+                    QString manifest = xml.readElementText();
+                    repo.manifest = QUrl::fromUserInput(manifest);
+                } else if (xml.name() == MANIFEST_TAG_LOGO) {
+                    QString logo = xml.readElementText();
+                    repo.logo = QUrl::fromUserInput(logo);
+                } else if (xml.name() == MANIFEST_TAG_ZIP) {
+                    QString zip = xml.readElementText();
+                    repo.zip = QUrl::fromUserInput(zip);
+                } else if (xml.name() == MANIFEST_TAG_CHECKSUM) {
+                    QString checksum = xml.readElementText();
+                    repo.checksum = checksum;
+                } else if (xml.name() == MANIFEST_TAG_MODIFIED) {
+                    QString modified = xml.readElementText();
+                    repo.modified = QDateTime::fromString(modified,
+                                                          MANIFEST_MODIFIED_FORMAT);
+                } else { xml.skipCurrentElement(); }
+            }
+        }
+    }
+    if (xml.hasError()) {
+        qWarning() << xml.errorString();
+        return RepoSpecs();
+    }
+    return repo;
 }
 
 void Plugins::handleFileDownloaded(QNetworkReply *reply)

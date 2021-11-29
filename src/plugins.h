@@ -35,6 +35,17 @@
 
 #define PLUGINS_SETTINGS_KEY_REPOS "repositories"
 
+#define MANIFEST_TAG_ROOT "repo"
+#define MANIFEST_TAG_VERSION "version"
+#define MANIFEST_TAG_TITLE "title"
+#define MANIFEST_TAG_URL "url"
+#define MANIFEST_TAG_MANIFEST "manifest"
+#define MANIFEST_TAG_LOGO "logo"
+#define MANIFEST_TAG_ZIP "zip"
+#define MANIFEST_TAG_CHECKSUM "checksum"
+#define MANIFEST_TAG_MODIFIED "modified"
+#define MANIFEST_MODIFIED_FORMAT "yyyy-MM-dd HH:mm"
+
 class Plugins : public QObject
 {
     Q_OBJECT
@@ -152,6 +163,10 @@ public:
     bool isValidManifest(const QString &manifest);
     Plugins::RepoSpecs readManifest(const QString &manifest);
     Plugins::RepoSpecs openManifest(const QString &filename);
+
+    double getManifestVersion(const QString &manifest);
+
+    Plugins::RepoSpecs parseManifestV1(const QString &manifest);
 
 signals:
 

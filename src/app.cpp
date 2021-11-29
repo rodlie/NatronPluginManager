@@ -255,11 +255,15 @@ void NatronPluginManager::setupPluginsComboBoxes()
     _comboStatus = new QComboBox(this);
     _comboStatus->setObjectName("ComboStatus");
     _comboStatus->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    _comboStatus->addItem(tr("All"), Plugins::NATRON_PLUGIN_TYPE_NONE);
+    _comboStatus->addItem(tr("All"),
+                          Plugins::NATRON_PLUGIN_TYPE_NONE);
     _comboStatus->insertSeparator(1);
-    _comboStatus->addItem(tr("Available"), Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
-    _comboStatus->addItem(tr("Installed"), Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
-    //_comboStatus->addItem(tr("Updates"), Plugins::NATRON_PLUGIN_TYPE_UPDATE);
+    _comboStatus->addItem(tr("Available"),
+                          Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
+    _comboStatus->addItem(tr("Installed"),
+                          Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
+    _comboStatus->addItem(tr("Updates"),
+                          Plugins::NATRON_PLUGIN_TYPE_UPDATE);
     _comboStatus->setEnabled(false);
 
     _comboGroup = new QComboBox(this);
