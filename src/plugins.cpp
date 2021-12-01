@@ -656,7 +656,7 @@ void Plugins::loadRepositories()
             }
         }
     }
-    /*if (_availableRepositories.size() < 1) {
+    if (_availableRepositories.size() < 1) {
         qDebug() << "no repos found, adding fallback!";
         RepoSpecs repo = openManifest(":/community.xml");
         if (isValidRepository(repo)) {
@@ -672,7 +672,7 @@ void Plugins::loadRepositories()
                 }
             }
         }
-    }*/
+    }
 
     checkRepositories();
 }
