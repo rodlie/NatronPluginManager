@@ -26,7 +26,11 @@ QMenuBar#MenuBar {
     color: #ebebeb;
 }
 
-QStatusBar#StatusBar,
+QProgressBar#ProgressBar {
+    margin-right: 0.5em;
+}
+
+QStatusBar,
 QWidget#MainWidget {
     background-color: #101113;
     color: #ebebeb;

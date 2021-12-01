@@ -307,6 +307,7 @@ void NatronPluginManager::setupPluginList()
 void NatronPluginManager::setupStatus()
 {
     _statusBar = new QStatusBar(this);
+    _statusBar->setSizeGripEnabled(false);
     setStatusBar(_statusBar);
 
     _progBar = new QProgressBar(this);
