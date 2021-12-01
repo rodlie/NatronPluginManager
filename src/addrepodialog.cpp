@@ -68,7 +68,12 @@ AddRepoDialog::AddRepoDialog(QWidget *parent,
 void AddRepoDialog::handleApplyButton()
 {
     QUrl url = QUrl::fromUserInput(_urlEdit->text());
-    qDebug() << "add repo?" << url;
-    if (url.isEmpty() || !url.isValid()) { return; }
+    if (url.isEmpty() || !url.isValid()) {
+        QMessageBox::warning(this,
+                             windowTitle(),
+                             tr("Please provide a valid url to a repository manifest XML."));
+        return;
+    }
     _plugins->addDownloadUrl(url);
+    accept();
 }

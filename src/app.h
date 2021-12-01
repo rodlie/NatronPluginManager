@@ -32,8 +32,8 @@
 #include <QComboBox>
 #include <QSize>
 #include <QByteArray>
-
-#include "statuswidget.h"
+#include <QStatusBar>
+#include <QProgressBar>
 
 class NatronPluginManager : public QMainWindow
 {
@@ -65,7 +65,8 @@ private:
     Plugins *_plugins;
     QMenuBar *_menuBar;
     QListWidget *_pluginList;
-    StatusWidget *_status;
+    QStatusBar *_statusBar;
+    QProgressBar *_progBar;
 
 private slots:
 
@@ -74,6 +75,7 @@ private slots:
     void setupMenu();
     void setupPluginsComboBoxes();
     void setupPluginList();
+    void setupStatus();
 
     void startup();
     void handleUpdatedPlugins();

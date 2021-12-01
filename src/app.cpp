@@ -46,8 +46,7 @@
 #define PLUGIN_LIST_ROLE_ID Qt::UserRole+1
 #define PLUGIN_LIST_ROLE_GROUP Qt::UserRole+2
 
-#define APP_STACK_STATUS 0
-#define APP_STACK_PLUGINS 1
+#define APP_STACK_PLUGINS 0
 
 NatronPluginManager::NatronPluginManager(QWidget *parent)
     : QMainWindow(parent)
@@ -57,7 +56,8 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     , _plugins(nullptr)
     , _menuBar(nullptr)
     , _pluginList(nullptr)
-    , _status(nullptr)
+    , _statusBar(nullptr)
+    , _progBar(nullptr)
 {
     setWindowIcon(QIcon(DEFAULT_ICON));
 
@@ -66,6 +66,7 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     setupMenu();
     setupPluginsComboBoxes();
     setupPluginList();
+    setupStatus();
 
     QWidget *mainWidget = new QWidget(this);
     mainWidget->setObjectName("MainWidget");
@@ -99,12 +100,9 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     pluginsWidgetLayout->addWidget(pluginsComboWidget);
     pluginsWidgetLayout->addWidget(_pluginList);
 
-    _status = new StatusWidget(this);
     _stack = new QStackedWidget(this);
-    _stack->addWidget(_status);
     _stack->addWidget(pluginsWidget);
 
-    _stack->setCurrentIndex(APP_STACK_STATUS);
     mainLayout->addWidget(_stack);
 
     QTimer::singleShot(0,
@@ -211,6 +209,10 @@ void NatronPluginManager::setupPlugins()
             this,
             SLOT(handlePluginsStatusError(QString)));
     connect(_plugins,
+            SIGNAL(statusMessage(QString)),
+            this,
+            SLOT(handlePluginsStatusMessage(QString)));
+    connect(_plugins,
             SIGNAL(statusDownload(QString,qint64,qint64)),
             this,
             SLOT(handleDownloadStatusMessage(QString,qint64,qint64)));
@@ -302,6 +304,22 @@ void NatronPluginManager::setupPluginList()
     _pluginList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
+void NatronPluginManager::setupStatus()
+{
+    _statusBar = new QStatusBar(this);
+    setStatusBar(_statusBar);
+
+    _progBar = new QProgressBar(this);
+    _progBar->setObjectName("ProgressBar");
+    _progBar->setMinimumWidth(100);
+    _progBar->setMaximumWidth(100);
+    _progBar->setRange(0, 1);
+    _progBar->setValue(1);
+    _progBar->setFormat("");
+    _statusBar->addPermanentWidget(_progBar);
+    _progBar->setHidden(true);
+}
+
 void NatronPluginManager::startup()
 {
     QByteArray geo = getConfigWindowGeometry();
@@ -347,18 +365,27 @@ void NatronPluginManager::handlePluginsStatusError(const QString &message)
 {
     if (message.isEmpty()) { return; }
     QMessageBox::warning(this, tr("Failure"), message);
+    qDebug() << message;
+
+    _statusBar->showMessage(message);
 }
 
 void NatronPluginManager::handlePluginsStatusMessage(const QString &message)
 {
-    _status->showMessage(message);
+    qDebug() << message;
+    _statusBar->showMessage(message, 1000);
 }
 
 void NatronPluginManager::handleDownloadStatusMessage(const QString &message,
                                                       qint64 value,
                                                       qint64 total)
 {
-    _status->showProgress(message, value, total);
+    qDebug() << message << value << total;
+    if (_progBar->isHidden()) { _progBar->show(); }
+    _statusBar->showMessage(message, 1000);
+    _progBar->setRange(0, total);
+    _progBar->setValue(value);
+    if (value == total && _progBar->isVisible()) { _progBar->hide(); }
 }
 
 void NatronPluginManager::populatePlugins()
@@ -406,8 +433,6 @@ void NatronPluginManager::populatePlugins()
         _pluginList->addItem(item);
         _pluginList->setItemWidget(item, pwidget);
     }
-
-    _stack->setCurrentIndex(APP_STACK_PLUGINS);
 }
 
 void NatronPluginManager::handleComboStatusChanged(const QString &status)

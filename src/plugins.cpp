@@ -70,7 +70,7 @@ void Plugins::scanForAvailablePlugins(const QString &path,
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _availablePlugins.clear(); }
-    emit statusMessage(tr("Scanning %1 ...").arg(path));
+    //emit statusMessage(tr("Scanning %1 ...").arg(path));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -96,7 +96,7 @@ void Plugins::scanForInstalledPlugins(const QString &path,
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _installedPlugins.clear(); }
-    emit statusMessage(tr("Scanning %1 ...").arg(path));
+    //emit statusMessage(tr("Scanning %1 ...").arg(path));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -608,6 +608,31 @@ bool Plugins::isValidRepository(const Plugins::RepoSpecs &repo)
     return true;
 }
 
+bool Plugins::addRepository(const QString &manifest)
+{
+    if (isValidManifest(manifest)) {
+        RepoSpecs repo = readManifest(manifest);
+        if (isValidRepository(repo)) {
+            repo.id = genNewRepoID();
+            repo.enabled = true;
+            if (!repo.id.isEmpty()) {
+                bool savedManifest = false;
+                QFile manifestFile(QString("%1/%2.xml").arg(getRepoPath(), repo.id));
+                if (manifestFile.open(QIODevice::WriteOnly)) {
+                    if (manifestFile.write(manifest.toUtf8()) > -1) { savedManifest = true; }
+                    manifestFile.close();
+                }
+                if (savedManifest) {
+                    emit statusMessage(tr("Added new repository: %1").arg(repo.label));
+                    _availableRepositories.push_back(repo);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 void Plugins::loadRepositories()
 {
     emit statusMessage(tr("Loading repositories ..."));
@@ -631,7 +656,7 @@ void Plugins::loadRepositories()
             }
         }
     }
-    if (_availableRepositories.size() < 1) {
+    /*if (_availableRepositories.size() < 1) {
         qDebug() << "no repos found, adding fallback!";
         RepoSpecs repo = openManifest(":/community.xml");
         if (isValidRepository(repo)) {
@@ -647,7 +672,7 @@ void Plugins::loadRepositories()
                 }
             }
         }
-    }
+    }*/
 
     checkRepositories();
 }
@@ -919,14 +944,19 @@ void Plugins::handleFileDownloaded(QNetworkReply *reply)
             qWarning() << "Download is unknown and will be ignored" << fileData.size() << url;
         }
     } else if (isValidManifest(fileData)) { // new manifest
-        // TODO
-        qDebug() << "new manifest downloaded!";
+        if (addRepository(fileData)) {
+            checkRepositories();
+            return;
+        }
+    } else {
+        qWarning() << "Download is unknown and will be ignored" << fileData.size() << url;
     }
     if (_downloadQueue.size() > 0) { emit downloadRequired(); }
 }
 
 void Plugins::handleDownloadError(QNetworkReply::NetworkError /*error*/)
 {
+    emit statusMessage(tr("Download failed"));
     emit statusError(tr("Failed to download"));
     _isDownloading = false;
     QNetworkReply *reply = qobject_cast<QNetworkReply*>(QObject::sender());

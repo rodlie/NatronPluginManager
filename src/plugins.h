@@ -143,6 +143,7 @@ public:
                                                const QString &checksum = QString());
 
     bool isValidRepository(const RepoSpecs &repo);
+    bool addRepository(const QString &manifest);
     void loadRepositories();
     void saveRepositories(const std::vector<RepoSpecs> &repos);
     void checkRepositories(bool emitChanges = true,
