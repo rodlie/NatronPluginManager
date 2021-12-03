@@ -1,6 +1,6 @@
 # Natron Plug-in Repository Standard v1.0
 
-**DRAFT, NOT IMPLEMENTED IN CLIENT YET**
+**DRAFT, NOT FINAL**
 
 
 # Manifest
