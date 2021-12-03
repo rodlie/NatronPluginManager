@@ -35,7 +35,6 @@
 #include <QTimer>
 #include <QtConcurrentRun>
 #include <QPalette>
-#include <QLabel>
 #include <QSettings>
 
 #include "pluginlistwidget.h"
@@ -58,6 +57,8 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     , _pluginList(nullptr)
     , _statusBar(nullptr)
     , _progBar(nullptr)
+    , _availableLabel(nullptr)
+    , _installedLabel(nullptr)
 {
     setWindowIcon(QIcon(DEFAULT_ICON));
 
@@ -307,8 +308,28 @@ void NatronPluginManager::setupPluginList()
 void NatronPluginManager::setupStatus()
 {
     _statusBar = new QStatusBar(this);
+    _statusBar->setObjectName("StatusBar");
     _statusBar->setSizeGripEnabled(false);
     setStatusBar(_statusBar);
+
+    _availableLabel = new QLabel(this);
+    _availableLabel->setText("0");
+
+    _installedLabel = new QLabel(this);
+    _installedLabel->setText("0");
+
+    QLabel *statusAvailableLabel = new QLabel(this);
+    statusAvailableLabel->setObjectName("StatusAvailableLabel");
+    statusAvailableLabel->setText(tr("Available"));
+
+    QLabel *statusInstalledLabel = new QLabel(this);
+    statusInstalledLabel->setObjectName("StatusInstalledLabel");
+    statusInstalledLabel->setText(tr("Installed"));
+
+    _statusBar->addPermanentWidget(statusAvailableLabel);
+    _statusBar->addPermanentWidget(_availableLabel);
+    _statusBar->addPermanentWidget(statusInstalledLabel);
+    _statusBar->addPermanentWidget(_installedLabel);
 
     _progBar = new QProgressBar(this);
     _progBar->setObjectName("ProgressBar");
@@ -335,10 +356,14 @@ void NatronPluginManager::startup()
 
 void NatronPluginManager::handleUpdatedPlugins()
 {
-    qDebug() << "AVAILABLE PLUGINS" << _plugins->getAvailablePlugins().size();
-    qDebug() << "INSTALLED PLUGINS" << _plugins->getInstalledPlugins().size();
-
+    updatePluginStatusLabels();
     populatePlugins();
+}
+
+void NatronPluginManager::updatePluginStatusLabels()
+{
+    _availableLabel->setText(QString::number(_plugins->getAvailablePlugins().size()));
+    _installedLabel->setText(QString::number(_plugins->getInstalledPlugins().size()));
 }
 
 void NatronPluginManager::handleAboutActionTriggered()
@@ -449,6 +474,7 @@ void NatronPluginManager::handleComboGroupChanged(const QString &group)
 void NatronPluginManager::updateFilterPlugins()
 {
     filterPluginsStatus(_comboStatus->currentText());
+    updatePluginStatusLabels();
 }
 
 void NatronPluginManager::filterPluginsStatus(const QString &status)

@@ -36,6 +36,15 @@ QWidget#MainWidget {
     color: #ebebeb;
 }
 
+QStatusBar#StatusBar .QLabel {
+    padding-right: 0.5em;
+}
+
+QLabel#StatusAvailableLabel,
+QLabel#StatusInstalledLabel {
+    font-weight: bold;
+}
+
 QListWidget#PluginList {
     background-color: #101113;
 }

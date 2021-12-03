@@ -34,6 +34,7 @@
 #include <QByteArray>
 #include <QStatusBar>
 #include <QProgressBar>
+#include <QLabel>
 
 class NatronPluginManager : public QMainWindow
 {
@@ -67,6 +68,8 @@ private:
     QListWidget *_pluginList;
     QStatusBar *_statusBar;
     QProgressBar *_progBar;
+    QLabel *_availableLabel;
+    QLabel *_installedLabel;
 
 private slots:
 
@@ -79,6 +82,7 @@ private slots:
 
     void startup();
     void handleUpdatedPlugins();
+    void updatePluginStatusLabels();
     void handleAboutActionTriggered();
     void handleAboutQtActionTriggered();
     void handlePluginsStatusError(const QString &message);
