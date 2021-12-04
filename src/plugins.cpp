@@ -277,6 +277,10 @@ Plugins::PluginSpecs Plugins::getPluginSpecs(const QString &path)
     if (folder.isEmpty()) { return specs; }
 
     QString pyFile = QString("%1/%2.py").arg(path, folder);
+    QString readme = QString("%1/README.md").arg(path);
+    QString changes = QString("%1/CHANGES.md").arg(path);
+    QString authors = QString("%1/AUTHORS.md").arg(path);
+
     if (QFile::exists(pyFile)) {
         specs.id = getValueFromFile("getPluginID():", pyFile);
         specs.label = QString(getValueFromFile("getLabel():", pyFile)).replace("_", " ");
@@ -287,6 +291,31 @@ Plugins::PluginSpecs Plugins::getPluginSpecs(const QString &path)
         specs.path = path;
         specs.folder = folder;
     }
+
+    if (QFile::exists(readme)) {
+        QFile readmeFile(readme);
+        if (readmeFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            specs.readme = readmeFile.readAll();
+            readmeFile.close();
+        }
+    }
+
+    if (QFile::exists(changes)) {
+        QFile changesFile(changes);
+        if (changesFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            specs.changes = changesFile.readAll();
+            changesFile.close();
+        }
+    }
+
+    if (QFile::exists(authors)) {
+        QFile authorsFile(authors);
+        if (authorsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            specs.authors = authorsFile.readAll();
+            authorsFile.close();
+        }
+    }
+
     return specs;
 }
 

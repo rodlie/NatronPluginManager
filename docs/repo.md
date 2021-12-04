@@ -68,6 +68,6 @@ The folder may contain any amount of files.
 
 If the folder contains a ``README.md`` file it will be used instead of the description found in the ``.py`` file. External assets contained in the folder is allowed.
 
-If the folder contains a ``ChangeLog.md`` file it will be used to display specific changes for the plug-in. External assets contained in the folder is allowed.
+If the folder contains a ``CHANGES.md`` file it will be used to display specific changes for the plug-in. External assets contained in the folder is allowed.
 
 If the folder contains a ``AUTHORS.md`` file it will be used to display the author(s) of the plug-in. External assets are not allowed.

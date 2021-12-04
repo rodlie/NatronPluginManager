@@ -62,6 +62,9 @@ public:
         QString path;
         QString folder;
         bool writable = true;
+        QString readme;
+        QString changes;
+        QString authors;
     };
 
     struct RepoSpecs {
