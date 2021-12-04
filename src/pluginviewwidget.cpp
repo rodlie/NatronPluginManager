@@ -27,6 +27,7 @@
 #include <QIcon>
 #include <QPixmap>
 #include <QRegExp>
+#include <QKeySequence>
 
 PluginViewWidget::PluginViewWidget(QWidget *parent,
                                    Plugins *plugins,
@@ -53,7 +54,9 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
 
     QHBoxLayout *headerLayout = new QHBoxLayout(headerWidget);
 
-    _goBackButton = new QPushButton(tr("❮"), this);
+    _goBackButton = new QPushButton("«", this);
+    _goBackButton->setShortcutEnabled(true);
+    _goBackButton->setShortcut(QKeySequence(tr("Left")));
     _goBackButton->setSizePolicy(QSizePolicy::Fixed,
                                  QSizePolicy::Expanding);
     _goBackButton->setObjectName("GoBackButton");
