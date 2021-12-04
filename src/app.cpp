@@ -40,7 +40,7 @@
 #include "pluginlistwidget.h"
 #include "addrepodialog.h"
 
-#define NATRON_STYLE ":/stylesheet.qss"
+#define APP_STYLE ":/stylesheet.qss"
 
 #define PLUGIN_LIST_ROLE_ID Qt::UserRole+1
 #define PLUGIN_LIST_ROLE_GROUP Qt::UserRole+2
@@ -186,11 +186,13 @@ void NatronPluginManager::setupStyle()
 #endif
 
     QSettings settings;
-    QFile styleFile(settings.value("stylesheet", NATRON_STYLE).toString());
+    QFile styleFile(settings.value("stylesheet", APP_STYLE).toString());
     if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QString stylesheet = styleFile.readAll();
         styleFile.close();
-        qApp->setStyleSheet(stylesheet.arg(pluginTitleFontSize).arg(pluginGroupFontSize));
+        qApp->setStyleSheet(stylesheet
+                            .arg(pluginTitleFontSize)
+                            .arg(pluginGroupFontSize));
     }
 }
 
@@ -347,10 +349,8 @@ void NatronPluginManager::startup()
     QByteArray geo = getConfigWindowGeometry();
     if (!geo.isNull()) { restoreGeometry(getConfigWindowGeometry()); }
     QByteArray state = getConfigWindowState();
-    if (!state.isEmpty()) { restoreState(state); }
-    if (getConfigWindowIsMaximized()) {
-        showMaximized();
-    }
+    if (!state.isNull()) { restoreState(state); }
+    if (getConfigWindowIsMaximized()) { showMaximized(); }
     QtConcurrent::run(_plugins, &Plugins::loadRepositories);
 }
 
@@ -391,15 +391,15 @@ void NatronPluginManager::handlePluginsStatusError(const QString &message)
 {
     if (message.isEmpty()) { return; }
     QMessageBox::warning(this, tr("Failure"), message);
-    qDebug() << message;
-
     _statusBar->showMessage(message);
+    qDebug() << message;
 }
 
 void NatronPluginManager::handlePluginsStatusMessage(const QString &message)
 {
-    qDebug() << message;
+    if (message.isEmpty()) { return; }
     _statusBar->showMessage(message, 1000);
+    qDebug() << message;
 }
 
 void NatronPluginManager::handleDownloadStatusMessage(const QString &message,
