@@ -39,6 +39,9 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
     , _pluginGroupLabel(nullptr)
     , _pluginDescBrowser(nullptr)
     , _iconSize(iconSize)
+    , _installButton(nullptr)
+    , _removeButton(nullptr)
+    , _updateButton(nullptr)
 {
     setObjectName("PluginViewWidget");
 
@@ -77,6 +80,51 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
     _pluginGroupLabel = new QLabel(tr("Group"), this);
     _pluginGroupLabel->setObjectName("PluginViewGroupLabel");
 
+    _installButton = new QPushButton(tr("Install"), this);
+    _removeButton = new QPushButton(tr("Remove"), this);
+    _updateButton = new QPushButton(tr("Update"), this);
+
+    _installButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    _removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    _updateButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    _installButton->setProperty("InstallButton", true);
+    _removeButton->setProperty("RemoveButton", true);
+    _updateButton->setProperty("UpdateButton", true);
+
+    _installButton->setEnabled(false);
+    _removeButton->setEnabled(false);
+    _updateButton->setEnabled(false);
+
+    _installButton->setHidden(true);
+    _removeButton->setHidden(true);
+    _updateButton->setHidden(true);
+
+    connect(_installButton,
+            SIGNAL(released()),
+            this,
+            SLOT(handleInstallButtonReleased()));
+    connect(_removeButton,
+            SIGNAL(released()),
+            this,
+            SLOT(handleRemoveButtonReleased()));
+    connect(_updateButton,
+            SIGNAL(released()),
+            this,
+            SLOT(handleUpdateButtonReleased()));
+
+    QWidget *pluginButtonsWidget = new QWidget(this);
+    pluginButtonsWidget->setObjectName("PluginViewButtonsWidget");
+    pluginButtonsWidget->setSizePolicy(QSizePolicy::Fixed,
+                                       QSizePolicy::Expanding);
+    QVBoxLayout *pluginButtonsLayout = new QVBoxLayout(pluginButtonsWidget);
+
+    pluginButtonsLayout->addStretch();
+    pluginButtonsLayout->addWidget(_installButton);
+    pluginButtonsLayout->addWidget(_updateButton);
+    pluginButtonsLayout->addWidget(_removeButton);
+    pluginButtonsLayout->addStretch();
+
     pluginHeaderLayout->addStretch();
     pluginHeaderLayout->addWidget(_pluginTitleLabel);
     pluginHeaderLayout->addWidget(_pluginGroupLabel);
@@ -85,6 +133,7 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
     headerLayout->addWidget(_goBackButton);
     headerLayout->addWidget(_pluginIconLabel);
     headerLayout->addWidget(pluginHeaderWidget);
+    headerLayout->addWidget(pluginButtonsWidget);
 
     _pluginDescBrowser = new QTextBrowser(this);
     _pluginDescBrowser->setObjectName("PluginViewBrowser");
@@ -101,6 +150,7 @@ void PluginViewWidget::showPlugin(const QString &id)
     if (!_plugins || id.isEmpty()) { return; }
     Plugins::PluginSpecs plugin = _plugins->getPlugin(id);
     if (!_plugins->isValidPlugin(plugin)) { return; }
+    _id = id;
 
     _pluginTitleLabel->setText(plugin.label);
     _pluginGroupLabel->setText(plugin.group);
@@ -125,9 +175,72 @@ void PluginViewWidget::showPlugin(const QString &id)
                         "<a href=\"\\1\">\\1</a>");
 
     _pluginDescBrowser->setHtml(desc);
+
+    if (_plugins->hasAvailablePlugin(plugin.id)) {
+        setPluginStatus(plugin.id, Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
+    } else if (_plugins->hasInstalledPlugin(plugin.id)) {
+        setPluginStatus(plugin.id, Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
+    }
+}
+
+void PluginViewWidget::setPluginStatus(const QString &id,
+                                       int type)
+{
+    Plugins::PluginSpecs plugin = _plugins->getPlugin(id);
+    if (!_plugins->isValidPlugin(plugin)) { return; }
+    if (plugin.id != id || id != _id) { return; }
+    switch(type) {
+    case Plugins::NATRON_PLUGIN_TYPE_AVAILABLE:
+        _installButton->setEnabled(true);
+        _installButton->setHidden(false);
+        _removeButton->setEnabled(false);
+        _removeButton->setHidden(true);
+        _updateButton->setEnabled(false);
+        _updateButton->setHidden(true);
+        break;
+    case Plugins::NATRON_PLUGIN_TYPE_INSTALLED:
+        _installButton->setEnabled(false);
+        _installButton->setHidden(true);
+        _removeButton->setEnabled(true);
+        _removeButton->setHidden(false);
+        _updateButton->setEnabled(false);
+        _updateButton->setHidden(true);
+        break;
+    case Plugins::NATRON_PLUGIN_TYPE_UPDATE:
+        _installButton->setEnabled(false);
+        _installButton->setHidden(true);
+        _removeButton->setEnabled(true);
+        _removeButton->setHidden(false);
+        _updateButton->setEnabled(true);
+        _updateButton->setHidden(false);
+        break;
+    default:
+        _installButton->setEnabled(false);
+        _installButton->setHidden(true);
+        _removeButton->setEnabled(false);
+        _removeButton->setHidden(true);
+        _updateButton->setEnabled(false);
+        _updateButton->setHidden(true);
+        break;
+    }
 }
 
 void PluginViewWidget::handleGoBackButton()
 {
     emit goBack();
+}
+
+void PluginViewWidget::handleInstallButtonReleased()
+{
+    emit installPlugin(_id);
+}
+
+void PluginViewWidget::handleRemoveButtonReleased()
+{
+    emit removePlugin(_id);
+}
+
+void PluginViewWidget::handleUpdateButtonReleased()
+{
+    emit updatePlugin(_id);
 }

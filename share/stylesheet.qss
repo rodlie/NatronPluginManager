@@ -60,7 +60,8 @@ QListWidget#PluginList .QFrame:hover {
 }
 
 QListWidget#PluginList .QPushButton,
-QDialog#AddRepoDialog .QPushButton  {
+QDialog#AddRepoDialog .QPushButton,
+QWidget#PluginViewButtonsWidget .QPushButton {
     padding: 0.5em;
     border: 2px solid #ebebeb;
     border-radius: 10%;
@@ -76,35 +77,44 @@ QListWidget#PluginList .QPushButton[InstallButton=true]:pressed,
 QListWidget#PluginList .QPushButton[RemoveButton=true]:pressed,
 QListWidget#PluginList .QPushButton[UpdateButton=true]:pressed,
 QDialog#AddRepoDialog .QPushButton[InstallButton=true]:pressed,
-QDialog#AddRepoDialog .QPushButton[RemoveButton=true]:pressed {
+QDialog#AddRepoDialog .QPushButton[RemoveButton=true]:pressed,
+QWidget#PluginViewButtonsWidget .QPushButton[InstallButton=true]:pressed,
+QWidget#PluginViewButtonsWidget .QPushButton[UpdateButton=true]:pressed,
+QWidget#PluginViewButtonsWidget .QPushButton[RemoveButton=true]:pressed {
     border-color: #ebebeb;
 }
 
 QListWidget#PluginList .QPushButton[InstallButton=true],
+QWidget#PluginViewButtonsWidget .QPushButton[InstallButton=true],
 QDialog#AddRepoDialog .QPushButton[InstallButton=true] {
     border-color: #2e82be;
 }
 
 QListWidget#PluginList .QPushButton[InstallButton=true]:hover,
+QWidget#PluginViewButtonsWidget .QPushButton[InstallButton=true]:hover,
 QDialog#AddRepoDialog .QPushButton[InstallButton=true]:hover {
     background-color: #2e82be;
 }
 
 QListWidget#PluginList .QPushButton[RemoveButton=true],
+QWidget#PluginViewButtonsWidget .QPushButton[RemoveButton=true],
 QDialog#AddRepoDialog .QPushButton[RemoveButton=true] {
     border-color: #be2e44;
 }
 
 QListWidget#PluginList .QPushButton[RemoveButton=true]:hover,
+QWidget#PluginViewButtonsWidget .QPushButton[RemoveButton=true]:hover,
 QDialog#AddRepoDialog .QPushButton[RemoveButton=true]:hover {
     background-color: #be2e44;
 }
 
-QListWidget#PluginList .QPushButton[UpdateButton=true] {
+QListWidget#PluginList .QPushButton[UpdateButton=true],
+QWidget#PluginViewButtonsWidget .QPushButton[UpdateButton=true] {
     border-color: #2ebe34;
 }
 
-QListWidget#PluginList .QPushButton[UpdateButton=true]:hover {
+QListWidget#PluginList .QPushButton[UpdateButton=true]:hover,
+QWidget#PluginViewButtonsWidget .QPushButton[UpdateButton=true]:hover {
     background-color: #2ebe34;
 }
 

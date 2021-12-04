@@ -316,6 +316,18 @@ void NatronPluginManager::setupPluginList()
             SIGNAL(goBack()),
             this,
             SLOT(showPlugins()));
+    connect(this,
+            SIGNAL(pluginStatusChanged(QString,int)),
+            _pluginView,
+            SLOT(setPluginStatus(QString,int)));
+    connect(_pluginView,
+            SIGNAL(installPlugin(QString)),
+            this,
+            SLOT(installPlugin(QString)));
+    connect(_pluginView,
+            SIGNAL(removePlugin(QString)),
+            this,
+            SLOT(removePlugin(QString)));
 }
 
 void NatronPluginManager::setupStatus()

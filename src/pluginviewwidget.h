@@ -43,10 +43,15 @@ public:
 signals:
 
     void goBack();
+    void installPlugin(const QString &id);
+    void removePlugin(const QString &id);
+    void updatePlugin(const QString &id);
 
 public slots:
 
     void showPlugin(const QString &id);
+    void setPluginStatus(const QString &id,
+                         int type);
 
 private:
 
@@ -57,10 +62,17 @@ private:
     QLabel *_pluginGroupLabel;
     QTextBrowser *_pluginDescBrowser;
     QSize _iconSize;
+    QPushButton *_installButton;
+    QPushButton *_removeButton;
+    QPushButton *_updateButton;
+    QString _id;
 
 private slots:
 
     void handleGoBackButton();
+    void handleInstallButtonReleased();
+    void handleRemoveButtonReleased();
+    void handleUpdateButtonReleased();
 };
 
 #endif // PLUGINVIEWWIDGET_H
