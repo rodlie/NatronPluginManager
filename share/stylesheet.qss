@@ -197,6 +197,14 @@ QLabel#PluginViewTitleLabel {
     border: 0;
 }
 
+QPushButton#GoBackButton {
+    color: #767776;
+}
+
+QPushButton#GoBackButton:hover {
+    color: #ebebeb;
+}
+
 QLabel#PluginViewTitleLabel{
     font-weight: normal;
 }
