@@ -2,7 +2,7 @@
 #
 # Natron Plug-in Manager
 #
-# Copyright (c) 2021 Ole-André Rodlie. All rights reserved.
+# Copyright (c) Ole-André Rodlie. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -181,6 +181,7 @@ void NatronPluginManager::setupStyle()
     qApp->setStyle(QString("fusion"));
     qApp->setPalette(palette);
 
+    double pluginViewGoBackButton = 24;
     double pluginTitleFontSize = 16;
     double pluginGroupFontSize = 11;
 #ifndef Q_OS_MAC
@@ -195,7 +196,8 @@ void NatronPluginManager::setupStyle()
         styleFile.close();
         qApp->setStyleSheet(stylesheet
                             .arg(pluginTitleFontSize)
-                            .arg(pluginGroupFontSize));
+                            .arg(pluginGroupFontSize)
+                            .arg(pluginViewGoBackButton));
     }
 }
 
@@ -463,6 +465,10 @@ void NatronPluginManager::populatePlugins()
                 SIGNAL(pluginStatusChanged(QString,int)),
                 pwidget,
                 SLOT(setPluginStatus(QString,int)));
+        connect(pwidget,
+                SIGNAL(showPlugin(QString)),
+                this,
+                SLOT(showPlugin(QString)));
 
         item->setSizeHint(_pluginList->gridSize());
         _pluginList->addItem(item);

@@ -2,7 +2,7 @@
 #
 # Natron Plug-in Manager
 #
-# Copyright (c) 2021 Ole-André Rodlie. All rights reserved.
+# Copyright (c) Ole-André Rodlie. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -190,4 +190,10 @@ void PluginListWidget::handleUpdateButtonReleased()
 {
     emit pluginButtonReleased(_plugin.id,
                               Plugins::NATRON_PLUGIN_TYPE_UPDATE);
+}
+
+void PluginListWidget::mouseReleaseEvent(QMouseEvent *e)
+{
+    emit showPlugin(_plugin.id);
+    QWidget::mouseReleaseEvent(e);
 }

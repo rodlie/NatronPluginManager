@@ -2,7 +2,7 @@
 #
 # Natron Plug-in Manager
 #
-# Copyright (c) 2021 Ole-André Rodlie. All rights reserved.
+# Copyright (c) Ole-André Rodlie. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ QListWidget#PluginList .QFrame:hover {
 }
 
 QListWidget#PluginList .QPushButton,
-QDialog#AddRepoDialog .QPushButton {
+QDialog#AddRepoDialog .QPushButton  {
     padding: 0.5em;
     border: 2px solid #ebebeb;
     border-radius: 10%;
@@ -182,4 +182,38 @@ QComboBox#ComboStatus::drop-down {
 
 QComboBox QAbstractItemView {
     background-color: #101113;
+}
+
+QPushButton#GoBackButton {
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#GoBackButton,
+QLabel#PluginViewTitleLabel {
+    font-weight: bold;
+    font-size: %3pt;
+    color: #ebebeb;
+    border: 0;
+}
+
+QLabel#PluginViewTitleLabel{
+    font-weight: normal;
+}
+
+QLabel#PluginViewGroupLabel {
+    font-size: %1pt;
+    font-weight: bold;
+    color: #ebebeb;
+}
+
+/*QWidget#PluginViewHeaderWidget {
+    border: 1px solid red;
+}*/
+
+QTextBrowser#PluginViewBrowser {
+    border: 0;
+    background-color: transparent;
+    font-size: %1pt;
+    padding: 0.5em;
 }

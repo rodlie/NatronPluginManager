@@ -2,7 +2,7 @@
 #
 # Natron Plug-in Manager
 #
-# Copyright (c) 2021 Ole-André Rodlie. All rights reserved.
+# Copyright (c) Ole-André Rodlie. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <QWidget>
 #include <QSize>
 #include <QPushButton>
+#include <QMouseEvent>
 
 #include "plugins.h"
 
@@ -45,6 +46,7 @@ signals:
 
     void pluginButtonReleased(QString id,
                               int type);
+    void showPlugin(const QString &id);
 
 public slots:
 
@@ -63,6 +65,10 @@ private slots:
     void handleInstallButtonReleased();
     void handleRemoveButtonReleased();
     void handleUpdateButtonReleased();
+
+protected:
+
+    void mouseReleaseEvent(QMouseEvent *e);
 };
 
 #endif // PLUGINLISTWIDGET_H
