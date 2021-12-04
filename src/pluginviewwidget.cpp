@@ -19,35 +19,17 @@
 #
 */
 
-#ifndef ADDREPODIALOG_H
-#define ADDREPODIALOG_H
+#include "pluginviewwidget.h"
 
-#include <QDialog>
-#include <QPushButton>
-#include <QLineEdit>
-
-#include "plugins.h"
-
-class AddRepoDialog : public QDialog
+PluginViewWidget::PluginViewWidget(QWidget *parent,
+                                   Plugins *plugins)
+    : QWidget(parent)
+    , _plugins(plugins)
 {
-    Q_OBJECT
 
-public:
+}
 
-    explicit AddRepoDialog(QWidget *parent = nullptr,
-                           Plugins *plugins = nullptr);
-
-private:
-
-    Plugins *_plugins;
-    QLineEdit *_urlEdit;
-    QPushButton *_applyButton;
-    QPushButton *_cancelButton;
-    bool _validRepo;
-
-private slots:
-
-    void handleApplyButton();
-};
-
-#endif // ADDREPODIALOG_H
+void PluginViewWidget::showPlugin(const QString &id)
+{
+    if (!_plugins) {return; }
+}

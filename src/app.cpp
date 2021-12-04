@@ -46,6 +46,7 @@
 #define PLUGIN_LIST_ROLE_GROUP Qt::UserRole+2
 
 #define APP_STACK_PLUGINS 0
+#define APP_STACK_PLUGIN 1
 
 NatronPluginManager::NatronPluginManager(QWidget *parent)
     : QMainWindow(parent)
@@ -55,6 +56,7 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     , _plugins(nullptr)
     , _menuBar(nullptr)
     , _pluginList(nullptr)
+    , _pluginView(nullptr)
     , _statusBar(nullptr)
     , _progBar(nullptr)
     , _availableLabel(nullptr)
@@ -102,7 +104,8 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     pluginsWidgetLayout->addWidget(_pluginList);
 
     _stack = new QStackedWidget(this);
-    _stack->addWidget(pluginsWidget);
+    _stack->addWidget(pluginsWidget); // APP_STACK_PLUGINS
+    _stack->addWidget(_pluginView); // APP_STACK_PLUGIN
 
     mainLayout->addWidget(_stack);
 
@@ -305,6 +308,12 @@ void NatronPluginManager::setupPluginList()
     _pluginList->setGridSize(getConfigPluginGridSize());
     _pluginList->setResizeMode(QListView::Adjust);
     _pluginList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    _pluginView = new PluginViewWidget(this, _plugins);
+    connect(_pluginView,
+            SIGNAL(goBack()),
+            this,
+            SLOT(showPlugins()));
 }
 
 void NatronPluginManager::setupStatus()
@@ -549,6 +558,20 @@ void NatronPluginManager::openAddRepoDialog()
     dialog.exec();
 }
 
+void NatronPluginManager::showPlugins()
+{
+    if (_stack->currentIndex() == APP_STACK_PLUGINS) { return; }
+    _stack->setCurrentIndex(APP_STACK_PLUGINS);
+}
+
+void NatronPluginManager::showPlugin(const QString &id)
+{
+    if (_stack->currentIndex() != APP_STACK_PLUGIN) {
+        _stack->setCurrentIndex(APP_STACK_PLUGIN);
+    }
+    if (!id.isEmpty()) { _pluginView->showPlugin(id); }
+}
+
 void NatronPluginManager::closeEvent(QCloseEvent *e)
 {
     if (_plugins->isBusy()) {
@@ -556,8 +579,6 @@ void NatronPluginManager::closeEvent(QCloseEvent *e)
                              tr("Unable to quit"),
                              tr("The application is busy, please try again later."));
         e->ignore();
-    } else {
-        e->accept();
-    }
+    } else { e->accept(); }
 }
 

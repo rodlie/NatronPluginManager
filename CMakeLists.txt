@@ -115,6 +115,8 @@ set(SRC
     src/addrepodialog.h
     src/pluginlistwidget.cpp
     src/pluginlistwidget.h
+    src/pluginviewwidget.cpp
+    src/pluginviewwidget.h
     src/app.cpp
     src/app.h
     share/assets.qrc

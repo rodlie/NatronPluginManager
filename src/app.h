@@ -22,8 +22,6 @@
 #ifndef NATRONPLUGINMANAGER_H
 #define NATRONPLUGINMANAGER_H
 
-#include "plugins.h"
-
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QCloseEvent>
@@ -35,6 +33,9 @@
 #include <QStatusBar>
 #include <QProgressBar>
 #include <QLabel>
+
+#include "plugins.h"
+#include "pluginviewwidget.h"
 
 class NatronPluginManager : public QMainWindow
 {
@@ -66,6 +67,7 @@ private:
     Plugins *_plugins;
     QMenuBar *_menuBar;
     QListWidget *_pluginList;
+    PluginViewWidget *_pluginView;
     QStatusBar *_statusBar;
     QProgressBar *_progBar;
     QLabel *_availableLabel;
@@ -105,6 +107,9 @@ private slots:
     void removePlugin(const QString &id);
 
     void openAddRepoDialog();
+
+    void showPlugins();
+    void showPlugin(const QString &id = QString());
 
 protected:
 
