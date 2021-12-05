@@ -28,6 +28,7 @@
 #include <QPixmap>
 #include <QRegExp>
 #include <QKeySequence>
+#include <QtGlobal>
 
 PluginViewWidget::PluginViewWidget(QWidget *parent,
                                    Plugins *plugins,
@@ -177,7 +178,13 @@ void PluginViewWidget::showPlugin(const QString &id)
     desc = desc.replace(QRegExp("((?:https?|ftp)://\\S+)"),
                         "<a href=\"\\1\">\\1</a>");
 
+    _pluginDescBrowser->setSearchPaths(QStringList() << plugin.path);
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     _pluginDescBrowser->setHtml(desc);
+#else
+    if (!plugin.readme.isEmpty()) { _pluginDescBrowser->setMarkdown(plugin.readme); }
+    else { _pluginDescBrowser->setHtml(desc); }
+#endif
 
     if (_plugins->hasAvailablePlugin(plugin.id)) {
         setPluginStatus(plugin.id, Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
