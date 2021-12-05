@@ -12,6 +12,8 @@ A plug-in ([PyPlug](https://github.com/NatronGitHub/natron-plugins)) manager for
 
 This application requires CMake, Qt 5.10+ (Concurrent/Network/Widgets) and libzip to build.
 
+***Note**: Qt 5.14+ is required for markdown support.*
+
 ### Checkout
 ```
 git clone https://github.com/rodlie/NatronPluginManager
