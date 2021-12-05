@@ -182,8 +182,11 @@ void PluginViewWidget::showPlugin(const QString &id)
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     _pluginDescBrowser->setHtml(desc);
 #else
-    if (!plugin.readme.isEmpty()) { _pluginDescBrowser->setMarkdown(plugin.readme); }
-    else { _pluginDescBrowser->setHtml(desc); }
+    if (!plugin.readme.isEmpty()) {
+        QString markdown = plugin.readme;
+        QString title = QString("# %1").arg(QString(plugin.label).replace(" ", "_"));
+        _pluginDescBrowser->setMarkdown(markdown.replace(title, ""));
+    } else { _pluginDescBrowser->setHtml(desc); }
 #endif
 
     if (_plugins->hasAvailablePlugin(plugin.id)) {
