@@ -35,8 +35,9 @@ for i in $QTLIBS; do
     cp $MXE/usr/$TCHAIN/qt5/bin/${i}.dll . || exit 1
 done
 
-mkdir platforms
+mkdir platforms imageformats
 cp $MXE/usr/$TCHAIN/qt5/plugins/platforms/qwindows.dll platforms/ || exit 1
+cp $MXE/usr/$TCHAIN/qt5/plugins/imageformats/qjpeg.dll imageformats/ || exit 1
 
 $TCHAIN-strip -s *.exe *.dll */*.dll
 
