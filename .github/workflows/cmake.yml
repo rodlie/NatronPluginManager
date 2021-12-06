@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: apt install
-      run: sudo apt-get update && sudo apt-get install curl qt5-default qtbase5-dev libzip-dev libxkbcommon-x11-dev libxkbcommon-dev libx11-xcb-dev libxcb1-dev libxcb-*-dev libharfbuzz-dev
+      run: sudo apt-get update && sudo apt-get install curl qt5-default qtbase5-dev libzip-dev libxkbcommon-x11-dev libxkbcommon-dev libx11-xcb-dev libxcb1-dev libxcb-*-dev libharfbuzz-dev libdrm-dev mesa-common-dev
     - name: Setup Qt
       run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/qtbase-Natron-5.15.tar.xz --output qt.tar.xz && sudo tar xf qt.tar.xz -C /opt
     - name: Configure CMake
