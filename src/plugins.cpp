@@ -37,9 +37,7 @@
 #include <QXmlStreamReader>
 
 #include <zip.h>
-
 #define ZIP_BUF_SIZE 2048
-#define NATRON_COMMUNITY_PLUGINS_URL "https://github.com/NatronGitHub/natron-plugins/archive/master.zip"
 
 Plugins::Plugins(QObject *parent)
     : QObject(parent)
@@ -60,7 +58,7 @@ Plugins::Plugins(QObject *parent)
 
 Plugins::~Plugins()
 {
-    saveRepositories(_availableRepositories);
+    //saveRepositories(_availableRepositories);
 }
 
 void Plugins::scanForAvailablePlugins(const QString &path,
@@ -70,7 +68,6 @@ void Plugins::scanForAvailablePlugins(const QString &path,
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _availablePlugins.clear(); }
-    //emit statusMessage(tr("Scanning %1 ...").arg(path));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -81,11 +78,9 @@ void Plugins::scanForAvailablePlugins(const QString &path,
         if (!hasAvailablePlugin(plugin.id) &&
             !hasInstalledPlugin(plugin.id))
         {
-            //emit statusMessage(tr("Found available plug-in %1").arg(plugin.label));
             _availablePlugins.push_back(plugin);
         }
     }
-    //emit statusMessage(tr("Done"));
     if (_availablePlugins.size() > 0 && emitChanges) { emit updatedPlugins(); }
 
     if (emitCache) { emit updatedCache(); }
@@ -96,7 +91,6 @@ void Plugins::scanForInstalledPlugins(const QString &path,
 {
     if (!QFile::exists(path)) { return; }
     if (!append) { _installedPlugins.clear(); }
-    //emit statusMessage(tr("Scanning %1 ...").arg(path));
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -105,11 +99,9 @@ void Plugins::scanForInstalledPlugins(const QString &path,
         if (!folderHasPlugin(item)) { continue; }
         PluginSpecs plugin = getPluginSpecs(item);
         if (!hasInstalledPlugin(plugin.id)) {
-            //emit statusMessage(tr("Found installed plug-in %1").arg(plugin.label));
             _installedPlugins.push_back(plugin);
         }
     }
-    //emit statusMessage(tr("Done"));
 }
 
 bool Plugins::hasPlugin(const QString &id)
@@ -402,10 +394,6 @@ const QString Plugins::getRepoPath(const QString &uid)
     QString cache = getRepoPath();
     if (cache.isEmpty() || uid.isEmpty()) { return QString(); }
     cache.append(QString("/%1").arg(uid));
-    /*if (!QFile::exists(cache)) {
-        QDir dir;
-        dir.mkpath(cache);
-    }*/
     return cache;
 }
 
@@ -698,6 +686,7 @@ void Plugins::loadRepositories()
                 {
                     qDebug() << "added community repo";
                     _availableRepositories.push_back(repo);
+                    saveRepositories(_availableRepositories);
                 }
             }
         }
@@ -708,14 +697,11 @@ void Plugins::loadRepositories()
 
 void Plugins::saveRepositories(const std::vector<Plugins::RepoSpecs> &repos)
 {
-    emit statusMessage(tr("Saving repositories"));
     if (repos.size() < 1) { return; }
+    emit statusMessage(tr("Saving repositories"));
     QSettings settings;
     QHash<QString,QVariant> list;
     for (unsigned long i = 0; i < repos.size(); ++i) {
-        /*if (list.contains(repos.at(i).label)) { continue; }
-        list.insert(repos.at(i).label,
-                    QStringList() << repos.at(i).zip.toString() << repos.at(i).folder);*/
         if (list.contains(repos.at(i).id)) { continue; }
         list.insert(repos.at(i).id, repos.at(i).enabled);
     }
@@ -748,6 +734,7 @@ void Plugins::checkRepositories(bool emitChanges,
             scanForAvailablePlugins(repoPath, true, emitChanges, emitCache);
         }
     }
+    emit statusMessage(tr("Done"));
     if (_downloadQueue.size() > 0) { emit downloadRequired(); }
 }
 

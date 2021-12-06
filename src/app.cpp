@@ -421,7 +421,7 @@ void NatronPluginManager::handlePluginsStatusError(const QString &message)
 void NatronPluginManager::handlePluginsStatusMessage(const QString &message)
 {
     if (message.isEmpty()) { return; }
-    _statusBar->showMessage(message, 1000);
+    _statusBar->showMessage(message, 2000);
     qDebug() << message;
 }
 
@@ -431,7 +431,7 @@ void NatronPluginManager::handleDownloadStatusMessage(const QString &message,
 {
     qDebug() << message << value << total;
     if (_progBar->isHidden()) { _progBar->show(); }
-    _statusBar->showMessage(message, 1000);
+    _statusBar->showMessage(message, 2000);
     _progBar->setRange(0, total);
     _progBar->setValue(value);
     if (value == total && _progBar->isVisible()) { _progBar->hide(); }
@@ -599,4 +599,3 @@ void NatronPluginManager::closeEvent(QCloseEvent *e)
         e->ignore();
     } else { e->accept(); }
 }
-

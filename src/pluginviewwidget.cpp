@@ -56,6 +56,7 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
     QHBoxLayout *headerLayout = new QHBoxLayout(headerWidget);
 
     _goBackButton = new QPushButton("«", this);
+    _goBackButton->setFocusPolicy(Qt::NoFocus);
     _goBackButton->setShortcutEnabled(true);
     _goBackButton->setShortcut(QKeySequence(tr("Left")));
     _goBackButton->setSizePolicy(QSizePolicy::Fixed,

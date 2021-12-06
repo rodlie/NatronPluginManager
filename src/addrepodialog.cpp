@@ -63,7 +63,6 @@ AddRepoDialog::AddRepoDialog(QWidget *parent,
 
     _applyButton = new QPushButton(tr("Add"), this);
     _applyButton->setProperty("InstallButton", true);
-    //_applyButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_DialogOkButton));
     connect(_applyButton,
             SIGNAL(released()),
             this,
@@ -71,7 +70,6 @@ AddRepoDialog::AddRepoDialog(QWidget *parent,
 
     _cancelButton = new QPushButton(tr("Cancel"), this);
     _cancelButton->setProperty("RemoveButton", true);
-    //_cancelButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_DialogCancelButton));
     connect(_cancelButton,
             SIGNAL(released()),
             this,
