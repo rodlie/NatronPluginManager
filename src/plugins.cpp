@@ -39,6 +39,15 @@
 #include <zip.h>
 #define ZIP_BUF_SIZE 2048
 
+// Natron QSettings
+#ifndef NATRON_ORGANIZATION_NAME
+#define NATRON_ORGANIZATION_NAME "INRIA"
+#endif
+#ifndef NATRON_APPLICATION_NAME
+#define NATRON_APPLICATION_NAME "Natron"
+#endif
+#define NATRON_SETTINGS_PLUGINS_PATH "groupPluginsSearchPath"
+
 Plugins::Plugins(QObject *parent)
     : QObject(parent)
     , _isWorking(false)
@@ -86,9 +95,15 @@ void Plugins::scanForAvailablePlugins(const QString &path,
     if (emitCache) { emit updatedCache(); }
 }
 
+void Plugins::scanForInstalledPlugins(const QStringList &paths)
+{
+    for (int i = 0; i < paths.size(); ++i) { scanForInstalledPlugins(paths.at(i), true); }
+}
+
 void Plugins::scanForInstalledPlugins(const QString &path,
                                       bool append)
 {
+    qDebug() << "scan for plugins" << path;
     if (!QFile::exists(path)) { return; }
     if (!append) { _installedPlugins.clear(); }
     QDirIterator it(path,
@@ -282,6 +297,8 @@ Plugins::PluginSpecs Plugins::getPluginSpecs(const QString &path)
         specs.desc = getValueFromFile("getPluginDescription():", pyFile, true);
         specs.path = path;
         specs.folder = folder;
+        QFileInfo info(pyFile);
+        specs.writable = info.isWritable();
     }
 
     if (QFile::exists(readme)) {
@@ -363,6 +380,30 @@ const QString Plugins::getUserPluginPath()
 const QStringList Plugins::getSystemPluginPaths()
 {
     QStringList paths;
+    paths << QString("%1/Program Files/Common Files/Natron/Plugins").arg(QDir::rootPath());
+    paths << "/Library/Application Support/Natron/Plugins";
+    paths << "/usr/share/Natron/Plugins";
+    return paths;
+}
+
+const QStringList Plugins::getNatronCustomPaths()
+{
+    QStringList paths;
+    QSettings settings(QString(NATRON_ORGANIZATION_NAME), QString(NATRON_APPLICATION_NAME));
+    QString custom = settings.value(NATRON_SETTINGS_PLUGINS_PATH).toString();
+    custom.prepend("<?xml version=\"1.0\" encoding=\"utf-8\"?><settings>");
+    custom.append("</settings>");
+
+    QXmlStreamReader xml(custom);
+    if (xml.readNextStartElement()) {
+        if (xml.name() == "settings") {
+            while(xml.readNextStartElement()) {
+                if (xml.name() == "Value") {
+                    paths << xml.readElementText();
+                }  else { xml.skipCurrentElement(); }
+            }
+        }
+    }
 
     return paths;
 }
@@ -713,9 +754,14 @@ void Plugins::checkRepositories(bool emitChanges,
                                 bool emitCache)
 {
     emit statusMessage(tr("Checking repositories ..."));
+
+    scanForInstalledPlugins(getSystemPluginPaths());
     scanForInstalledPlugins(getUserPluginPath());
+    scanForInstalledPlugins(getNatronCustomPaths());
+
     _availablePlugins.clear();
     _downloadQueue.clear();
+
     if (_availableRepositories.size() < 1) {
         qDebug() << "got no repos!!!";
         emit updatedPlugins();

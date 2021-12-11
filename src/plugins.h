@@ -99,6 +99,7 @@ public:
                                  bool append = false,
                                  bool emitChanges = true,
                                  bool emitCache = false);
+    void scanForInstalledPlugins(const QStringList &paths);
     void scanForInstalledPlugins(const QString &path,
                                  bool append = false);
 
@@ -129,6 +130,7 @@ public:
 
     const QString getUserPluginPath();
     const QStringList getSystemPluginPaths();
+    const QStringList getNatronCustomPaths();
     const QString getCachePath();
     const QString getRepoPath();
     const QString getRepoPath(const QString &uid);
