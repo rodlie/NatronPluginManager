@@ -38,7 +38,8 @@ public:
 
     explicit PluginViewWidget(QWidget *parent = nullptr,
                               Plugins *plugins = nullptr,
-                              QSize iconSize = QSize(64, 64));
+                              QSize iconSize = QSize(PLUGINS_SETTINGS_LARGE_ICON_SIZE_DEFAULT,
+                                                     PLUGINS_SETTINGS_LARGE_ICON_SIZE_DEFAULT));
 
 signals:
 

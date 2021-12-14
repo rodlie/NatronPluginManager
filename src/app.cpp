@@ -127,6 +127,14 @@ const QSize NatronPluginManager::getConfigPluginIconSize()
                                 PLUGINS_SETTINGS_ICON_SIZE_DEFAULT)).toSize();
 }
 
+const QSize NatronPluginManager::getConfigPluginLargeIconSize()
+{
+    QSettings settings;
+    return settings.value(PLUGINS_SETTINGS_LARGE_ICON_SIZE,
+                          QSize(PLUGINS_SETTINGS_LARGE_ICON_SIZE_DEFAULT,
+                                PLUGINS_SETTINGS_LARGE_ICON_SIZE_DEFAULT)).toSize();
+}
+
 const QSize NatronPluginManager::getConfigPluginGridSize()
 {
     QSettings settings;
@@ -321,7 +329,9 @@ void NatronPluginManager::setupPluginList()
     _pluginList->setResizeMode(QListView::Adjust);
     _pluginList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    _pluginView = new PluginViewWidget(this, _plugins);
+    _pluginView = new PluginViewWidget(this,
+                                       _plugins,
+                                       getConfigPluginLargeIconSize());
     connect(_pluginView,
             SIGNAL(goBack()),
             this,
