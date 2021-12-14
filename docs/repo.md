@@ -1,8 +1,5 @@
 # Natron Plug-in Repository Standard v1.0
 
-**DRAFT, NOT FINAL**
-
-
 # Manifest
 
 All repositories must implement a manifest XML file.
@@ -37,15 +34,15 @@ Url to the homepage of the repository. Must be ``http://`` or ``https://``. This
 
 ### ``manifest``
 
-Direct url to the manifest XML file. Must be ``http://``, ``https://`` or ``file://``.
+Direct url to the manifest XML file. Must be ``http://`` or ``https://``.
 
 ### ``logo``
 
-Direct url to a PNG image for the repository, should be at least 128x128 px. The image is downloaded once. Must be ``http://``, ``https://`` or ``file://``. This is optional.
+Direct url to a PNG image for the repository, should be at least 128x128 px. The image is downloaded once (unless the url changes). Must be ``http://`` or ``https://``. This is optional.
 
 ### ``zip``
 
-Direct url to a ZIP file containing the plug-ins. Must be ``http://``, ``https://`` or ``file://``.
+Direct url to a ZIP file containing the plug-ins. Must be ``http://`` or ``https://``.
 
 ### ``checksum``
 
