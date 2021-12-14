@@ -47,8 +47,14 @@ public:
     ~NatronPluginManager();
 
     const QSize getConfigPluginIconSize();
+    void setConfigPluginIconSize(int iconSize);
+
     const QSize getConfigPluginLargeIconSize();
+    void setConfigPluginLargeIconSize(int iconSize);
+
     const QSize getConfigPluginGridSize();
+    void setConfigPluginGridSize(QSize gridSize);
+
     const QByteArray getConfigWindowGeometry();
     const QByteArray getConfigWindowState();
     bool getConfigWindowIsMaximized();

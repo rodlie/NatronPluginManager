@@ -127,6 +127,14 @@ const QSize NatronPluginManager::getConfigPluginIconSize()
                                 PLUGINS_SETTINGS_ICON_SIZE_DEFAULT)).toSize();
 }
 
+void NatronPluginManager::setConfigPluginIconSize(int iconSize)
+{
+    QSettings settings;
+    settings.setValue(PLUGINS_SETTINGS_ICON_SIZE,
+                      QSize(iconSize, iconSize));
+    settings.sync();
+}
+
 const QSize NatronPluginManager::getConfigPluginLargeIconSize()
 {
     QSettings settings;
@@ -135,12 +143,27 @@ const QSize NatronPluginManager::getConfigPluginLargeIconSize()
                                 PLUGINS_SETTINGS_LARGE_ICON_SIZE_DEFAULT)).toSize();
 }
 
+void NatronPluginManager::setConfigPluginLargeIconSize(int iconSize)
+{
+    QSettings settings;
+    settings.setValue(PLUGINS_SETTINGS_LARGE_ICON_SIZE,
+                      QSize(iconSize, iconSize));
+    settings.sync();
+}
+
 const QSize NatronPluginManager::getConfigPluginGridSize()
 {
     QSettings settings;
     return settings.value(PLUGINS_SETTINGS_GRID_SIZE,
                           QSize(PLUGINS_SETTINGS_GRID_WIDTH,
                                 PLUGINS_SETTINGS_GRID_HEIGHT)).toSize();
+}
+
+void NatronPluginManager::setConfigPluginGridSize(QSize gridSize)
+{
+    QSettings settings;
+    settings.setValue(PLUGINS_SETTINGS_GRID_SIZE, gridSize);
+    settings.sync();
 }
 
 const QByteArray NatronPluginManager::getConfigWindowGeometry()
@@ -191,9 +214,9 @@ void NatronPluginManager::setupStyle()
     qApp->setStyle(QString("fusion"));
     qApp->setPalette(palette);
 
-    double pluginViewGoBackButton = 24;
-    double pluginTitleFontSize = 16;
-    double pluginGroupFontSize = 11;
+    int pluginViewGoBackButton = 24;
+    int pluginTitleFontSize = 16;
+    int pluginGroupFontSize = 11;
 #ifndef Q_OS_MAC
     pluginTitleFontSize = 12;
     pluginGroupFontSize = 9;
@@ -201,11 +224,11 @@ void NatronPluginManager::setupStyle()
 
     QSettings settings;
 
-    if (settings.value(PLUGINS_SETTINGS_TITLE_FONT_SIZE).toDouble() > 0) {
-        pluginTitleFontSize = settings.value(PLUGINS_SETTINGS_TITLE_FONT_SIZE).toDouble();
+    if (settings.value(PLUGINS_SETTINGS_TITLE_FONT_SIZE).toInt() > 0) {
+        pluginTitleFontSize = settings.value(PLUGINS_SETTINGS_TITLE_FONT_SIZE).toInt();
     }
-    if (settings.value(PLUGINS_SETTINGS_GROUP_FONT_SIZE).toDouble() > 0) {
-        pluginGroupFontSize = settings.value(PLUGINS_SETTINGS_GROUP_FONT_SIZE).toDouble();
+    if (settings.value(PLUGINS_SETTINGS_GROUP_FONT_SIZE).toInt() > 0) {
+        pluginGroupFontSize = settings.value(PLUGINS_SETTINGS_GROUP_FONT_SIZE).toInt();
     }
 
     QFile styleFile(settings.value(PLUGINS_SETTINGS_KEY_STYLE, APP_STYLE).toString());
