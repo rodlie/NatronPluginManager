@@ -367,14 +367,21 @@ int Plugins::folderHasPlugins(const QString &path)
 const QString Plugins::getUserPluginPath()
 {
     QSettings settings;
-    QString folder = settings.value("UserPluginPath",
+    QString folder = settings.value(PLUGINS_SETTINGS_USER_PATH,
                                     QString("%1/.Natron/plugins")
                                     .arg(QDir::homePath())).toString();
     if (!QFile::exists(folder)) {
         QDir dir;
-        dir.mkpath(folder);
+        if (!dir.mkpath(folder)) { folder.clear(); }
     }
     return folder;
+}
+
+void Plugins::setUserPluginPath(const QString &path)
+{
+    QSettings settings;
+    settings.setValue(PLUGINS_SETTINGS_USER_PATH, path);
+    settings.sync();
 }
 
 const QStringList Plugins::getSystemPluginPaths()

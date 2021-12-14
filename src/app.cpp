@@ -122,15 +122,17 @@ NatronPluginManager::~NatronPluginManager()
 const QSize NatronPluginManager::getConfigPluginIconSize()
 {
     QSettings settings;
-    return settings.value("PluginIconSize",
-                          QSize(48,48)).toSize();
+    return settings.value(PLUGINS_SETTINGS_ICON_SIZE,
+                          QSize(PLUGINS_SETTINGS_ICON_SIZE_DEFAULT,
+                                PLUGINS_SETTINGS_ICON_SIZE_DEFAULT)).toSize();
 }
 
 const QSize NatronPluginManager::getConfigPluginGridSize()
 {
     QSettings settings;
-    return settings.value("PluginGridSize",
-                          QSize(330,160)).toSize();
+    return settings.value(PLUGINS_SETTINGS_GRID_SIZE,
+                          QSize(PLUGINS_SETTINGS_GRID_WIDTH,
+                                PLUGINS_SETTINGS_GRID_HEIGHT)).toSize();
 }
 
 const QByteArray NatronPluginManager::getConfigWindowGeometry()

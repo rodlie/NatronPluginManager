@@ -35,8 +35,18 @@
 
 #define PLUGINS_SETTINGS_KEY_REPOS "repositories"
 #define PLUGINS_SETTINGS_KEY_STYLE "stylesheet"
+
 #define PLUGINS_SETTINGS_TITLE_FONT_SIZE "pluginTitleFontSize"
 #define PLUGINS_SETTINGS_GROUP_FONT_SIZE "pluginGroupFontSize"
+
+#define PLUGINS_SETTINGS_ICON_SIZE "PluginIconSize"
+#define PLUGINS_SETTINGS_ICON_SIZE_DEFAULT 48
+
+#define PLUGINS_SETTINGS_GRID_SIZE "PluginGridSize"
+#define PLUGINS_SETTINGS_GRID_WIDTH 330
+#define PLUGINS_SETTINGS_GRID_HEIGHT 160
+
+#define PLUGINS_SETTINGS_USER_PATH "UserPluginPath"
 
 #define MANIFEST_TAG_ROOT "repo"
 #define MANIFEST_TAG_VERSION "version"
@@ -132,6 +142,8 @@ public:
     int folderHasPlugins(const QString &path);
 
     const QString getUserPluginPath();
+    void setUserPluginPath(const QString &path);
+
     const QStringList getSystemPluginPaths();
     const QStringList getNatronCustomPaths();
     const QString getCachePath();
