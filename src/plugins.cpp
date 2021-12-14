@@ -569,6 +569,21 @@ Plugins::PluginStatus Plugins::removePlugin(const QString &id)
     return  status;
 }
 
+Plugins::PluginStatus Plugins::updatePlugin(const QString &id)
+{
+    PluginStatus status;
+    status.success = false;
+    if (hasInstalledPlugin(id)) {
+        PluginStatus removedPlugin = removePlugin(id);
+        if (removedPlugin.success) {
+            PluginStatus installedPlugin = installPlugin(id);
+            if (installedPlugin.success) { status.success = true; }
+            else { status = installedPlugin; }
+        } else { status = removedPlugin; }
+    } else { status.message = tr("Plug-in is not installed."); }
+    return status;
+}
+
 Plugins::PluginStatus Plugins::extractPluginArchive(const QString &filename,
                                                     const QString &folder,
                                                     const QString &checksum)

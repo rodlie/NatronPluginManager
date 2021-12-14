@@ -157,6 +157,7 @@ public:
 
     Plugins::PluginStatus installPlugin(const QString &id);
     Plugins::PluginStatus removePlugin(const QString &id);
+    Plugins::PluginStatus updatePlugin(const QString &id);
 
     Plugins::PluginStatus extractPluginArchive(const QString &filename,
                                                const QString &folder,
