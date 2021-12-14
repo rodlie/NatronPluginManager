@@ -190,7 +190,15 @@ void NatronPluginManager::setupStyle()
 #endif
 
     QSettings settings;
-    QFile styleFile(settings.value("stylesheet", APP_STYLE).toString());
+
+    if (settings.value(PLUGINS_SETTINGS_TITLE_FONT_SIZE).toDouble() > 0) {
+        pluginTitleFontSize = settings.value(PLUGINS_SETTINGS_TITLE_FONT_SIZE).toDouble();
+    }
+    if (settings.value(PLUGINS_SETTINGS_GROUP_FONT_SIZE).toDouble() > 0) {
+        pluginGroupFontSize = settings.value(PLUGINS_SETTINGS_GROUP_FONT_SIZE).toDouble();
+    }
+
+    QFile styleFile(settings.value(PLUGINS_SETTINGS_KEY_STYLE, APP_STYLE).toString());
     if (styleFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QString stylesheet = styleFile.readAll();
         styleFile.close();

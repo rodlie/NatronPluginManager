@@ -34,6 +34,9 @@
 #define DEFAULT_ICON ":/NatronPluginManager.png"
 
 #define PLUGINS_SETTINGS_KEY_REPOS "repositories"
+#define PLUGINS_SETTINGS_KEY_STYLE "stylesheet"
+#define PLUGINS_SETTINGS_TITLE_FONT_SIZE "pluginTitleFontSize"
+#define PLUGINS_SETTINGS_GROUP_FONT_SIZE "pluginGroupFontSize"
 
 #define MANIFEST_TAG_ROOT "repo"
 #define MANIFEST_TAG_VERSION "version"
