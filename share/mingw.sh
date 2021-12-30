@@ -2,7 +2,7 @@
 #
 # Natron Plug-in Manager
 #
-# Copyright (c) 2021 Ole-André Rodlie. All rights reserved.
+# Copyright (c) Ole-André Rodlie. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,29 +18,25 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 
+set -e -x
+
+CWD=`pwd`
 MXE=/opt/mxe-NatronPluginManager
-TCHAIN=x86_64-w64-mingw32.static
+TOOL=x86_64-w64-mingw32.static
 PATH=$MXE/usr/bin:$PATH
-PKG_CONFIG_PATH=$MXE/usr/$TCHAIN/lib/pkgconfig
-QTLIBS="Qt5Concurrent Qt5Core Qt5Gui Qt5Network Qt5Widgets"
+PKG_CONFIG_PATH=$MXE/usr/$TOOL/lib/pkgconfig
 
 rm -r build || true
-
 mkdir build && cd build
-$TCHAIN-cmake -DCMAKE_BUILD_TYPE=Release .. && make
-mkdir NatronPluginManager && cd NatronPluginManager
-mv ../*.exe .
 
-for i in $QTLIBS; do
-    cp $MXE/usr/$TCHAIN/qt5/bin/${i}.dll . || exit 1
-done
+$TOOL-cmake -DCMAKE_BUILD_TYPE=Release ..
+make
 
-mkdir platforms imageformats
-cp $MXE/usr/$TCHAIN/qt5/plugins/platforms/qwindows.dll platforms/ || exit 1
-cp $MXE/usr/$TCHAIN/qt5/plugins/imageformats/qjpeg.dll imageformats/ || exit 1
+$TOOL-strip -s NatronPluginManager.exe
 
-$TCHAIN-strip -s *.exe *.dll */*.dll
-
-cd .. || exit 1
-
-zip -9 -r NatronPluginManager.zip NatronPluginManager || exit 1
+mkdir -p NatronPluginManager/third-party
+cp $CWD/LICENSE NatronPluginManager/
+cp $CWD/README.md NatronPluginManager/
+cp -a $MXE/licenses/* NatronPluginManager/third-party/
+mv NatronPluginManager.exe NatronPluginManager/
+zip -9 -r NatronPluginManager.zip NatronPluginManager

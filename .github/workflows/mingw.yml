@@ -1,4 +1,4 @@
-name: Windows (MinGW)
+name: Windows (MXE/MinGW)
 
 on: [push, pull_request]
 
@@ -9,9 +9,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Setup
-      run: sudo mkdir -p /opt/mxe-NatronPluginManager && sudo chown 777 /opt/mxe-NatronPluginManager
+      run: sudo mkdir -p /opt/mxe-NatronPluginManager && sudo chmod 777 /opt/mxe-NatronPluginManager
     - name: SDK
-      run: wget https://github.com/rodlie/NatronPluginManager/releases/download/continuous/mxe-NatronPluginManager-gcc7-qt515-hb.tar.xz && tar xvf mxe-NatronPluginManager-gcc7-qt515-hb.tar.xz -C /opt/mxe-NatronPluginManager/
+      run: wget https://github.com/rodlie/NatronPluginManager/releases/download/continuous/mxe-NatronPluginManager-20211230.tar.xz && tar xvf mxe-NatronPluginManager-20211230.tar.xz -C /opt/mxe-NatronPluginManager/
     - name: Build
       run: bash share/mingw.sh
     - name: Artifact
