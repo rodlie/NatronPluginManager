@@ -85,11 +85,11 @@ void SettingsDialog::setupGeneral()
     QWidget *pluginPathEditWidget = new QWidget(this);
     QHBoxLayout *pluginPathEditLayout = new QHBoxLayout(pluginPathEditWidget);
 
-    QLabel *urlEditLabel = new QLabel(tr("Installation path"), this);
+    QLabel *pluginPathEditLabel = new QLabel(tr("Installation path"), this);
     _pluginPath = new QLineEdit(this);
     _pluginPath->setText(_plugins->getUserPluginPath());
 
-    pluginPathEditLayout->addWidget(urlEditLabel);
+    pluginPathEditLayout->addWidget(pluginPathEditLabel);
     pluginPathEditLayout->addStretch();
     pluginPathEditLayout->addWidget(_pluginPath);
 

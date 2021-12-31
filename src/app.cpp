@@ -631,13 +631,12 @@ void NatronPluginManager::openAddRepoDialog()
 void NatronPluginManager::openSettingsDialog()
 {
     SettingsDialog dialog(this, _plugins);
-    int ret = dialog.exec();
-    if (ret == QDialog::Accepted) { updateSettings(); }
+    if (dialog.exec() == QDialog::Accepted) { updateSettings(); }
 }
 
 void NatronPluginManager::updateSettings()
 {
-    qDebug() << "update settings";
+    _plugins->checkRepositories();
 }
 
 void NatronPluginManager::showPlugins()
