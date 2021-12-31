@@ -114,6 +114,8 @@ set(SRC
     src/plugins.h
     src/addrepodialog.cpp
     src/addrepodialog.h
+    src/settingsdialog.cpp
+    src/settingsdialog.h
     src/pluginlistwidget.cpp
     src/pluginlistwidget.h
     src/pluginviewwidget.cpp

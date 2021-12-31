@@ -114,6 +114,9 @@ private slots:
     void removePlugin(const QString &id);
 
     void openAddRepoDialog();
+    void openSettingsDialog();
+
+    void updateSettings();
 
     void showPlugins();
     void showPlugin(const QString &id = QString());

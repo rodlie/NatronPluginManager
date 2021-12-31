@@ -39,6 +39,7 @@
 
 #include "pluginlistwidget.h"
 #include "addrepodialog.h"
+#include "settingsdialog.h"
 
 #define APP_STYLE ":/stylesheet.qss"
 
@@ -283,6 +284,14 @@ void NatronPluginManager::setupMenu()
             SIGNAL(triggered()),
             this,
             SLOT(openAddRepoDialog()));
+
+    QAction *settingsAction = new QAction(tr("Settings"), this);
+    settingsAction->setShortcut(QKeySequence(tr("Ctrl+S")));
+    fileMenu->addAction(settingsAction);
+    connect(settingsAction,
+            SIGNAL(triggered()),
+            this,
+            SLOT(openSettingsDialog()));
 
     QAction *fileQuitAction = new QAction(tr("Quit"), this);
     fileQuitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));
@@ -617,6 +626,18 @@ void NatronPluginManager::openAddRepoDialog()
 {
     AddRepoDialog dialog(this, _plugins);
     dialog.exec();
+}
+
+void NatronPluginManager::openSettingsDialog()
+{
+    SettingsDialog dialog(this, _plugins);
+    int ret = dialog.exec();
+    if (ret == QDialog::Accepted) { updateSettings(); }
+}
+
+void NatronPluginManager::updateSettings()
+{
+    qDebug() << "update settings";
 }
 
 void NatronPluginManager::showPlugins()

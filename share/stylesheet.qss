@@ -61,6 +61,7 @@ QListWidget#PluginList .QFrame:hover {
 
 QListWidget#PluginList .QPushButton,
 QDialog#AddRepoDialog .QPushButton,
+QDialog#SettingsDialog .QPushButton,
 QWidget#PluginViewButtonsWidget .QPushButton {
     padding: 0.5em;
     border: 2px solid #ebebeb;
@@ -78,6 +79,8 @@ QListWidget#PluginList .QPushButton[RemoveButton=true]:pressed,
 QListWidget#PluginList .QPushButton[UpdateButton=true]:pressed,
 QDialog#AddRepoDialog .QPushButton[InstallButton=true]:pressed,
 QDialog#AddRepoDialog .QPushButton[RemoveButton=true]:pressed,
+QDialog#SettingsDialog .QPushButton[InstallButton=true]:pressed,
+QDialog#SettingsDialog .QPushButton[RemoveButton=true]:pressed,
 QWidget#PluginViewButtonsWidget .QPushButton[InstallButton=true]:pressed,
 QWidget#PluginViewButtonsWidget .QPushButton[UpdateButton=true]:pressed,
 QWidget#PluginViewButtonsWidget .QPushButton[RemoveButton=true]:pressed {
@@ -86,25 +89,29 @@ QWidget#PluginViewButtonsWidget .QPushButton[RemoveButton=true]:pressed {
 
 QListWidget#PluginList .QPushButton[InstallButton=true],
 QWidget#PluginViewButtonsWidget .QPushButton[InstallButton=true],
-QDialog#AddRepoDialog .QPushButton[InstallButton=true] {
+QDialog#AddRepoDialog .QPushButton[InstallButton=true],
+QDialog#SettingsDialog .QPushButton[InstallButton=true] {
     border-color: #2e82be;
 }
 
 QListWidget#PluginList .QPushButton[InstallButton=true]:hover,
 QWidget#PluginViewButtonsWidget .QPushButton[InstallButton=true]:hover,
-QDialog#AddRepoDialog .QPushButton[InstallButton=true]:hover {
+QDialog#AddRepoDialog .QPushButton[InstallButton=true]:hover,
+QDialog#SettingsDialog .QPushButton[InstallButton=true]:hover {
     background-color: #2e82be;
 }
 
 QListWidget#PluginList .QPushButton[RemoveButton=true],
 QWidget#PluginViewButtonsWidget .QPushButton[RemoveButton=true],
-QDialog#AddRepoDialog .QPushButton[RemoveButton=true] {
+QDialog#AddRepoDialog .QPushButton[RemoveButton=true],
+QDialog#SettingsDialog .QPushButton[RemoveButton=true] {
     border-color: #be2e44;
 }
 
 QListWidget#PluginList .QPushButton[RemoveButton=true]:hover,
 QWidget#PluginViewButtonsWidget .QPushButton[RemoveButton=true]:hover,
-QDialog#AddRepoDialog .QPushButton[RemoveButton=true]:hover {
+QDialog#AddRepoDialog .QPushButton[RemoveButton=true]:hover,
+QDialog#SettingsDialog .QPushButton[RemoveButton=true]:hover {
     background-color: #be2e44;
 }
 
@@ -197,7 +204,8 @@ QLabel#ComboGroupLabel {
 
 QComboBox#ComboGroup,
 QComboBox#ComboStatus,
-QDialog#AddRepoDialog .QLineEdit {
+QDialog#AddRepoDialog .QLineEdit,
+QDialog#SettingsDialog .QLineEdit {
     padding: 0.2em;
     padding-left: 0.5em;
     border: 2px solid #252525;
@@ -205,8 +213,13 @@ QDialog#AddRepoDialog .QLineEdit {
     background-color: #191919;
 }
 
-QDialog#AddRepoDialog .QLineEdit {
+QDialog#AddRepoDialog .QLineEdit,
+QDialog#SettingsDialog .QLineEdit {
     border-color: #767776;
+}
+
+QDialog#SettingsDialog .QLineEdit {
+    min-width: 200px;
 }
 
 QComboBox#ComboGroup::down-arrow,
