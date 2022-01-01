@@ -280,6 +280,10 @@ QLabel#PluginViewGroupLabel {
     color: #ebebeb;
 }
 
+QLabel#PluginViewVersionLabel {
+    margin-right: 1em;
+}
+
 /*QWidget#PluginViewHeaderWidget {
     border: 1px solid red;
 }*/

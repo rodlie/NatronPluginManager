@@ -111,8 +111,10 @@ private slots:
 
     void handlePluginButtonReleased(const QString &id,
                                     int type);
+
     void installPlugin(const QString &id);
     void removePlugin(const QString &id);
+    void updatePlugin(const QString &id);
 
     void openAddRepoDialog();
     void openSettingsDialog();

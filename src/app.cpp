@@ -386,6 +386,10 @@ void NatronPluginManager::setupPluginList()
             SIGNAL(removePlugin(QString)),
             this,
             SLOT(removePlugin(QString)));
+    connect(_pluginView,
+            SIGNAL(updatePlugin(QString)),
+            this,
+            SLOT(updatePlugin(QString)));
 }
 
 void NatronPluginManager::setupStatus()
@@ -530,7 +534,9 @@ void NatronPluginManager::populatePlugins()
         item->setData(PLUGIN_LIST_ROLE_GROUP, plugin.group);
         item->setData(PLUGIN_LIST_ROLE_ID, plugin.id);
         Plugins::PluginType type = Plugins::NATRON_PLUGIN_TYPE_NONE;
-        if (_plugins->hasAvailablePlugin(plugin.id)) {
+        if (_plugins->hasUpdatedPlugin(plugin.id)) {
+            type = Plugins::NATRON_PLUGIN_TYPE_UPDATE;
+        } else if (_plugins->hasAvailablePlugin(plugin.id)) {
             type = Plugins::NATRON_PLUGIN_TYPE_AVAILABLE;
         } else if (_plugins->hasInstalledPlugin(plugin.id)) {
             type = Plugins::NATRON_PLUGIN_TYPE_INSTALLED;
@@ -583,6 +589,8 @@ void NatronPluginManager::filterPluginsStatus(const QString &status)
             visible = _plugins->hasAvailablePlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
         } else if (status == tr("Installed")) {
             visible = _plugins->hasInstalledPlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
+        } else if (status == tr("Updates")) {
+            visible = _plugins->hasUpdatedPlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
         }
         item->setHidden(!visible);
     }
@@ -607,6 +615,9 @@ void NatronPluginManager::handlePluginButtonReleased(const QString &id,
         break;
     case Plugins::NATRON_PLUGIN_TYPE_INSTALLED:
         removePlugin(id);
+        break;
+    case Plugins::NATRON_PLUGIN_TYPE_UPDATE:
+        updatePlugin(id);
         break;
     default:;
     }
@@ -633,6 +644,20 @@ void NatronPluginManager::removePlugin(const QString &id)
         QMessageBox::warning(this, tr("Remove"), status.message);
     } else {
         emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
+        QtConcurrent::run(_plugins,
+                          &Plugins::checkRepositories,
+                          false,
+                          true);
+    }
+}
+
+void NatronPluginManager::updatePlugin(const QString &id)
+{
+    Plugins::PluginStatus status = _plugins->updatePlugin(id);
+    if (!status.success) {
+        QMessageBox::warning(this, tr("Update"), status.message);
+    } else {
+        emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
         QtConcurrent::run(_plugins,
                           &Plugins::checkRepositories,
                           false,

@@ -122,14 +122,17 @@ public:
     bool hasPlugin(const QString &id);
     bool hasAvailablePlugin(const QString &id);
     bool hasInstalledPlugin(const QString &id);
+    bool hasUpdatedPlugin(const QString &id);
 
     Plugins::PluginSpecs getPlugin(const QString &id);
     Plugins::PluginSpecs getAvailablePlugin(const QString &id);
     Plugins::PluginSpecs getInstalledPlugin(const QString &id);
+    Plugins::PluginSpecs getUpdatedPlugin(const QString &id);
 
     std::vector<Plugins::PluginSpecs> getPlugins();
     std::vector<Plugins::PluginSpecs> getAvailablePlugins();
     std::vector<Plugins::PluginSpecs> getInstalledPlugins();
+    std::vector<Plugins::PluginSpecs> getUpdatedPlugins();
 
     const QStringList getPluginGroups();
     const QStringList getPluginGroups(Plugins::PluginType type);
@@ -159,7 +162,8 @@ public:
 
     const QString genNewRepoID();
 
-    Plugins::PluginStatus installPlugin(const QString &id);
+    Plugins::PluginStatus installPlugin(const QString &id,
+                                        bool update = false);
     Plugins::PluginStatus removePlugin(const QString &id);
     Plugins::PluginStatus updatePlugin(const QString &id);
 
@@ -212,6 +216,7 @@ private:
     bool _isWorking;
     bool _isDownloading;
     std::vector<Plugins::PluginSpecs> _availablePlugins;
+    std::vector<Plugins::PluginSpecs> _availablePluginUpdates;
     std::vector<Plugins::PluginSpecs> _installedPlugins;
     std::vector<Plugins::RepoSpecs> _availableRepositories;
     std::vector<QUrl> _downloadQueue;

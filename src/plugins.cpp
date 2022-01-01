@@ -76,7 +76,10 @@ void Plugins::scanForAvailablePlugins(const QString &path,
                                       bool emitCache)
 {
     if (!QFile::exists(path)) { return; }
-    if (!append) { _availablePlugins.clear(); }
+    if (!append) {
+        _availablePlugins.clear();
+        _availablePluginUpdates.clear();
+    }
     QDirIterator it(path,
                     QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
                     QDirIterator::Subdirectories);
@@ -89,8 +92,13 @@ void Plugins::scanForAvailablePlugins(const QString &path,
         {
             _availablePlugins.push_back(plugin);
         }
+        if (hasInstalledPlugin(plugin.id) &&
+            plugin.version > getInstalledPlugin(plugin.id).version)
+        {
+            _availablePluginUpdates.push_back(plugin);
+        }
     }
-    if (_availablePlugins.size() > 0 && emitChanges) { emit updatedPlugins(); }
+    if ((_availablePlugins.size() > 0 || _availablePluginUpdates.size() > 0) && emitChanges) { emit updatedPlugins(); }
 
     if (emitCache) { emit updatedCache(); }
 }
@@ -140,9 +148,18 @@ bool Plugins::hasInstalledPlugin(const QString &id)
     return false;
 }
 
+bool Plugins::hasUpdatedPlugin(const QString &id)
+{
+    for (unsigned long i = 0; i < _availablePluginUpdates.size(); ++i) {
+        if (id == _availablePluginUpdates.at(i).id) { return true; }
+    }
+    return false;
+}
+
 Plugins::PluginSpecs Plugins::getPlugin(const QString &id)
 {
-    PluginSpecs plugin = getAvailablePlugin(id);
+    PluginSpecs plugin = getUpdatedPlugin(id);
+    if (!isValidPlugin(plugin)) { plugin = getAvailablePlugin(id); }
     if (!isValidPlugin(plugin)) { plugin = getInstalledPlugin(id); }
     return plugin;
 }
@@ -159,6 +176,14 @@ Plugins::PluginSpecs Plugins::getInstalledPlugin(const QString &id)
 {
     for (unsigned long i = 0; i < _installedPlugins.size(); ++i) {
         if (id == _installedPlugins.at(i).id) { return _installedPlugins.at(i); }
+    }
+    return PluginSpecs();
+}
+
+Plugins::PluginSpecs Plugins::getUpdatedPlugin(const QString &id)
+{
+    for (unsigned long i = 0; i < _availablePluginUpdates.size(); ++i) {
+        if (id == _availablePluginUpdates.at(i).id) { return _availablePluginUpdates.at(i); }
     }
     return PluginSpecs();
 }
@@ -180,6 +205,11 @@ std::vector<Plugins::PluginSpecs> Plugins::getAvailablePlugins()
 std::vector<Plugins::PluginSpecs> Plugins::getInstalledPlugins()
 {
     return _installedPlugins;
+}
+
+std::vector<Plugins::PluginSpecs> Plugins::getUpdatedPlugins()
+{
+    return _availablePluginUpdates;
 }
 
 const QStringList Plugins::getPluginGroups()
@@ -504,18 +534,20 @@ const QString Plugins::genNewRepoID()
     return uid;
 }
 
-Plugins::PluginStatus Plugins::installPlugin(const QString &id)
+Plugins::PluginStatus Plugins::installPlugin(const QString &id,
+                                             bool update)
 {
     PluginStatus status;
-    if (hasInstalledPlugin(id)) {
+    if (hasInstalledPlugin(id) && !update) {
         status.message = tr("Plug-in already installed");
         return status;
     }
-    if (!hasAvailablePlugin(id)) {
+    if (!hasAvailablePlugin(id) && !update) {
         status.message = tr("Plug-in not available");
         return  status;
     }
     PluginSpecs plugin = getAvailablePlugin(id);
+    if (update) { plugin = getUpdatedPlugin(id); }
     if (!isValidPlugin(plugin)) {
         status.message = tr("Not a valid plug-in");
         return  status;
@@ -592,7 +624,7 @@ Plugins::PluginStatus Plugins::updatePlugin(const QString &id)
     if (hasInstalledPlugin(id)) {
         PluginStatus removedPlugin = removePlugin(id);
         if (removedPlugin.success) {
-            PluginStatus installedPlugin = installPlugin(id);
+            PluginStatus installedPlugin = installPlugin(id, true);
             if (installedPlugin.success) { status.success = true; }
             else { status = installedPlugin; }
         } else { status = removedPlugin; }
@@ -793,11 +825,14 @@ void Plugins::checkRepositories(bool emitChanges,
 {
     emit statusMessage(tr("Checking repositories ..."));
 
+    _installedPlugins.clear();
+
     scanForInstalledPlugins(getSystemPluginPaths());
     scanForInstalledPlugins(getUserPluginPath());
     scanForInstalledPlugins(getNatronCustomPaths());
 
     _availablePlugins.clear();
+    _availablePluginUpdates.clear();
     _downloadQueue.clear();
 
     if (_availableRepositories.size() < 1) {

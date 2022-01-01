@@ -39,6 +39,7 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
     , _pluginIconLabel(nullptr)
     , _pluginTitleLabel(nullptr)
     , _pluginGroupLabel(nullptr)
+    , _pluginVersionLabel(nullptr)
     , _pluginDescBrowser(nullptr)
     , _iconSize(iconSize)
     , _installButton(nullptr)
@@ -118,13 +119,17 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
             this,
             SLOT(handleUpdateButtonReleased()));
 
+    _pluginVersionLabel = new QLabel(this);
+    _pluginVersionLabel->setObjectName("PluginViewVersionLabel");
+
     QWidget *pluginButtonsWidget = new QWidget(this);
     pluginButtonsWidget->setObjectName("PluginViewButtonsWidget");
     pluginButtonsWidget->setSizePolicy(QSizePolicy::Fixed,
                                        QSizePolicy::Expanding);
-    QVBoxLayout *pluginButtonsLayout = new QVBoxLayout(pluginButtonsWidget);
+    QHBoxLayout *pluginButtonsLayout = new QHBoxLayout(pluginButtonsWidget);
 
     pluginButtonsLayout->addStretch();
+    pluginButtonsLayout->addWidget(_pluginVersionLabel);
     pluginButtonsLayout->addWidget(_installButton);
     pluginButtonsLayout->addWidget(_updateButton);
     pluginButtonsLayout->addWidget(_removeButton);
@@ -159,6 +164,7 @@ void PluginViewWidget::showPlugin(const QString &id)
 
     _pluginTitleLabel->setText(plugin.label);
     _pluginGroupLabel->setText(plugin.group);
+    _pluginVersionLabel->setText(tr("Version %1").arg(plugin.version));
 
     _pluginIconLabel->setPixmap(QIcon(QString(DEFAULT_ICON)).pixmap(_iconSize).scaled(_iconSize,
                                                                                       Qt::KeepAspectRatio,
@@ -190,7 +196,9 @@ void PluginViewWidget::showPlugin(const QString &id)
     } else { _pluginDescBrowser->setHtml(desc); }
 #endif
 
-    if (_plugins->hasAvailablePlugin(plugin.id)) {
+    if (_plugins->hasUpdatedPlugin(plugin.id)) {
+        setPluginStatus(plugin.id, Plugins::NATRON_PLUGIN_TYPE_UPDATE);
+    } else if (_plugins->hasAvailablePlugin(plugin.id)) {
         setPluginStatus(plugin.id, Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
     } else if (_plugins->hasInstalledPlugin(plugin.id)) {
         setPluginStatus(plugin.id, Plugins::NATRON_PLUGIN_TYPE_INSTALLED);

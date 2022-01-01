@@ -61,6 +61,7 @@ private:
     QLabel *_pluginIconLabel;
     QLabel *_pluginTitleLabel;
     QLabel *_pluginGroupLabel;
+    QLabel *_pluginVersionLabel;
     QTextBrowser *_pluginDescBrowser;
     QSize _iconSize;
     QPushButton *_installButton;
