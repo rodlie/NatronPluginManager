@@ -285,6 +285,8 @@ void NatronPluginManager::setupMenu()
             this,
             SLOT(openAddRepoDialog()));
 
+    fileMenu->addSeparator();
+
     QAction *settingsAction = new QAction(tr("Settings"), this);
     settingsAction->setShortcut(QKeySequence(tr("Ctrl+S")));
     fileMenu->addAction(settingsAction);
@@ -292,6 +294,8 @@ void NatronPluginManager::setupMenu()
             SIGNAL(triggered()),
             this,
             SLOT(openSettingsDialog()));
+
+    fileMenu->addSeparator();
 
     QAction *fileQuitAction = new QAction(tr("Quit"), this);
     fileQuitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));

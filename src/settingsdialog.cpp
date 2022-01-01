@@ -27,6 +27,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QUrl>
+#include <QFileDialog>
 
 SettingsDialog::SettingsDialog(QWidget *parent,
                                Plugins *plugins)
@@ -87,11 +88,20 @@ void SettingsDialog::setupGeneral()
 
     QLabel *pluginPathEditLabel = new QLabel(tr("Installation path"), this);
     _pluginPath = new QLineEdit(this);
+    _pluginPath->setProperty("StyleEdit", true);
     _pluginPath->setText(_plugins->getUserPluginPath());
+
+    QPushButton *pluginPathEditButton = new QPushButton(tr("..."), this);
+    pluginPathEditButton->setProperty("FileButton", true);
+    connect(pluginPathEditButton,
+            SIGNAL(released()),
+            this,
+            SLOT(handleSelectButton()));
 
     pluginPathEditLayout->addWidget(pluginPathEditLabel);
     pluginPathEditLayout->addStretch();
     pluginPathEditLayout->addWidget(_pluginPath);
+    pluginPathEditLayout->addWidget(pluginPathEditButton);
 
     generalLayout->addWidget(pluginPathEditWidget);
     generalLayout->addStretch();
@@ -110,4 +120,13 @@ void SettingsDialog::handleApplyButton()
 
     if (changed) { accept(); }
     else { reject(); }
+}
+
+void SettingsDialog::handleSelectButton()
+{
+    QString dir = QFileDialog::getExistingDirectory(this,
+                                                    tr("Select directory"),
+                                                    QDir::homePath(),
+                                                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if (!dir.isEmpty()) { _pluginPath->setText(dir); }
 }

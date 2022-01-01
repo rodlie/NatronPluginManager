@@ -22,7 +22,7 @@
 QToolBar#ToolBar,
 QMenuBar#MenuBar {
     border: 0;
-    background-color: #232528;
+    background-color: /*#232528*/#101113;
     color: #ebebeb;
 }
 
@@ -61,12 +61,24 @@ QListWidget#PluginList .QFrame:hover {
 
 QListWidget#PluginList .QPushButton,
 QDialog#AddRepoDialog .QPushButton,
-QDialog#SettingsDialog .QPushButton,
+QDialog#SettingsDialog .QPushButton[InstallButton=true],
+QDialog#SettingsDialog .QPushButton[RemoveButton=true],
 QWidget#PluginViewButtonsWidget .QPushButton {
     padding: 0.5em;
     border: 2px solid #ebebeb;
     border-radius: 10%;
     color: #ebebeb;
+}
+
+QDialog#SettingsDialog .QPushButton[FileButton=true] {
+    padding: 0.2em;
+    border: 0;
+    color: #ebebeb;
+    font-weight: bold;
+}
+
+QDialog#SettingsDialog .QPushButton[FileButton=true]:hover {
+    color: #767776;
 }
 
 /* this looks ugly on windows */
@@ -205,7 +217,7 @@ QLabel#ComboGroupLabel {
 QComboBox#ComboGroup,
 QComboBox#ComboStatus,
 QDialog#AddRepoDialog .QLineEdit,
-QDialog#SettingsDialog .QLineEdit {
+QDialog#SettingsDialog .QLineEdit[StyleEdit=true] {
     padding: 0.2em;
     padding-left: 0.5em;
     border: 2px solid #252525;
@@ -214,7 +226,7 @@ QDialog#SettingsDialog .QLineEdit {
 }
 
 QDialog#AddRepoDialog .QLineEdit,
-QDialog#SettingsDialog .QLineEdit {
+QDialog#SettingsDialog .QLineEdit[StyleEdit=true] {
     border-color: #767776;
 }
 

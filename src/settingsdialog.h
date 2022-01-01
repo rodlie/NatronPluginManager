@@ -53,6 +53,7 @@ private:
 private slots:
 
     void handleApplyButton();
+    void handleSelectButton();
 };
 
 #endif // SETTINGSDIALOG_H
