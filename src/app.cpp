@@ -63,6 +63,7 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     , _progBar(nullptr)
     , _availableLabel(nullptr)
     , _installedLabel(nullptr)
+    , _updatesLabel(nullptr)
     , _cacheLabel(nullptr)
 {
     setWindowIcon(QIcon(DEFAULT_ICON));
@@ -405,6 +406,9 @@ void NatronPluginManager::setupStatus()
     _installedLabel = new QLabel(this);
     _installedLabel->setText("0");
 
+    _updatesLabel = new QLabel(this);
+    _updatesLabel->setText("0");
+
     _cacheLabel = new QLabel(this);
     _cacheLabel->setText("0");
 
@@ -420,10 +424,16 @@ void NatronPluginManager::setupStatus()
     statusCacheLabel->setObjectName("StatusCacheLabel");
     statusCacheLabel->setText(tr("Cache"));
 
+    QLabel *statusUpdatesLabel = new QLabel(this);
+    statusUpdatesLabel->setObjectName("StatusUpdatesLabel");
+    statusUpdatesLabel->setText(tr("Updates"));
+
     _statusBar->addPermanentWidget(statusCacheLabel);
     _statusBar->addPermanentWidget(_cacheLabel);
     _statusBar->addPermanentWidget(statusAvailableLabel);
     _statusBar->addPermanentWidget(_availableLabel);
+    _statusBar->addPermanentWidget(statusUpdatesLabel);
+    _statusBar->addPermanentWidget(_updatesLabel);
     _statusBar->addPermanentWidget(statusInstalledLabel);
     _statusBar->addPermanentWidget(_installedLabel);
 
@@ -458,6 +468,7 @@ void NatronPluginManager::updatePluginStatusLabels()
 {
     _availableLabel->setText(QString::number(_plugins->getAvailablePlugins().size()));
     _installedLabel->setText(QString::number(_plugins->getInstalledPlugins().size()));
+    _updatesLabel->setText(QString::number(_plugins->getUpdatedPlugins().size()));
 
     QLocale locale = this->locale();
     _cacheLabel->setText(locale.formattedDataSize(_plugins->getCacheSize()));

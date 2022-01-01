@@ -42,7 +42,8 @@ QStatusBar#StatusBar .QLabel {
 
 QLabel#StatusAvailableLabel,
 QLabel#StatusInstalledLabel,
-QLabel#StatusCacheLabel {
+QLabel#StatusCacheLabel,
+QLabel#StatusUpdatesLabel {
     font-weight: bold;
 }
 

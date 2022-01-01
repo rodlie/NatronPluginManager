@@ -79,6 +79,7 @@ private:
     QProgressBar *_progBar;
     QLabel *_availableLabel;
     QLabel *_installedLabel;
+    QLabel *_updatesLabel;
     QLabel *_cacheLabel;
 
 private slots:
