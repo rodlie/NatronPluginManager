@@ -425,6 +425,22 @@ const QString Plugins::getCachePath()
     return folder;
 }
 
+qint64 Plugins::getCacheSize()
+{
+    qint64 total = 0;
+    QString folder = getCachePath();
+    if (QFile::exists(folder)) {
+        QDirIterator it(folder,
+                        QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
+                        QDirIterator::Subdirectories);
+        while (it.hasNext()) {
+            total += it.fileInfo().size();
+            it.next();
+        }
+    }
+    return total;
+}
+
 const QString Plugins::getRepoPath()
 {
     QString cache = getCachePath();

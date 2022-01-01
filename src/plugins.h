@@ -150,6 +150,7 @@ public:
     const QStringList getSystemPluginPaths();
     const QStringList getNatronCustomPaths();
     const QString getCachePath();
+    qint64 getCacheSize();
     const QString getRepoPath();
     const QString getRepoPath(const QString &uid);
     const QString getRandom(const QString &path = QString(),

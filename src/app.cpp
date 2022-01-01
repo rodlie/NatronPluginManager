@@ -36,6 +36,7 @@
 #include <QtConcurrentRun>
 #include <QPalette>
 #include <QSettings>
+#include <QLocale>
 
 #include "pluginlistwidget.h"
 #include "addrepodialog.h"
@@ -62,6 +63,7 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     , _progBar(nullptr)
     , _availableLabel(nullptr)
     , _installedLabel(nullptr)
+    , _cacheLabel(nullptr)
 {
     setWindowIcon(QIcon(DEFAULT_ICON));
 
@@ -399,6 +401,9 @@ void NatronPluginManager::setupStatus()
     _installedLabel = new QLabel(this);
     _installedLabel->setText("0");
 
+    _cacheLabel = new QLabel(this);
+    _cacheLabel->setText("0");
+
     QLabel *statusAvailableLabel = new QLabel(this);
     statusAvailableLabel->setObjectName("StatusAvailableLabel");
     statusAvailableLabel->setText(tr("Available"));
@@ -407,6 +412,12 @@ void NatronPluginManager::setupStatus()
     statusInstalledLabel->setObjectName("StatusInstalledLabel");
     statusInstalledLabel->setText(tr("Installed"));
 
+    QLabel *statusCacheLabel = new QLabel(this);
+    statusCacheLabel->setObjectName("StatusCacheLabel");
+    statusCacheLabel->setText(tr("Cache"));
+
+    _statusBar->addPermanentWidget(statusCacheLabel);
+    _statusBar->addPermanentWidget(_cacheLabel);
     _statusBar->addPermanentWidget(statusAvailableLabel);
     _statusBar->addPermanentWidget(_availableLabel);
     _statusBar->addPermanentWidget(statusInstalledLabel);
@@ -443,6 +454,9 @@ void NatronPluginManager::updatePluginStatusLabels()
 {
     _availableLabel->setText(QString::number(_plugins->getAvailablePlugins().size()));
     _installedLabel->setText(QString::number(_plugins->getInstalledPlugins().size()));
+
+    QLocale locale = this->locale();
+    _cacheLabel->setText(locale.formattedDataSize(_plugins->getCacheSize()));
 }
 
 void NatronPluginManager::handleAboutActionTriggered()
