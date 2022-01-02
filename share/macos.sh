@@ -21,7 +21,7 @@
 set -e -x
 
 CWD=`pwd`
-SDK="/opt/Qt5.12.11/5.12.11/clang_64"
+SDK="/opt/qtbase-5.15"
 MKJOBS=${MKJOBS:-1}
 CMAKE=${CMAKE:-/opt/local/bin/cmake}
 OSX_MIN=10.13
@@ -44,14 +44,6 @@ $CMAKE \
 make -j${MKJOBS}
 
 $SDK/bin/macdeployqt NatronPluginManager.app
-
-#rm -rf NatronPluginManager.app/Contents/Frameworks/QtDBus.framework
-rm -rf NatronPluginManager.app/Contents/Frameworks/QtSvg.framework
-
-rm -rf NatronPluginManager.app/Contents/PlugIns/bearer
-rm -rf NatronPluginManager.app/Contents/PlugIns/iconengines
-rm -rf NatronPluginManager.app/Contents/PlugIns/imageformats
-
 strip -S -x NatronPluginManager.app/Contents/MacOS/NatronPluginManager
 
 mkdir NatronPluginManager

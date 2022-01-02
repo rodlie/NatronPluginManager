@@ -35,8 +35,30 @@ Natron Plug-in Manager for Windows is built using MXE (MinGW) on Linux. See [min
 
 # macOS
 
-Using Qt 5.15 from macports produces an app bundle twice as large as using the official binaries (5.12), but the official 5.15 binaries are not compatible with older macOS versions anymore. Build from scratch with patches from macports for macOS 10.13.
+```
+./configure \
+-prefix /opt/qtbase-5.15 \
+-opensource \
+-release \
+-confirm-license \
+-no-glib \
+-no-dbus \
+-static \
+-nomake examples \
+-nomake tests \
+-no-icu \
+-no-sql-{db2,ibase,mysql,oci,odbc,psql,sqlite2,sqlite,tds} \
+-qt-zlib \
+-qt-libpng \
+-qt-libjpeg \
+-no-fontconfig \
+-qt-freetype \
+-qt-harfbuzz \
+-qt-pcre \
+-no-cups \
+-securetransport \
+-no-avx \
+-no-avx2 \
+-no-avx512
+```
 
-```
-N/A
-```
