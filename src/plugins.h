@@ -82,6 +82,8 @@ public:
         QString readme;
         QString changes;
         QString authors;
+        QString key; // addons-only
+        QString modifier; // addons-only
     };
 
     struct RepoSpecs {
@@ -143,10 +145,18 @@ public:
     const QString getValueFromFile(const QString &key,
                                    const QString &filename,
                                    bool toHtml = false);
+
     Plugins::PluginSpecs getPluginSpecs(const QString &path);
+    Plugins::PluginSpecs getAddonSpecs(const QString &path);
+
     bool isValidPlugin(const Plugins::PluginSpecs &plugin);
+    bool isValidAddon(const Plugins::PluginSpecs &addon);
+
     bool folderHasPlugin(const QString &path);
+    bool folderHasAddon(const QString &path);
+
     int folderHasPlugins(const QString &path);
+    int folderHasAddons(const QString &path);
 
     const QString getUserNatronPath();
 
