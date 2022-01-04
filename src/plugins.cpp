@@ -394,12 +394,22 @@ int Plugins::folderHasPlugins(const QString &path)
     return plugins;
 }
 
+const QString Plugins::getUserNatronPath()
+{
+    QString folder = QString("%1/.Natron").arg(QDir::homePath());
+    if (!QFile::exists(folder)) {
+        QDir dir;
+        if (!dir.mkpath(folder)) { folder.clear(); }
+    }
+    return folder;
+}
+
 const QString Plugins::getUserPluginPath()
 {
     QSettings settings;
     QString folder = settings.value(PLUGINS_SETTINGS_USER_PATH,
-                                    QString("%1/.Natron/plugins")
-                                    .arg(QDir::homePath())).toString();
+                                    QString("%1/plugins")
+                                    .arg(getUserNatronPath())).toString();
     if (!QFile::exists(folder)) {
         QDir dir;
         if (!dir.mkpath(folder)) { folder.clear(); }
@@ -411,6 +421,28 @@ void Plugins::setUserPluginPath(const QString &path)
 {
     QSettings settings;
     settings.setValue(PLUGINS_SETTINGS_USER_PATH, path);
+    settings.sync();
+}
+
+const QString Plugins::getUserAddonPath()
+{
+    QSettings settings;
+    QString folder = settings.value(ADDONS_SETTINGS_USER_PATH,
+                                    QString("%1/addons")
+                                    .arg(getUserNatronPath())).toString();
+    if (!folder.startsWith(getUserNatronPath())) { return QString(); }
+    if (!QFile::exists(folder)) {
+        QDir dir;
+        if (!dir.mkpath(folder)) { folder.clear(); }
+    }
+    return folder;
+}
+
+void Plugins::setUserAddonPath(const QString &path)
+{
+    if (!path.startsWith(getUserNatronPath())) { return; }
+    QSettings settings;
+    settings.setValue(ADDONS_SETTINGS_USER_PATH, path);
     settings.sync();
 }
 

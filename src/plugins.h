@@ -50,6 +50,7 @@
 #define PLUGINS_SETTINGS_GRID_HEIGHT 160
 
 #define PLUGINS_SETTINGS_USER_PATH "UserPluginPath"
+#define ADDONS_SETTINGS_USER_PATH "UserAddonPath"
 
 #define MANIFEST_TAG_ROOT "repo"
 #define MANIFEST_TAG_VERSION "version"
@@ -147,8 +148,13 @@ public:
     bool folderHasPlugin(const QString &path);
     int folderHasPlugins(const QString &path);
 
+    const QString getUserNatronPath();
+
     const QString getUserPluginPath();
     void setUserPluginPath(const QString &path);
+
+    const QString getUserAddonPath();
+    void setUserAddonPath(const QString &path);
 
     const QStringList getSystemPluginPaths();
     const QStringList getNatronCustomPaths();
