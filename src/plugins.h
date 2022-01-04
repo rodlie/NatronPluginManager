@@ -84,6 +84,7 @@ public:
         QString authors;
         QString key; // addons-only
         QString modifier; // addons-only
+        bool isAddon = false;
     };
 
     struct RepoSpecs {

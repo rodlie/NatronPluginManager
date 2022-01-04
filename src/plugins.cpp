@@ -85,8 +85,8 @@ void Plugins::scanForAvailablePlugins(const QString &path,
                     QDirIterator::Subdirectories);
     while (it.hasNext()) {
         QString item = it.next();
-        if (!folderHasPlugin(item)) { continue; }
-        PluginSpecs plugin = getPluginSpecs(item);
+        if (!folderHasPlugin(item) && !folderHasAddon(item)) { continue; }
+        PluginSpecs plugin = folderHasPlugin(item) ? getPluginSpecs(item) : folderHasAddon(item) ? getAddonSpecs(item) : PluginSpecs();
         if (!hasAvailablePlugin(plugin.id) &&
             !hasInstalledPlugin(plugin.id))
         {
@@ -119,8 +119,8 @@ void Plugins::scanForInstalledPlugins(const QString &path,
                     QDirIterator::Subdirectories);
     while (it.hasNext()) {
         QString item = it.next();
-        if (!folderHasPlugin(item)) { continue; }
-        PluginSpecs plugin = getPluginSpecs(item);
+        if (!folderHasPlugin(item) && !folderHasAddon(item)) { continue; }
+        PluginSpecs plugin = folderHasPlugin(item) ? getPluginSpecs(item) : folderHasAddon(item) ? getAddonSpecs(item) : PluginSpecs();
         if (!hasInstalledPlugin(plugin.id)) {
             _installedPlugins.push_back(plugin);
         }
@@ -377,6 +377,8 @@ Plugins::PluginSpecs Plugins::getAddonSpecs(const QString &path)
         !QFile::exists(initFile) ||
         !QFile::exists(readme)) { return PluginSpecs(); }
 
+    specs.desc = tr("No description");
+    specs.isAddon = true;
     specs.path = path;
     specs.folder = folder;
 
@@ -692,7 +694,8 @@ Plugins::PluginStatus Plugins::installPlugin(const QString &id,
         return  status;
     }
 
-    QString destPath = QString("%1/%2").arg(getUserPluginPath(), plugin.folder);
+    QString userPath = plugin.isAddon ? getUserAddonPath() : getUserPluginPath();
+    QString destPath = QString("%1/%2").arg(userPath, plugin.folder);
     if (QFile::exists(destPath)) {
         status.message = tr("Plug-in directory (%1) already exists").arg(destPath);
         return status;
@@ -742,7 +745,8 @@ Plugins::PluginStatus Plugins::removePlugin(const QString &id)
         return  status;
     }
 
-    QString destPath = QString("%1/%2").arg(getUserPluginPath(), plugin.folder);
+    QString userPath = plugin.isAddon ? getUserAddonPath() : getUserPluginPath();
+    QString destPath = QString("%1/%2").arg(userPath, plugin.folder);
     if (QFile::exists(destPath)) {
         QDir dir(destPath);
         if (!dir.removeRecursively()) {
@@ -967,8 +971,9 @@ void Plugins::checkRepositories(bool emitChanges,
     _installedPlugins.clear();
 
     scanForInstalledPlugins(getSystemPluginPaths());
-    scanForInstalledPlugins(getUserPluginPath());
+    scanForInstalledPlugins(getUserPluginPath(), true);
     scanForInstalledPlugins(getNatronCustomPaths());
+    scanForInstalledPlugins(getUserAddonPath(), true);
 
     _availablePlugins.clear();
     _availablePluginUpdates.clear();
@@ -989,10 +994,7 @@ void Plugins::checkRepositories(bool emitChanges,
             emit statusMessage(tr("Need to download %1 repository").arg(repo.label));
             _downloadQueue.push_back(repo.zip);
         } else {
-            if (folderHasPlugins(repoPath) > 0) {
-                scanForAvailablePlugins(repoPath, true, emitChanges, emitCache);
-            }
-            // TODO : addons
+            scanForAvailablePlugins(repoPath, true, emitChanges, emitCache);
         }
     }
     emit statusMessage(tr("Done"));
