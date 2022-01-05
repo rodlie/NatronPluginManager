@@ -130,7 +130,7 @@ public:
 
     bool hasInstalledAddons();
     bool hasPluginInList(const QString &needle,
-                         const std::vector<Plugins::PluginSpecs> haystack);
+                         const std::vector<Plugins::PluginSpecs> &haystack);
 
     Plugins::PluginSpecs getPlugin(const QString &id);
     Plugins::PluginSpecs getAvailablePlugin(const QString &id);

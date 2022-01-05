@@ -165,7 +165,7 @@ bool Plugins::hasInstalledAddons()
 }
 
 bool Plugins::hasPluginInList(const QString &needle,
-                              const std::vector<Plugins::PluginSpecs> haystack)
+                              const std::vector<PluginSpecs> &haystack)
 {
     for (unsigned long i = 0; i < haystack.size(); ++i) {
         if (needle == haystack.at(i).id) { return true; }
@@ -1265,7 +1265,7 @@ const QString Plugins::generateInitGuiPy()
         QString root = getUserAddonPath().split("/").takeLast();
         if (root.isEmpty()) { return QString(); }
         output.append(QString("\nfrom %1.%2.%2 import *").arg(root).arg(plugin.folder));
-        if (plugin.key.isEmpty() && plugin.modifier.isEmpty()) {
+        if (plugin.key.isEmpty() || plugin.modifier.isEmpty()) {
             output.append(QString("\nNatronGui.natron.addMenuCommand('%1/%2','%3')").arg(plugin.group,
                                                                                          plugin.label,
                                                                                          plugin.folder));
