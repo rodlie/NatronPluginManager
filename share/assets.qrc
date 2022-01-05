@@ -3,5 +3,6 @@
         <file>NatronPluginManager.png</file>
         <file>stylesheet.qss</file>
         <file>community.xml</file>
+        <file>initGui.py</file>
     </qresource>
 </RCC>

@@ -85,8 +85,8 @@ void Plugins::scanForAvailablePlugins(const QString &path,
                     QDirIterator::Subdirectories);
     while (it.hasNext()) {
         QString item = it.next();
-        if (!folderHasPlugin(item)) { continue; }
-        PluginSpecs plugin = getPluginSpecs(item);
+        if (!folderHasPlugin(item) && !folderHasAddon(item)) { continue; }
+        PluginSpecs plugin = folderHasPlugin(item) ? getPluginSpecs(item) : folderHasAddon(item) ? getAddonSpecs(item) : PluginSpecs();
         if (!hasAvailablePlugin(plugin.id) &&
             !hasInstalledPlugin(plugin.id))
         {
@@ -119,8 +119,8 @@ void Plugins::scanForInstalledPlugins(const QString &path,
                     QDirIterator::Subdirectories);
     while (it.hasNext()) {
         QString item = it.next();
-        if (!folderHasPlugin(item)) { continue; }
-        PluginSpecs plugin = getPluginSpecs(item);
+        if (!folderHasPlugin(item) && !folderHasAddon(item)) { continue; }
+        PluginSpecs plugin = folderHasPlugin(item) ? getPluginSpecs(item) : folderHasAddon(item) ? getAddonSpecs(item) : PluginSpecs();
         if (!hasInstalledPlugin(plugin.id)) {
             _installedPlugins.push_back(plugin);
         }
@@ -152,6 +152,23 @@ bool Plugins::hasUpdatedPlugin(const QString &id)
 {
     for (unsigned long i = 0; i < _availablePluginUpdates.size(); ++i) {
         if (id == _availablePluginUpdates.at(i).id) { return true; }
+    }
+    return false;
+}
+
+bool Plugins::hasInstalledAddons()
+{
+    for (unsigned long i = 0; i < _installedPlugins.size(); ++i) {
+        if (_installedPlugins.at(i).isAddon) { return true; }
+    }
+    return false;
+}
+
+bool Plugins::hasPluginInList(const QString &needle,
+                              const std::vector<Plugins::PluginSpecs> haystack)
+{
+    for (unsigned long i = 0; i < haystack.size(); ++i) {
+        if (needle == haystack.at(i).id) { return true; }
     }
     return false;
 }
@@ -358,6 +375,86 @@ Plugins::PluginSpecs Plugins::getPluginSpecs(const QString &path)
     return specs;
 }
 
+Plugins::PluginSpecs Plugins::getAddonSpecs(const QString &path)
+{
+    PluginSpecs specs;
+    if (!QFile::exists(path)) { return specs; }
+
+    QDir dir(path);
+    QString folder = dir.dirName();
+    if (folder.isEmpty()) { return specs; }
+
+    QString pyFile = QString("%1/%2.py").arg(path, folder);
+    QString initFile = QString("%1/__init__.py").arg(path);
+    QString readme = QString("%1/README.md").arg(path);
+    QString changes = QString("%1/CHANGES.md").arg(path);
+    QString authors = QString("%1/AUTHORS.md").arg(path);
+
+    if (!QFile::exists(pyFile) ||
+        !QFile::exists(initFile) ||
+        !QFile::exists(readme)) { return PluginSpecs(); }
+
+    specs.desc = tr("No description");
+    specs.isAddon = true;
+    specs.path = path;
+    specs.folder = folder;
+
+    QFileInfo info(pyFile);
+    specs.writable = info.isWritable();
+
+    QFile readmeFile(readme);
+    if (readmeFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&readmeFile);
+        while (!in.atEnd()) {
+           QString line = in.readLine();
+           if (line.startsWith("[//]: # (ID :")) {
+               QString id = line.split(":").takeLast().replace(")", "").trimmed();
+               if (!id.isEmpty()) { specs.id = id; }
+           } else if (line.startsWith("[//]: # (LABEL :")) {
+               QString label = line.split(":").takeLast().replace(")", "").trimmed();
+               if (!label.isEmpty()) { specs.label = label; }
+           } else if (line.startsWith("[//]: # (VERSION :")) {
+               specs.version = line.split(":").takeLast().replace(")", "").trimmed().toDouble();
+           } else if (line.startsWith("[//]: # (GROUP :")) {
+               QString group = line.split(":").takeLast().replace(")", "").trimmed();
+               if (!group.isEmpty()) { specs.group = group; }
+           } else if (line.startsWith("[//]: # (KEY :")) {
+               QString key = line.split(":").takeLast().replace(")", "").trimmed();
+               if (!key.isEmpty()) { specs.key = key; }
+           } else if (line.startsWith("[//]: # (MODIFIER :")) {
+               QString mod = line.split(":").takeLast().replace(")", "").trimmed();
+               if (!mod.isEmpty()) { specs.modifier = mod; }
+           }
+        }
+        readmeFile.close();
+    }
+    if (readmeFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        specs.readme = readmeFile.readAll();
+        readmeFile.close();
+    }
+
+    if (QFile::exists(changes)) {
+        QFile changesFile(changes);
+        if (changesFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            specs.changes = changesFile.readAll();
+            changesFile.close();
+        }
+    }
+
+    if (QFile::exists(authors)) {
+        QFile authorsFile(authors);
+        if (authorsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            specs.authors = authorsFile.readAll();
+            authorsFile.close();
+        }
+    }
+
+    //qDebug() << "ADDON" << specs.id << specs.label << specs.version << specs.group << specs.key << specs.modifier;
+    //qDebug() << "ADDON README" << specs.readme;
+
+    return specs;
+}
+
 bool Plugins::isValidPlugin(const Plugins::PluginSpecs &plugin)
 {
     if (!plugin.id.isEmpty() &&
@@ -370,10 +467,23 @@ bool Plugins::isValidPlugin(const Plugins::PluginSpecs &plugin)
     return false;
 }
 
+bool Plugins::isValidAddon(const Plugins::PluginSpecs &addon)
+{
+    return isValidPlugin(addon);
+}
+
 bool Plugins::folderHasPlugin(const QString &path)
 {
     if (!QFile::exists(path)) { return false; }
     PluginSpecs specs = getPluginSpecs(path);
+    if (!specs.id.isEmpty()) { return true; }
+    return false;
+}
+
+bool Plugins::folderHasAddon(const QString &path)
+{
+    if (!QFile::exists(path)) { return false; }
+    PluginSpecs specs = getAddonSpecs(path);
     if (!specs.id.isEmpty()) { return true; }
     return false;
 }
@@ -394,12 +504,38 @@ int Plugins::folderHasPlugins(const QString &path)
     return plugins;
 }
 
+int Plugins::folderHasAddons(const QString &path)
+{
+    int addons = 0;
+    if (!QFile::exists(path)) { return addons; }
+    QDirIterator it(path,
+                    QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
+                    QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        QString item = it.next();
+        if (!folderHasAddon(item)) { continue; }
+        PluginSpecs addon = getAddonSpecs(item);
+        if (isValidAddon(addon)) { addons++; }
+    }
+    return addons;
+}
+
+const QString Plugins::getUserNatronPath()
+{
+    QString folder = QString("%1/.Natron").arg(QDir::homePath());
+    if (!QFile::exists(folder)) {
+        QDir dir;
+        if (!dir.mkpath(folder)) { folder.clear(); }
+    }
+    return folder;
+}
+
 const QString Plugins::getUserPluginPath()
 {
     QSettings settings;
     QString folder = settings.value(PLUGINS_SETTINGS_USER_PATH,
-                                    QString("%1/.Natron/plugins")
-                                    .arg(QDir::homePath())).toString();
+                                    QString("%1/plugins")
+                                    .arg(getUserNatronPath())).toString();
     if (!QFile::exists(folder)) {
         QDir dir;
         if (!dir.mkpath(folder)) { folder.clear(); }
@@ -411,6 +547,36 @@ void Plugins::setUserPluginPath(const QString &path)
 {
     QSettings settings;
     settings.setValue(PLUGINS_SETTINGS_USER_PATH, path);
+    settings.sync();
+}
+
+const QString Plugins::getUserAddonPath()
+{
+    QSettings settings;
+    QString folder = settings.value(ADDONS_SETTINGS_USER_PATH,
+                                    QString("%1/addons")
+                                    .arg(getUserNatronPath())).toString();
+    if (!folder.startsWith(getUserNatronPath())) { return QString(); }
+    if (!QFile::exists(folder)) {
+        QDir dir;
+        if (!dir.mkpath(folder)) { folder.clear(); }
+    }
+    QString initPy = QString("%1/__init__.py").arg(folder);
+    if (!QFile::exists(initPy)) {
+        QFile initFile(initPy);
+        if (initFile.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+            initFile.write("");
+            initFile.close();
+        }
+    }
+    return folder;
+}
+
+void Plugins::setUserAddonPath(const QString &path)
+{
+    if (!path.startsWith(getUserNatronPath())) { return; }
+    QSettings settings;
+    settings.setValue(ADDONS_SETTINGS_USER_PATH, path);
     settings.sync();
 }
 
@@ -553,7 +719,8 @@ Plugins::PluginStatus Plugins::installPlugin(const QString &id,
         return  status;
     }
 
-    QString destPath = QString("%1/%2").arg(getUserPluginPath(), plugin.folder);
+    QString userPath = plugin.isAddon ? getUserAddonPath() : getUserPluginPath();
+    QString destPath = QString("%1/%2").arg(userPath, plugin.folder);
     if (QFile::exists(destPath)) {
         status.message = tr("Plug-in directory (%1) already exists").arg(destPath);
         return status;
@@ -583,6 +750,8 @@ Plugins::PluginStatus Plugins::installPlugin(const QString &id,
             return status;
         }
     }
+
+    if (plugin.isAddon) { writeInitGuiPy(generateInitGuiPy()); }
     status.success = true;
     return status;
 }
@@ -603,7 +772,8 @@ Plugins::PluginStatus Plugins::removePlugin(const QString &id)
         return  status;
     }
 
-    QString destPath = QString("%1/%2").arg(getUserPluginPath(), plugin.folder);
+    QString userPath = plugin.isAddon ? getUserAddonPath() : getUserPluginPath();
+    QString destPath = QString("%1/%2").arg(userPath, plugin.folder);
     if (QFile::exists(destPath)) {
         QDir dir(destPath);
         if (!dir.removeRecursively()) {
@@ -614,6 +784,8 @@ Plugins::PluginStatus Plugins::removePlugin(const QString &id)
         status.message = tr("Unable to find directory %1").arg(destPath);
         status.success = false;
     }
+
+    if (status.success && plugin.isAddon) { writeInitGuiPy(generateInitGuiPy()); }
     return  status;
 }
 
@@ -828,8 +1000,9 @@ void Plugins::checkRepositories(bool emitChanges,
     _installedPlugins.clear();
 
     scanForInstalledPlugins(getSystemPluginPaths());
-    scanForInstalledPlugins(getUserPluginPath());
+    scanForInstalledPlugins(getUserPluginPath(), true);
     scanForInstalledPlugins(getNatronCustomPaths());
+    scanForInstalledPlugins(getUserAddonPath(), true);
 
     _availablePlugins.clear();
     _availablePluginUpdates.clear();
@@ -845,7 +1018,7 @@ void Plugins::checkRepositories(bool emitChanges,
         if (!isValidRepository(repo) || !repo.enabled) { continue; }
         QString repoPath = getRepoPath(repo.id);
         qDebug() << "repo path?" << repoPath;
-        if (folderHasPlugins(repoPath) < 1) {
+        if (folderHasPlugins(repoPath) < 1 && folderHasAddons(repoPath) < 1) {
             qDebug() << "repo has no plugins, try downloading zip";
             emit statusMessage(tr("Need to download %1 repository").arg(repo.label));
             _downloadQueue.push_back(repo.zip);
@@ -1031,6 +1204,84 @@ void Plugins::addDownloadUrl(const QUrl &url)
     emit downloadRequired();
 }
 
+bool Plugins::hasInitGuiPy()
+{
+    QString py = QString("%1/.Natron/initGui.py").arg(QDir::homePath());
+    return QFile::exists(py);
+}
+
+bool Plugins::writeInitGuiPy(const QString &content)
+{
+    if (content.isEmpty()) { return false; }
+    QString py = QString("%1/.Natron/initGui.py").arg(QDir::homePath());
+    QFile file(py);
+    if (QFile::exists(py)) {
+        qDebug() << "initGui.py exists!";
+        bool backupPy = false;
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QString txt = file.readAll();
+            backupPy = !txt.contains("# Generated by NatronPluginManager");
+            file.close();
+        } else { return false; }
+        if (backupPy) {
+            qDebug() << "initGui.py is unknown, backup!";
+            QString dest = py;
+            dest.append(getRandom());
+            if (!file.copy(dest)) { return false; }
+        }
+    }
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qint64 res = file.write(content.toUtf8());
+        file.close();
+        if (res > -1) { return true; }
+    }
+    return false;
+}
+
+const QString Plugins::generateInitGuiPy()
+{
+    QString output;
+    QFile py(":/initGui.py");
+    if (!py.open(QIODevice::ReadOnly | QIODevice::Text)) { return QString(); }
+    output = py.readAll();
+    py.close();
+
+    std::vector<Plugins::PluginSpecs> installedPlugins;
+    QDirIterator it(getUserAddonPath(),
+                    QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks,
+                    QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        QString item = it.next();
+        if (!folderHasAddon(item)) { continue; }
+        PluginSpecs plugin = getAddonSpecs(item);
+        if (!hasPluginInList(plugin.id, installedPlugins)) {
+            installedPlugins.push_back(plugin);
+        }
+    }
+
+    for (unsigned long i = 0; i < installedPlugins.size(); ++i) {
+        PluginSpecs plugin = installedPlugins.at(i);
+        if (!plugin.isAddon) { continue; }
+        QString root = getUserAddonPath().split("/").takeLast();
+        if (root.isEmpty()) { return QString(); }
+        output.append(QString("\nfrom %1.%2.%2 import *").arg(root).arg(plugin.folder));
+        if (plugin.key.isEmpty() && plugin.modifier.isEmpty()) {
+            output.append(QString("\nNatronGui.natron.addMenuCommand('%1/%2','%3')").arg(plugin.group,
+                                                                                         plugin.label,
+                                                                                         plugin.folder));
+        } else {
+            output.append(QString("\nNatronGui.natron.addMenuCommand('%1/%2','%3', QtCore.Qt.Key.%4, QtCore.Qt.KeyboardModifier.%5)").arg(plugin.group,
+                                                                                                                                          plugin.label,
+                                                                                                                                          plugin.folder,
+                                                                                                                                          plugin.key,
+                                                                                                                                          plugin.modifier));
+        }
+    }
+
+    qDebug() << output;
+    return output;
+}
+
 void Plugins::handleFileDownloaded(QNetworkReply *reply)
 {
     emit statusMessage(tr("Done"));
@@ -1061,6 +1312,7 @@ void Plugins::handleFileDownloaded(QNetworkReply *reply)
                 PluginStatus res = extractPluginArchive(tempFile.fileName(), destFolder);
                 if (res.success) {
                     emit statusMessage(tr("Done"));
+                    saveRepositories(_availableRepositories);
                     scanForAvailablePlugins(destFolder, true);
                 } else {
                     emit statusError(res.message);

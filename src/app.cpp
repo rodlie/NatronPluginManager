@@ -462,6 +462,7 @@ void NatronPluginManager::handleUpdatedPlugins()
 {
     updatePluginStatusLabels();
     populatePlugins();
+    updateFilterPlugins();
 }
 
 void NatronPluginManager::updatePluginStatusLabels()
@@ -577,21 +578,24 @@ void NatronPluginManager::populatePlugins()
 
 void NatronPluginManager::handleComboStatusChanged(const QString &status)
 {
-    filterPluginsStatus(status);
+    Q_UNUSED(status)
+    updateFilterPlugins();
 }
 
 void NatronPluginManager::handleComboGroupChanged(const QString &group)
 {
-    filterPluginsGroup(group);
+    Q_UNUSED(group)
+    updateFilterPlugins();
 }
 
 void NatronPluginManager::updateFilterPlugins()
 {
-    filterPluginsStatus(_comboStatus->currentText());
+    filterPlugins(_comboStatus->currentText(), _comboGroup->currentText());
     updatePluginStatusLabels();
 }
 
-void NatronPluginManager::filterPluginsStatus(const QString &status)
+void NatronPluginManager::filterPlugins(const QString &status,
+                                        const QString &group)
 {
     for (int i = 0; i < _pluginList->count(); ++i) {
         QListWidgetItem *item = _pluginList->item(i);
@@ -603,16 +607,11 @@ void NatronPluginManager::filterPluginsStatus(const QString &status)
         } else if (status == tr("Updates")) {
             visible = _plugins->hasUpdatedPlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
         }
+        if (!group.isEmpty()) {
+            bool hasGroup = (item->data(PLUGIN_LIST_ROLE_GROUP).toString() == group || group == tr("All"));
+            if (visible && !hasGroup) { visible = false; }
+        }
         item->setHidden(!visible);
-    }
-}
-
-void NatronPluginManager::filterPluginsGroup(const QString &group)
-{
-    for (int i = 0; i < _pluginList->count(); ++i) {
-        QListWidgetItem *item = _pluginList->item(i);
-        bool hasGroup = (item->data(PLUGIN_LIST_ROLE_GROUP).toString() == group || group == tr("All"));
-        item->setHidden(group.isEmpty() ? true : !hasGroup);
     }
 }
 

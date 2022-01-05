@@ -63,8 +63,34 @@ Each PyPlug plug-in must have it's own folder, including a minimum of one valid 
 
 The folder may contain any amount of files.
 
-If the folder contains a ``README.md`` file it will be used instead of the description found in the ``.py`` file. External assets contained in the folder is allowed.
+* If the folder contains a ``README.md`` file it will be used instead of the description found in the ``.py`` file. External assets contained in the folder is allowed.
 
-If the folder contains a ``CHANGES.md`` file it will be used to display specific changes for the plug-in. External assets contained in the folder is allowed.
+* If the folder contains a ``CHANGES.md`` file it will be used to display specific changes for the plug-in. External assets contained in the folder is allowed.
 
-If the folder contains a ``AUTHORS.md`` file it will be used to display the author(s) of the plug-in. External assets are not allowed.
+* If the folder contains a ``AUTHORS.md`` file it will be used to display the author(s) of the plug-in. External assets are not allowed.
+
+# Add-on
+
+**DRAFT**
+
+Each add-on must have it's own folder, including a minimum of one valid ``py`` file, the filename must match the parent folder.
+
+```
+└── MyPlugin
+    └── MyPlugin.py
+```
+
+The folder must also contain a ``README.md`` file with the following structure:
+
+```
+[//]: # (ID : com.myplugin)
+[//]: # (LABEL : MyPlugin)
+[//]: # (VERSION : 1.0)
+[//]: # (GROUP : Transform)
+[//]: # (KEY : Key_E)
+[//]: # (MODIFIER : ControlModifier)
+
+ANYTHING YOU WANT, MARKDOWN OR PLAIN TEXT.
+```
+
+``KEY`` and ``MODIFIER`` is optional (shortcut for the add-on).

@@ -50,6 +50,7 @@
 #define PLUGINS_SETTINGS_GRID_HEIGHT 160
 
 #define PLUGINS_SETTINGS_USER_PATH "UserPluginPath"
+#define ADDONS_SETTINGS_USER_PATH "UserAddonPath"
 
 #define MANIFEST_TAG_ROOT "repo"
 #define MANIFEST_TAG_VERSION "version"
@@ -81,6 +82,9 @@ public:
         QString readme;
         QString changes;
         QString authors;
+        QString key; // addons-only
+        QString modifier; // addons-only
+        bool isAddon = false;
     };
 
     struct RepoSpecs {
@@ -124,6 +128,10 @@ public:
     bool hasInstalledPlugin(const QString &id);
     bool hasUpdatedPlugin(const QString &id);
 
+    bool hasInstalledAddons();
+    bool hasPluginInList(const QString &needle,
+                         const std::vector<Plugins::PluginSpecs> haystack);
+
     Plugins::PluginSpecs getPlugin(const QString &id);
     Plugins::PluginSpecs getAvailablePlugin(const QString &id);
     Plugins::PluginSpecs getInstalledPlugin(const QString &id);
@@ -142,13 +150,26 @@ public:
     const QString getValueFromFile(const QString &key,
                                    const QString &filename,
                                    bool toHtml = false);
+
     Plugins::PluginSpecs getPluginSpecs(const QString &path);
+    Plugins::PluginSpecs getAddonSpecs(const QString &path);
+
     bool isValidPlugin(const Plugins::PluginSpecs &plugin);
+    bool isValidAddon(const Plugins::PluginSpecs &addon);
+
     bool folderHasPlugin(const QString &path);
+    bool folderHasAddon(const QString &path);
+
     int folderHasPlugins(const QString &path);
+    int folderHasAddons(const QString &path);
+
+    const QString getUserNatronPath();
 
     const QString getUserPluginPath();
     void setUserPluginPath(const QString &path);
+
+    const QString getUserAddonPath();
+    void setUserAddonPath(const QString &path);
 
     const QStringList getSystemPluginPaths();
     const QStringList getNatronCustomPaths();
@@ -199,6 +220,10 @@ public:
     Plugins::RepoSpecs parseManifestV1(const QString &manifest);
 
     void addDownloadUrl(const QUrl &url);
+
+    bool hasInitGuiPy();
+    bool writeInitGuiPy(const QString &content);
+    const QString generateInitGuiPy();
 
 signals:
 
