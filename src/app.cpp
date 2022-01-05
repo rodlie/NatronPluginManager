@@ -607,8 +607,10 @@ void NatronPluginManager::filterPlugins(const QString &status,
         } else if (status == tr("Updates")) {
             visible = _plugins->hasUpdatedPlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
         }
-        bool hasGroup = (item->data(PLUGIN_LIST_ROLE_GROUP).toString() == group || group == tr("All"));
-        if (visible && !hasGroup) { visible = false; }
+        if (!group.isEmpty()) {
+            bool hasGroup = (item->data(PLUGIN_LIST_ROLE_GROUP).toString() == group || group == tr("All"));
+            if (visible && !hasGroup) { visible = false; }
+        }
         item->setHidden(!visible);
     }
 }

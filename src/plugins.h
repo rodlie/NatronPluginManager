@@ -128,6 +128,10 @@ public:
     bool hasInstalledPlugin(const QString &id);
     bool hasUpdatedPlugin(const QString &id);
 
+    bool hasInstalledAddons();
+    bool hasPluginInList(const QString &needle,
+                         const std::vector<Plugins::PluginSpecs> haystack);
+
     Plugins::PluginSpecs getPlugin(const QString &id);
     Plugins::PluginSpecs getAvailablePlugin(const QString &id);
     Plugins::PluginSpecs getInstalledPlugin(const QString &id);
@@ -216,6 +220,10 @@ public:
     Plugins::RepoSpecs parseManifestV1(const QString &manifest);
 
     void addDownloadUrl(const QUrl &url);
+
+    bool hasInitGuiPy();
+    bool writeInitGuiPy(const QString &content);
+    const QString generateInitGuiPy();
 
 signals:
 
