@@ -12,32 +12,18 @@ A plug-in manager for [Natron](https://github.com/NatronGitHub/Natron).
 
 ## Build
 
-This application requires CMake, Qt 5.10+ (Concurrent/Network/Widgets) and libzip to build.
+This application requires CMake 3.5+, Qt 5.10+ (Concurrent/Network/Widgets) and libzip to build.
 
-***Note**: Qt 5.14+ is required for markdown support.*
+***Note**: Qt 5.14+ is required for markdown support, recommended.*
 
-### Checkout
-```
-git clone https://github.com/rodlie/NatronPluginManager
-cd NatronPluginManager
-```
-
-### Build
 ```
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr .. && make
 ```
 
-### Run
+## Documentation
 
-```
-./NatronPluginManager
-```
-
-### Package (DEB)
-```
-make package
-```
+* [Natron Plug-in Repository Standard v1.0](docs/repo.md)
 
 ## License
 
