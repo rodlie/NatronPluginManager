@@ -18,8 +18,6 @@ All repositories must implement a manifest XML file.
 </repo>
 ```
 
-The client adds a new repository by providing a direct url to the XML file.
-
 ### ``version``
 
 Natron Plug-in Repository Standard version compatibility.
@@ -69,15 +67,13 @@ The folder may contain any amount of files.
 
 * If the folder contains a ``AUTHORS.md`` file it will be used to display the author(s) of the plug-in. External assets are not allowed.
 
-# Add-on
-
-**DRAFT**
+# Add-on (DRAFT)
 
 Each add-on must have it's own folder, including a minimum of one valid ``py`` file, the filename must match the parent folder.
 
 ```
-└── MyPlugin
-    └── MyPlugin.py
+└── MyAddon
+    └── MyAddon.py
 ```
 
 The folder must also contain a ``README.md`` file with the following structure:
