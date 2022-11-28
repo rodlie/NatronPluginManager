@@ -3,8 +3,8 @@ name: macOS
 on: [push, pull_request]
 
 jobs:
-  catalina:
-    runs-on: macos-10.15
+  bigsur:
+    runs-on: macos-11
     steps:
     - uses: actions/checkout@v2
     - name: Setup Qt
@@ -21,15 +21,3 @@ jobs:
       with:
         name: NatronPluginManager-${{github.sha}}-macOS
         path: /opt/NatronPluginManager.dmg
-  bigsur:
-    runs-on: macos-11
-    steps:
-    - uses: actions/checkout@v2
-    - name: Setup Qt
-      run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/qtbase-5.15-static-macos.tar.bz2 --output qt.tar.bz2 && sudo tar xf qt.tar.bz2 -C /opt
-    - name: Setup libzip
-      run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/libzip-HighSierra.tar.gz --output libzip.tar.gz && sudo tar xf libzip.tar.gz -C /opt
-    - name: Setup local
-      run: sudo mkdir -p /opt/local/lib && sudo cp -a /opt/libzip/lib/* /opt/local/lib/
-    - name: Build
-      run: CMAKE=cmake sh share/macos.sh
