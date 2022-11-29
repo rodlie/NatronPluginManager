@@ -1,10 +1,9 @@
 # Natron Plug-in Manager
 
-![logo](share/NatronPluginManager.png)
-
 A plug-in manager for [Natron](https://github.com/NatronGitHub/Natron).
 
-![screenshot](docs/screenshot.png)
+![screenshot](docs/screenshot-plugins.png)
+![screenshot](docs/screenshot-plugin.png)
 
 <p align="center">
     <a href="https://github.com/rodlie/NatronPluginManager/releases/latest" target="_blank"><img src="docs/download.png"></a>

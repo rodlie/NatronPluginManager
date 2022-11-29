@@ -66,6 +66,9 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     , _updatesLabel(nullptr)
     , _cacheLabel(nullptr)
 {
+#ifdef Q_OS_DARWIN
+    setWindowTitle(tr("Natron Plug-in Manager"));
+#endif
     setWindowIcon(QIcon(DEFAULT_ICON));
 
     setupStyle();
@@ -484,7 +487,7 @@ void NatronPluginManager::handleAboutActionTriggered()
                      "Free Software Foundation; either version 2 of the License, "
                      "or (at your option) any later version.");
     QString text = tr("<h3 style=\"font-weight:normal;\">%1</h3>"
-                      "<p>A plug-in (<a href=\"https://github.com/NatronGitHub/natron-plugins\">PyPlug</a>) manager for <a href=\"https://natrongithub.github.io\">Natron</a>.</p>"
+                      "<p>A plug-in manager for <a href=\"https://natrongithub.github.io\">Natron</a>.</p>"
                       "<p style=\"font-size:small;\">%2</p>"
                       "<p style=\"font-size:small;\">Copyright &copy; <a href=\"https://github.com/rodlie\">Ole-André Rodlie</a>. All rights reserved.</p>")
                    .arg(title, lic);
