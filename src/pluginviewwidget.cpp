@@ -26,7 +26,7 @@
 #include <QFile>
 #include <QIcon>
 #include <QPixmap>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QKeySequence>
 #include <QtGlobal>
 
@@ -182,8 +182,8 @@ void PluginViewWidget::showPlugin(const QString &id)
         desc = QString("<p>%1.</p>").arg(tr("No description available"));
     }
 
-    desc = desc.replace(QRegExp("((?:https?|ftp)://\\S+)"),
-                        "<a href=\"\\1\">\\1</a>");
+    desc = desc.replace(QRegularExpression("((?:https?|ftp)://\\S+)"),
+                                           "<a href=\"\\1\">\\1</a>");
 
     _pluginDescBrowser->setSearchPaths(QStringList() << plugin.path);
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)

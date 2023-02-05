@@ -41,7 +41,6 @@ set(COMPANY "Natron")
 set(COPYRIGHT "Copyright (c) Ole-Andre Rodlie")
 set(IDENTIFIER "org.natronvfx.plugins")
 
-set(QTV "5" CACHE STRING "Qt major version")
 option(USE_PKGCONF "Use pkg-config" ON)
 
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050F00)
@@ -59,7 +58,8 @@ else()
     add_definitions(-DQT_MESSAGELOGCONTEXT)
 endif()
 
-find_package(Qt${QTV} 5.10 COMPONENTS Concurrent Network Widgets REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} 5.10 COMPONENTS Concurrent Network Widgets REQUIRED)
 
 if(${USE_PKGCONF})
     find_package(PkgConfig REQUIRED)
@@ -143,9 +143,9 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-    Qt${QTV}::Concurrent
-    Qt${QTV}::Network
-    Qt${QTV}::Widgets
+    Qt${QT_VERSION_MAJOR}::Concurrent
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Widgets
     ${ZIP_LDFLAGS}
 )
 

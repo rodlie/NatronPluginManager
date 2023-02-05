@@ -29,7 +29,6 @@
 #include <QTextStream>
 #include <QSettings>
 #include <QStandardPaths>
-#include <QRegExp>
 #include <QRandomGenerator>
 #include <QHash>
 #include <QHashIterator>
@@ -599,9 +598,9 @@ const QStringList Plugins::getNatronCustomPaths()
 
     QXmlStreamReader xml(custom);
     if (xml.readNextStartElement()) {
-        if (xml.name() == "settings") {
+        if (xml.name() == QString("settings")) {
             while(xml.readNextStartElement()) {
-                if (xml.name() == "Value") {
+                if (xml.name() == QString("Value")) {
                     paths << xml.readElementText();
                 }  else { xml.skipCurrentElement(); }
             }
@@ -1079,7 +1078,9 @@ void Plugins::startDownloads()
     if (url.isEmpty()) { return; }
     qDebug() << "download" << url;
     QNetworkRequest request(url);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
+#endif
     QNetworkReply *reply = _nam->get(request);
     reply->setProperty("url", url.toString());
     connect(reply,
@@ -1142,9 +1143,9 @@ double Plugins::getManifestVersion(const QString &manifest)
 {
     QXmlStreamReader xml(manifest);
     if (xml.readNextStartElement()) {
-        if (xml.name() == MANIFEST_TAG_ROOT) {
+        if (xml.name() == QString(MANIFEST_TAG_ROOT)) {
             while(xml.readNextStartElement()) {
-                if (xml.name() == MANIFEST_TAG_VERSION) {
+                if (xml.name() == QString(MANIFEST_TAG_VERSION)) {
                     return xml.readElementText().toDouble();
                 }  else { xml.skipCurrentElement(); }
             }
@@ -1158,30 +1159,30 @@ Plugins::RepoSpecs Plugins::parseManifestV1(const QString &manifest)
     RepoSpecs repo;
     QXmlStreamReader xml(manifest);
     if (xml.readNextStartElement()) {
-        if (xml.name() == MANIFEST_TAG_ROOT) {
+        if (xml.name() == QString(MANIFEST_TAG_ROOT)) {
             while(xml.readNextStartElement()) {
-                if (xml.name() == MANIFEST_TAG_VERSION) {
+                if (xml.name() == QString(MANIFEST_TAG_VERSION)) {
                     QString version = xml.readElementText();
                     repo.version = version.toDouble();
-                } else if (xml.name() == MANIFEST_TAG_TITLE) {
+                } else if (xml.name() == QString(MANIFEST_TAG_TITLE)) {
                     QString title = xml.readElementText();
                     repo.label = title;
-                } else if (xml.name() == MANIFEST_TAG_URL) {
+                } else if (xml.name() == QString(MANIFEST_TAG_URL)) {
                     QString url = xml.readElementText();
                     repo.url = QUrl::fromUserInput(url);
-                } else if (xml.name() == MANIFEST_TAG_MANIFEST) {
+                } else if (xml.name() == QString(MANIFEST_TAG_MANIFEST)) {
                     QString manifest = xml.readElementText();
                     repo.manifest = QUrl::fromUserInput(manifest);
-                } else if (xml.name() == MANIFEST_TAG_LOGO) {
+                } else if (xml.name() == QString(MANIFEST_TAG_LOGO)) {
                     QString logo = xml.readElementText();
                     repo.logo = QUrl::fromUserInput(logo);
-                } else if (xml.name() == MANIFEST_TAG_ZIP) {
+                } else if (xml.name() == QString(MANIFEST_TAG_ZIP)) {
                     QString zip = xml.readElementText();
                     repo.zip = QUrl::fromUserInput(zip);
-                } else if (xml.name() == MANIFEST_TAG_CHECKSUM) {
+                } else if (xml.name() == QString(MANIFEST_TAG_CHECKSUM)) {
                     QString checksum = xml.readElementText();
                     repo.checksum = checksum;
-                } else if (xml.name() == MANIFEST_TAG_MODIFIED) {
+                } else if (xml.name() == QString(MANIFEST_TAG_MODIFIED)) {
                     QString modified = xml.readElementText();
                     repo.modified = QDateTime::fromString(modified,
                                                           MANIFEST_MODIFIED_FORMAT);

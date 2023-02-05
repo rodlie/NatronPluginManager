@@ -458,7 +458,11 @@ void NatronPluginManager::startup()
     QByteArray state = getConfigWindowState();
     if (!state.isNull()) { restoreState(state); }
     if (getConfigWindowIsMaximized()) { showMaximized(); }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QFuture f = QtConcurrent::run(&Plugins::loadRepositories, _plugins);
+#else
     QtConcurrent::run(_plugins, &Plugins::loadRepositories);
+#endif
 }
 
 void NatronPluginManager::handleUpdatedPlugins()
@@ -643,10 +647,17 @@ void NatronPluginManager::installPlugin(const QString &id)
         QMessageBox::warning(this, tr("Install"), status.message);
     } else {
         emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
-        QtConcurrent::run(_plugins,
-                          &Plugins::checkRepositories,
-                          false,
-                          true);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QFuture f = QtConcurrent::run(
+                                      &Plugins::checkRepositories,
+                                      _plugins,
+#else
+        QtConcurrent::run(
+                                      _plugins,
+                                      &Plugins::checkRepositories,
+#endif
+                                      false,
+                                      true);
     }
 }
 
@@ -657,10 +668,17 @@ void NatronPluginManager::removePlugin(const QString &id)
         QMessageBox::warning(this, tr("Remove"), status.message);
     } else {
         emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_AVAILABLE);
-        QtConcurrent::run(_plugins,
-                          &Plugins::checkRepositories,
-                          false,
-                          true);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QFuture f = QtConcurrent::run(
+                                      &Plugins::checkRepositories,
+                                      _plugins,
+#else
+        QtConcurrent::run(
+                                      _plugins,
+                                      &Plugins::checkRepositories,
+#endif
+                                      false,
+                                      true);
     }
 }
 
@@ -671,10 +689,17 @@ void NatronPluginManager::updatePlugin(const QString &id)
         QMessageBox::warning(this, tr("Update"), status.message);
     } else {
         emit pluginStatusChanged(id, Plugins::NATRON_PLUGIN_TYPE_INSTALLED);
-        QtConcurrent::run(_plugins,
-                          &Plugins::checkRepositories,
-                          false,
-                          true);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QFuture f = QtConcurrent::run(
+                                     &Plugins::checkRepositories,
+                                     _plugins,
+#else
+        QtConcurrent::run(
+                                     _plugins,
+                                      &Plugins::checkRepositories,
+#endif
+                                      false,
+                                      true);
     }
 }
 
