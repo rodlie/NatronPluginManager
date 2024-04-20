@@ -33,6 +33,7 @@
 #include <QStatusBar>
 #include <QProgressBar>
 #include <QLabel>
+#include <QLineEdit>
 
 #include "plugins.h"
 #include "pluginviewwidget.h"
@@ -70,6 +71,7 @@ private:
 
     QComboBox *_comboStatus;
     QComboBox *_comboGroup;
+    QLineEdit *_lineEdit;
     QStackedWidget *_stack;
     int _stackListIndex;
     int _stackViewIndex;
@@ -110,7 +112,8 @@ private slots:
 
     void updateFilterPlugins();
     void filterPlugins(const QString &status,
-                       const QString &group);
+                       const QString &group,
+                       const QString &filter = QString());
 
     void handlePluginButtonReleased(const QString &id,
                                     int type);

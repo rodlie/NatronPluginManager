@@ -37,6 +37,7 @@
 #include <QPalette>
 #include <QSettings>
 #include <QLocale>
+#include <QShortcut>
 
 #include "pluginlistwidget.h"
 #include "addrepodialog.h"
@@ -51,6 +52,7 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     : QMainWindow(parent)
     , _comboStatus(nullptr)
     , _comboGroup(nullptr)
+    , _lineEdit(nullptr)
     , _stack(nullptr)
     , _stackListIndex(0)
     , _stackViewIndex(0)
@@ -100,11 +102,16 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     const auto comboGroupLabel = new QLabel(tr("Groups"), this);
     comboGroupLabel->setObjectName("ComboGroupLabel");
 
+    const auto comboSearchLabel = new QLabel(tr("Search"), this);
+    comboSearchLabel->setObjectName("ComboSearchLabel");
+
     pluginsComboWidgetLayout->addWidget(comboStatusLabel);
     pluginsComboWidgetLayout->addWidget(_comboStatus);
     pluginsComboWidgetLayout->addWidget(comboGroupLabel);
     pluginsComboWidgetLayout->addWidget(_comboGroup);
     pluginsComboWidgetLayout->addStretch();
+    pluginsComboWidgetLayout->addWidget(comboSearchLabel);
+    pluginsComboWidgetLayout->addWidget(_lineEdit);
 
     pluginsWidgetLayout->addWidget(pluginsComboWidget);
     pluginsWidgetLayout->addWidget(_pluginList);
@@ -355,6 +362,12 @@ void NatronPluginManager::setupPluginsComboBoxes()
             SIGNAL(currentTextChanged(QString)),
             this,
             SLOT(handleComboStatusChanged(QString)));
+
+    _lineEdit = new QLineEdit(this);
+    connect(_lineEdit, &QLineEdit::textChanged,
+            this, [=]() { updateFilterPlugins(); });
+    connect(new QShortcut(QKeySequence(Qt::Key_Escape), this),
+            &QShortcut::activated, [=]() { _lineEdit->clear(); });
 }
 
 void NatronPluginManager::setupPluginList()
@@ -594,26 +607,36 @@ void NatronPluginManager::handleComboGroupChanged(const QString &group)
 
 void NatronPluginManager::updateFilterPlugins()
 {
-    filterPlugins(_comboStatus->currentText(), _comboGroup->currentText());
+    filterPlugins(_comboStatus->currentText(),
+                  _comboGroup->currentText(),
+                  _lineEdit->text());
     updatePluginStatusLabels();
 }
 
 void NatronPluginManager::filterPlugins(const QString &status,
-                                        const QString &group)
+                                        const QString &group,
+                                        const QString &filter)
 {
     for (int i = 0; i < _pluginList->count(); ++i) {
         const auto item = _pluginList->item(i);
+        const QString itemId = item->data(PLUGIN_LIST_ROLE_ID).toString();
+        const QString itemGroup = item->data(PLUGIN_LIST_ROLE_GROUP).toString();
         bool visible = true;
         if (status == tr("Available")) {
-            visible = _plugins->hasAvailablePlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
+            visible = _plugins->hasAvailablePlugin(itemId);
         } else if (status == tr("Installed")) {
-            visible = _plugins->hasInstalledPlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
+            visible = _plugins->hasInstalledPlugin(itemId);
         } else if (status == tr("Updates")) {
-            visible = _plugins->hasUpdatedPlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
+            visible = _plugins->hasUpdatedPlugin(itemId);
         }
         if (!group.isEmpty()) {
-            bool hasGroup = (item->data(PLUGIN_LIST_ROLE_GROUP).toString() == group || group == tr("All"));
+            bool hasGroup = (itemGroup == group || group == tr("All"));
             if (visible && !hasGroup) { visible = false; }
+        }
+        if (!filter.isEmpty()) {
+            bool isMatch = _plugins->getPlugin(itemId).label.startsWith(filter,
+                                                                        Qt::CaseInsensitive);
+            if (!isMatch && visible) { visible = false; }
         }
         item->setHidden(!visible);
     }

@@ -216,6 +216,7 @@ QLabel#ComboGroupLabel {
     margin-left: 0.5em;
 }
 
+QLineEdit,
 QComboBox#ComboGroup,
 QComboBox#ComboStatus,
 QDialog#AddRepoDialog .QLineEdit,
