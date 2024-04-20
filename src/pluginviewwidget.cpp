@@ -163,7 +163,15 @@ void PluginViewWidget::showPlugin(const QString &id)
     _id = id;
 
     _pluginTitleLabel->setText(plugin.label);
-    _pluginGroupLabel->setText(plugin.group);
+
+    if (!plugin.repo.label.isEmpty()) {
+        _pluginGroupLabel->setText(QString("%1 <span style=\"font-weight: normal; font-size: small;\">(%2)</span>")
+                                   .arg(plugin.group,
+                                        plugin.repo.label));
+    } else {
+        _pluginGroupLabel->setText(plugin.group);
+    }
+
     _pluginVersionLabel->setText(tr("Version %1").arg(plugin.version));
 
     _pluginIconLabel->setPixmap(QIcon(QString(DEFAULT_ICON)).pixmap(_iconSize).scaled(_iconSize,

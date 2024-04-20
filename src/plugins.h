@@ -69,6 +69,19 @@ class Plugins : public QObject
 
 public:
 
+    struct RepoSpecs {
+        double version = 1.0;
+        QString label;
+        QString id;
+        QUrl url;
+        QUrl manifest;
+        QUrl logo;
+        QUrl zip;
+        QString checksum;
+        QDateTime modified;
+        bool enabled = false;
+    };
+
     struct PluginSpecs {
         QString id;
         QString label;
@@ -85,19 +98,7 @@ public:
         QString key; // addons-only
         QString modifier; // addons-only
         bool isAddon = false;
-    };
-
-    struct RepoSpecs {
-        double version = 1.0;
-        QString label;
-        QString id;
-        QUrl url;
-        QUrl manifest;
-        QUrl logo;
-        QUrl zip;
-        QString checksum;
-        QDateTime modified;
-        bool enabled = false;
+        RepoSpecs repo;
     };
 
     struct PluginStatus {
@@ -115,7 +116,8 @@ public:
     explicit Plugins(QObject *parent = nullptr);
     ~Plugins();
 
-    void scanForAvailablePlugins(const QString &path,
+    void scanForAvailablePlugins(const RepoSpecs &repo,
+                                 const QString &path,
                                  bool append = false,
                                  bool emitChanges = true,
                                  bool emitCache = false);

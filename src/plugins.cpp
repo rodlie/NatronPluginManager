@@ -69,7 +69,8 @@ Plugins::~Plugins()
     //saveRepositories(_availableRepositories);
 }
 
-void Plugins::scanForAvailablePlugins(const QString &path,
+void Plugins::scanForAvailablePlugins(const RepoSpecs &repo,
+                                      const QString &path,
                                       bool append,
                                       bool emitChanges,
                                       bool emitCache)
@@ -86,6 +87,7 @@ void Plugins::scanForAvailablePlugins(const QString &path,
         QString item = it.next();
         if (!folderHasPlugin(item) && !folderHasAddon(item)) { continue; }
         PluginSpecs plugin = folderHasPlugin(item) ? getPluginSpecs(item) : folderHasAddon(item) ? getAddonSpecs(item) : PluginSpecs();
+        plugin.repo = repo;
         if (!hasAvailablePlugin(plugin.id) &&
             !hasInstalledPlugin(plugin.id))
         {
@@ -1013,7 +1015,7 @@ void Plugins::checkRepositories(bool emitChanges,
         return;
     }
     for (unsigned long i = 0; i < _availableRepositories.size(); ++i) {
-        RepoSpecs repo = _availableRepositories.at(i);
+        const auto repo = _availableRepositories.at(i);
         if (!isValidRepository(repo) || !repo.enabled) { continue; }
         QString repoPath = getRepoPath(repo.id);
         qDebug() << "repo path?" << repoPath;
@@ -1022,7 +1024,7 @@ void Plugins::checkRepositories(bool emitChanges,
             emit statusMessage(tr("Need to download %1 repository").arg(repo.label));
             _downloadQueue.push_back(repo.zip);
         } else {
-            scanForAvailablePlugins(repoPath, true, emitChanges, emitCache);
+            scanForAvailablePlugins(repo, repoPath, true, emitChanges, emitCache);
         }
     }
     emit statusMessage(tr("Done"));
@@ -1314,7 +1316,7 @@ void Plugins::handleFileDownloaded(QNetworkReply *reply)
                 if (res.success) {
                     emit statusMessage(tr("Done"));
                     saveRepositories(_availableRepositories);
-                    scanForAvailablePlugins(destFolder, true);
+                    scanForAvailablePlugins(repo, destFolder, true);
                 } else {
                     emit statusError(res.message);
                 }
