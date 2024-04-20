@@ -1,4 +1,4 @@
-name: Ubuntu Focal (Qt 5.15)
+name: Ubuntu Jammy
 
 on: [push, pull_request]
 
@@ -7,23 +7,15 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v2
     - name: apt install
-      run: sudo apt-get update && sudo apt-get install curl qt5-default qtbase5-dev libzip-dev libxkbcommon-x11-dev libxkbcommon-dev libx11-xcb-dev libxcb1-dev libxcb-*-dev libharfbuzz-dev libdrm-dev mesa-common-dev
-    - name: Setup Qt
-      run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/qtbase-Natron-5.15.tar.xz --output qt.tar.xz && sudo tar xf qt.tar.xz -C /opt
+      run: sudo apt-get update && sudo apt-get install cmake qt5-default qtbase5-dev libzip-dev
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=/opt/qtbase-Natron-5.15
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=/usr
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
     - name: Package
       run: cd ${{github.workspace}}/build; make package
-    - name: Artifact
-      run: sudo cp ${{github.workspace}}/build/NatronPluginManager.deb /opt/
-    - uses: actions/upload-artifact@v2
-      with:
-        name: NatronPluginManager-${{github.sha}}-Ubuntu-Focal
-        path: /opt/NatronPluginManager.deb
