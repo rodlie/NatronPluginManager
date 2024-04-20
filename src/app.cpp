@@ -138,7 +138,6 @@ void NatronPluginManager::setConfigPluginIconSize(int iconSize)
     QSettings settings;
     settings.setValue(PLUGINS_SETTINGS_ICON_SIZE,
                       QSize(iconSize, iconSize));
-    settings.sync();
 }
 
 const QSize NatronPluginManager::getConfigPluginLargeIconSize()
@@ -154,7 +153,6 @@ void NatronPluginManager::setConfigPluginLargeIconSize(int iconSize)
     QSettings settings;
     settings.setValue(PLUGINS_SETTINGS_LARGE_ICON_SIZE,
                       QSize(iconSize, iconSize));
-    settings.sync();
 }
 
 const QSize NatronPluginManager::getConfigPluginGridSize()
@@ -169,7 +167,6 @@ void NatronPluginManager::setConfigPluginGridSize(QSize gridSize)
 {
     QSettings settings;
     settings.setValue(PLUGINS_SETTINGS_GRID_SIZE, gridSize);
-    settings.sync();
 }
 
 const QByteArray NatronPluginManager::getConfigWindowGeometry()
@@ -196,7 +193,6 @@ void NatronPluginManager::saveWindowConfig()
     settings.setValue("WindowGeometry", saveGeometry());
     settings.setValue("WindowState", saveState());
     settings.setValue("WindowMaximized", isMaximized());
-    settings.sync();
 }
 
 void NatronPluginManager::setupStyle()
@@ -453,9 +449,9 @@ void NatronPluginManager::setupStatus()
 
 void NatronPluginManager::startup()
 {
-    QByteArray geo = getConfigWindowGeometry();
+    const auto geo = getConfigWindowGeometry();
     if (!geo.isNull()) { restoreGeometry(getConfigWindowGeometry()); }
-    QByteArray state = getConfigWindowState();
+    const auto state = getConfigWindowState();
     if (!state.isNull()) { restoreState(state); }
     if (getConfigWindowIsMaximized()) { showMaximized(); }
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -478,7 +474,7 @@ void NatronPluginManager::updatePluginStatusLabels()
     _installedLabel->setText(QString::number(_plugins->getInstalledPlugins().size()));
     _updatesLabel->setText(QString::number(_plugins->getUpdatedPlugins().size()));
 
-    QLocale locale = this->locale();
+    const auto locale = this->locale();
     _cacheLabel->setText(locale.formattedDataSize(_plugins->getCacheSize()));
 }
 
@@ -532,8 +528,8 @@ void NatronPluginManager::handleDownloadStatusMessage(const QString &message,
 
 void NatronPluginManager::populatePlugins()
 {
-    std::vector<Plugins::PluginSpecs> plugins =  _plugins->getPlugins();
-    QStringList groups = _plugins->getPluginGroups();
+    const auto plugins = _plugins->getPlugins();
+    const auto groups = _plugins->getPluginGroups();
 
     _comboGroup->clear();
     _comboGroup->addItem(tr("All"));
@@ -547,8 +543,8 @@ void NatronPluginManager::populatePlugins()
     _pluginList->clear();
 
     for (unsigned long i = 0; i< plugins.size(); ++i) {
-        QListWidgetItem *item = new QListWidgetItem(); // the list takes ownership
-        Plugins::PluginSpecs plugin = plugins.at(i);
+        const auto item = new QListWidgetItem(); // the list takes ownership
+        const auto plugin = plugins.at(i);
         item->setFlags(Qt::NoItemFlags);
         item->setData(PLUGIN_LIST_ROLE_GROUP, plugin.group);
         item->setData(PLUGIN_LIST_ROLE_ID, plugin.id);
@@ -560,10 +556,10 @@ void NatronPluginManager::populatePlugins()
         } else if (_plugins->hasInstalledPlugin(plugin.id)) {
             type = Plugins::NATRON_PLUGIN_TYPE_INSTALLED;
         }
-        PluginListWidget *pwidget = new PluginListWidget(plugin,
-                                                         type,
-                                                         _pluginList->gridSize(),
-                                                         getConfigPluginIconSize()); // the list takes ownership
+        const auto pwidget = new PluginListWidget(plugin,
+                                                  type,
+                                                  _pluginList->gridSize(),
+                                                  getConfigPluginIconSize()); // the list takes ownership
         connect(pwidget,
                 SIGNAL(pluginButtonReleased(QString,int)),
                 this,
@@ -605,7 +601,7 @@ void NatronPluginManager::filterPlugins(const QString &status,
                                         const QString &group)
 {
     for (int i = 0; i < _pluginList->count(); ++i) {
-        QListWidgetItem *item = _pluginList->item(i);
+        const auto item = _pluginList->item(i);
         bool visible = true;
         if (status == tr("Available")) {
             visible = _plugins->hasAvailablePlugin(item->data(PLUGIN_LIST_ROLE_ID).toString());
@@ -642,7 +638,7 @@ void NatronPluginManager::handlePluginButtonReleased(const QString &id,
 
 void NatronPluginManager::installPlugin(const QString &id)
 {
-    Plugins::PluginStatus status = _plugins->installPlugin(id);
+    const auto status = _plugins->installPlugin(id);
     if (!status.success) {
         QMessageBox::warning(this, tr("Install"), status.message);
     } else {
@@ -663,7 +659,7 @@ void NatronPluginManager::installPlugin(const QString &id)
 
 void NatronPluginManager::removePlugin(const QString &id)
 {
-    Plugins::PluginStatus status = _plugins->removePlugin(id);
+    const auto status = _plugins->removePlugin(id);
     if (!status.success) {
         QMessageBox::warning(this, tr("Remove"), status.message);
     } else {
@@ -684,7 +680,7 @@ void NatronPluginManager::removePlugin(const QString &id)
 
 void NatronPluginManager::updatePlugin(const QString &id)
 {
-    Plugins::PluginStatus status = _plugins->updatePlugin(id);
+    const auto status = _plugins->updatePlugin(id);
     if (!status.success) {
         QMessageBox::warning(this, tr("Update"), status.message);
     } else {
@@ -728,7 +724,7 @@ void NatronPluginManager::showPlugins()
 
 void NatronPluginManager::showPlugin(const QString &id)
 {
-    if (id.isEmpty()) { return; }
+    if (!_plugins->hasPlugin(id)) { return; }
     if (_stack->currentIndex() != _stackViewIndex) {
         _stack->setCurrentIndex(_stackViewIndex);
     }
