@@ -44,17 +44,16 @@
 
 #define APP_STYLE ":/stylesheet.qss"
 
-#define PLUGIN_LIST_ROLE_ID Qt::UserRole+1
-#define PLUGIN_LIST_ROLE_GROUP Qt::UserRole+2
-
-#define APP_STACK_PLUGINS 0
-#define APP_STACK_PLUGIN 1
+#define PLUGIN_LIST_ROLE_ID Qt::UserRole + 1
+#define PLUGIN_LIST_ROLE_GROUP Qt::UserRole + 2
 
 NatronPluginManager::NatronPluginManager(QWidget *parent)
     : QMainWindow(parent)
     , _comboStatus(nullptr)
     , _comboGroup(nullptr)
     , _stack(nullptr)
+    , _stackListIndex(0)
+    , _stackViewIndex(0)
     , _plugins(nullptr)
     , _menuBar(nullptr)
     , _pluginList(nullptr)
@@ -111,8 +110,8 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     pluginsWidgetLayout->addWidget(_pluginList);
 
     _stack = new QStackedWidget(this);
-    _stack->addWidget(pluginsWidget); // APP_STACK_PLUGINS
-    _stack->addWidget(_pluginView); // APP_STACK_PLUGIN
+    _stackListIndex = _stack->addWidget(pluginsWidget);
+    _stackViewIndex = _stack->addWidget(_pluginView);
 
     mainLayout->addWidget(_stack);
 
@@ -221,6 +220,7 @@ void NatronPluginManager::setupStyle()
     qApp->setStyle(QString("fusion"));
     qApp->setPalette(palette);
 
+    // TODO: probably breaks hdpi
     int pluginViewGoBackButton = 24;
     int pluginTitleFontSize = 16;
     int pluginGroupFontSize = 11;
@@ -722,16 +722,17 @@ void NatronPluginManager::updateSettings()
 
 void NatronPluginManager::showPlugins()
 {
-    if (_stack->currentIndex() == APP_STACK_PLUGINS) { return; }
-    _stack->setCurrentIndex(APP_STACK_PLUGINS);
+    if (_stack->currentIndex() == _stackListIndex) { return; }
+    _stack->setCurrentIndex(_stackListIndex);
 }
 
 void NatronPluginManager::showPlugin(const QString &id)
 {
-    if (_stack->currentIndex() != APP_STACK_PLUGIN) {
-        _stack->setCurrentIndex(APP_STACK_PLUGIN);
+    if (id.isEmpty()) { return; }
+    if (_stack->currentIndex() != _stackViewIndex) {
+        _stack->setCurrentIndex(_stackViewIndex);
     }
-    if (!id.isEmpty()) { _pluginView->showPlugin(id); }
+    _pluginView->showPlugin(id);
 }
 
 void NatronPluginManager::closeEvent(QCloseEvent *e)

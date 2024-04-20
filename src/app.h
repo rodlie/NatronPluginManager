@@ -71,6 +71,8 @@ private:
     QComboBox *_comboStatus;
     QComboBox *_comboGroup;
     QStackedWidget *_stack;
+    int _stackListIndex;
+    int _stackViewIndex;
     Plugins *_plugins;
     QMenuBar *_menuBar;
     QListWidget *_pluginList;
