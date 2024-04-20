@@ -41,27 +41,27 @@ PluginListWidget::PluginListWidget(const Plugins::PluginSpecs &plugin,
 {
     setFixedSize(widgetSize);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    const auto mainLayout = new QVBoxLayout(this);
 
-    QFrame *pluginFrame = new QFrame(this);
-    QVBoxLayout *pluginFrameLayout = new QVBoxLayout(pluginFrame);
+    const auto pluginFrame = new QFrame(this);
+    const auto pluginFrameLayout = new QVBoxLayout(pluginFrame);
 
-    QWidget *pluginHeader = new QWidget(pluginFrame);
-    QHBoxLayout *pluginHeaderLayout = new QHBoxLayout(pluginHeader);
+    const auto pluginHeader = new QWidget(pluginFrame);
+    const auto pluginHeaderLayout = new QHBoxLayout(pluginHeader);
 
-    QWidget *pluginFooter = new QWidget(this);
-    QHBoxLayout *pluginsFooterLayout = new QHBoxLayout(pluginFooter);
+    const auto pluginFooter = new QWidget(this);
+    const auto pluginsFooterLayout = new QHBoxLayout(pluginFooter);
 
-    QWidget *pluginHeaderText = new QWidget(this);
+    const auto pluginHeaderText = new QWidget(this);
     pluginHeaderText->setContentsMargins(0, 0, 0, 0);
 
-    QVBoxLayout *pluginHeaderTextLayout = new QVBoxLayout(pluginHeaderText);
+    const auto pluginHeaderTextLayout = new QVBoxLayout(pluginHeaderText);
     pluginHeaderTextLayout->setContentsMargins(0, 0, 0, 0);
     pluginHeaderTextLayout->setSpacing(0);
 
-    QLabel *pluginTitleLabel = new QLabel(_plugin.label, this);
-    QLabel *pluginGroupLabel = new QLabel(_plugin.group, this);
-    QLabel *pluginIconLabel = new QLabel(this);
+    const auto pluginTitleLabel = new QLabel(_plugin.label, this);
+    const auto pluginGroupLabel = new QLabel(_plugin.group, this);
+    const auto pluginIconLabel = new QLabel(this);
 
     pluginTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     pluginGroupLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

@@ -46,20 +46,20 @@ AddRepoDialog::AddRepoDialog(QWidget *parent,
     setObjectName("AddRepoDialog");
     setWindowTitle(tr("Add repository"));
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    const auto mainLayout = new QVBoxLayout(this);
 
-    QWidget *urlEditWidget = new QWidget(this);
-    QHBoxLayout *urlEditLayout = new QHBoxLayout(urlEditWidget);
+    const auto urlEditWidget = new QWidget(this);
+    const auto urlEditLayout = new QHBoxLayout(urlEditWidget);
 
-    QLabel *urlEditLabel = new QLabel(tr("Manifest URL"), this);
+    const auto urlEditLabel = new QLabel(tr("Manifest URL"), this);
     _urlEdit = new QLineEdit(this);
     _urlEdit->setPlaceholderText("https://");
 
     urlEditLayout->addWidget(urlEditLabel);
     urlEditLayout->addWidget(_urlEdit);
 
-    QWidget *buttonsWidget = new QWidget(this);
-    QHBoxLayout *buttonsLayout = new QHBoxLayout(buttonsWidget);
+    const auto buttonsWidget = new QWidget(this);
+    const auto buttonsLayout = new QHBoxLayout(buttonsWidget);
 
     _applyButton = new QPushButton(tr("Add"), this);
     _applyButton->setProperty("InstallButton", true);

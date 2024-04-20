@@ -78,27 +78,27 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     setupPluginList();
     setupStatus();
 
-    QWidget *mainWidget = new QWidget(this);
+    const auto mainWidget = new QWidget(this);
     mainWidget->setObjectName("MainWidget");
     mainWidget->setContentsMargins(0, 0, 0, 0);
-    QHBoxLayout *mainLayout = new QHBoxLayout(mainWidget);
+    const auto mainLayout = new QHBoxLayout(mainWidget);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
     setCentralWidget(mainWidget);
 
-    QWidget *pluginsWidget = new QWidget(this);
+    const auto pluginsWidget = new QWidget(this);
     pluginsWidget->setObjectName("PluginsWidget");
-    QVBoxLayout *pluginsWidgetLayout = new QVBoxLayout(pluginsWidget);
+    const auto pluginsWidgetLayout = new QVBoxLayout(pluginsWidget);
 
-    QWidget *pluginsComboWidget = new QWidget(this);
+    const auto pluginsComboWidget = new QWidget(this);
     pluginsComboWidget->setObjectName("PluginsComboWidget");
-    QHBoxLayout *pluginsComboWidgetLayout = new QHBoxLayout(pluginsComboWidget);
+    const auto pluginsComboWidgetLayout = new QHBoxLayout(pluginsComboWidget);
 
-    QLabel *comboStatusLabel = new QLabel(tr("Status"), this);
+    const auto comboStatusLabel = new QLabel(tr("Status"), this);
     comboStatusLabel->setObjectName("ComboStatusLabel");
 
-    QLabel *comboGroupLabel = new QLabel(tr("Groups"), this);
+    const auto comboGroupLabel = new QLabel(tr("Groups"), this);
     comboGroupLabel->setObjectName("ComboGroupLabel");
 
     pluginsComboWidgetLayout->addWidget(comboStatusLabel);
@@ -280,10 +280,10 @@ void NatronPluginManager::setupMenu()
     _menuBar->setObjectName("MenuBar");
     setMenuWidget(_menuBar);
 
-    QMenu *fileMenu = new QMenu(tr("File"), this);
+    const auto fileMenu = new QMenu(tr("File"), this);
     _menuBar->addMenu(fileMenu);
 
-    QAction *addRepoAction = new QAction(tr("Add repository"), this);
+    const auto addRepoAction = new QAction(tr("Add repository"), this);
     addRepoAction->setShortcut(QKeySequence(tr("Ctrl+A")));
     fileMenu->addAction(addRepoAction);
     connect(addRepoAction,
@@ -293,7 +293,7 @@ void NatronPluginManager::setupMenu()
 
     fileMenu->addSeparator();
 
-    QAction *settingsAction = new QAction(tr("Settings"), this);
+    const auto settingsAction = new QAction(tr("Settings"), this);
     settingsAction->setShortcut(QKeySequence(tr("Ctrl+S")));
     fileMenu->addAction(settingsAction);
     connect(settingsAction,
@@ -303,7 +303,7 @@ void NatronPluginManager::setupMenu()
 
     fileMenu->addSeparator();
 
-    QAction *fileQuitAction = new QAction(tr("Quit"), this);
+    const auto fileQuitAction = new QAction(tr("Quit"), this);
     fileQuitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));
     fileMenu->addAction(fileQuitAction);
     connect(fileQuitAction,
@@ -311,17 +311,17 @@ void NatronPluginManager::setupMenu()
             this,
             SLOT(close()));
 
-    QMenu *helpMenu = new QMenu(tr("Help"), this);
+    const auto helpMenu = new QMenu(tr("Help"), this);
     _menuBar->addMenu(helpMenu);
 
-    QAction *helpAboutAction = new QAction(tr("About"), this);
+    const auto helpAboutAction = new QAction(tr("About"), this);
     helpMenu->addAction(helpAboutAction);
     connect(helpAboutAction,
             SIGNAL(triggered()),
             this,
             SLOT(handleAboutActionTriggered()));
 
-    QAction *helpAboutQtAction = new QAction(tr("About Qt"), this);
+    const auto helpAboutQtAction = new QAction(tr("About Qt"), this);
     helpMenu->addAction(helpAboutQtAction);
     connect(helpAboutQtAction,
             SIGNAL(triggered()),
@@ -415,19 +415,19 @@ void NatronPluginManager::setupStatus()
     _cacheLabel = new QLabel(this);
     _cacheLabel->setText("0");
 
-    QLabel *statusAvailableLabel = new QLabel(this);
+    const auto statusAvailableLabel = new QLabel(this);
     statusAvailableLabel->setObjectName("StatusAvailableLabel");
     statusAvailableLabel->setText(tr("Available"));
 
-    QLabel *statusInstalledLabel = new QLabel(this);
+    const auto statusInstalledLabel = new QLabel(this);
     statusInstalledLabel->setObjectName("StatusInstalledLabel");
     statusInstalledLabel->setText(tr("Installed"));
 
-    QLabel *statusCacheLabel = new QLabel(this);
+    const auto statusCacheLabel = new QLabel(this);
     statusCacheLabel->setObjectName("StatusCacheLabel");
     statusCacheLabel->setText(tr("Cache"));
 
-    QLabel *statusUpdatesLabel = new QLabel(this);
+    const auto statusUpdatesLabel = new QLabel(this);
     statusUpdatesLabel->setObjectName("StatusUpdatesLabel");
     statusUpdatesLabel->setText(tr("Updates"));
 

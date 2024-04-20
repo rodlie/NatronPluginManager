@@ -48,13 +48,13 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
 {
     setObjectName("PluginViewWidget");
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    const auto mainLayout = new QVBoxLayout(this);
 
-    QWidget *headerWidget = new QWidget(this);
+    const auto headerWidget = new QWidget(this);
     headerWidget->setSizePolicy(QSizePolicy::Expanding,
                                 QSizePolicy::Fixed);
 
-    QHBoxLayout *headerLayout = new QHBoxLayout(headerWidget);
+    const auto headerLayout = new QHBoxLayout(headerWidget);
 
     _goBackButton = new QPushButton("«", this);
     _goBackButton->setFocusPolicy(Qt::NoFocus);
@@ -76,9 +76,9 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
                                                                                       Qt::KeepAspectRatio,
                                                                                       Qt::SmoothTransformation));
 
-    QWidget *pluginHeaderWidget = new QWidget(this);
+    const auto pluginHeaderWidget = new QWidget(this);
     pluginHeaderWidget->setObjectName("PluginViewHeaderWidget");
-    QVBoxLayout *pluginHeaderLayout = new QVBoxLayout(pluginHeaderWidget);
+    const auto pluginHeaderLayout = new QVBoxLayout(pluginHeaderWidget);
 
     _pluginTitleLabel = new QLabel(tr("Title"), this);
     _pluginTitleLabel->setObjectName("PluginViewTitleLabel");
@@ -122,11 +122,11 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
     _pluginVersionLabel = new QLabel(this);
     _pluginVersionLabel->setObjectName("PluginViewVersionLabel");
 
-    QWidget *pluginButtonsWidget = new QWidget(this);
+    const auto pluginButtonsWidget = new QWidget(this);
     pluginButtonsWidget->setObjectName("PluginViewButtonsWidget");
     pluginButtonsWidget->setSizePolicy(QSizePolicy::Fixed,
                                        QSizePolicy::Expanding);
-    QHBoxLayout *pluginButtonsLayout = new QHBoxLayout(pluginButtonsWidget);
+    const auto pluginButtonsLayout = new QHBoxLayout(pluginButtonsWidget);
 
     pluginButtonsLayout->addStretch();
     pluginButtonsLayout->addWidget(_pluginVersionLabel);
@@ -186,15 +186,12 @@ void PluginViewWidget::showPlugin(const QString &id)
                                            "<a href=\"\\1\">\\1</a>");
 
     _pluginDescBrowser->setSearchPaths(QStringList() << plugin.path);
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    _pluginDescBrowser->setHtml(desc);
-#else
+
     if (!plugin.readme.isEmpty()) {
         QString markdown = plugin.readme;
         QString title = QString("# %1").arg(QString(plugin.label).replace(" ", "_"));
         _pluginDescBrowser->setMarkdown(markdown.replace(title, ""));
     } else { _pluginDescBrowser->setHtml(desc); }
-#endif
 
     if (_plugins->hasUpdatedPlugin(plugin.id)) {
         setPluginStatus(plugin.id, Plugins::NATRON_PLUGIN_TYPE_UPDATE);

@@ -33,10 +33,3 @@ $TOOL-cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 
 $TOOL-strip -s NatronPluginManager.exe
-
-mkdir -p NatronPluginManager/third-party
-cp $CWD/LICENSE NatronPluginManager/
-cp $CWD/README.md NatronPluginManager/
-cp -a $MXE/licenses/* NatronPluginManager/third-party/
-mv NatronPluginManager.exe NatronPluginManager/
-zip -9 -r NatronPluginManager.zip NatronPluginManager

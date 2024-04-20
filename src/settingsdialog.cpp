@@ -44,12 +44,12 @@ SettingsDialog::SettingsDialog(QWidget *parent,
     setObjectName("SettingsDialog");
     setWindowTitle(tr("Settings"));
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    const auto mainLayout = new QVBoxLayout(this);
 
     _tabs = new QTabWidget(this);
 
-    QWidget *buttonsWidget = new QWidget(this);
-    QHBoxLayout *buttonsLayout = new QHBoxLayout(buttonsWidget);
+    const auto buttonsWidget = new QWidget(this);
+    const auto buttonsLayout = new QHBoxLayout(buttonsWidget);
 
     _applyButton = new QPushButton(tr("Apply"), this);
     _applyButton->setProperty("InstallButton", true);
@@ -78,20 +78,20 @@ SettingsDialog::SettingsDialog(QWidget *parent,
 
 void SettingsDialog::setupGeneral()
 {
-    QWidget *generalWidget = new QWidget(this);
-    QVBoxLayout *generalLayout = new QVBoxLayout(generalWidget);
+    const auto generalWidget = new QWidget(this);
+    const auto generalLayout = new QVBoxLayout(generalWidget);
 
     _tabs->addTab(generalWidget, tr("General"));
 
-    QWidget *pluginPathEditWidget = new QWidget(this);
-    QHBoxLayout *pluginPathEditLayout = new QHBoxLayout(pluginPathEditWidget);
+    const auto pluginPathEditWidget = new QWidget(this);
+    const auto pluginPathEditLayout = new QHBoxLayout(pluginPathEditWidget);
 
-    QLabel *pluginPathEditLabel = new QLabel(tr("Installation path"), this);
+    const auto pluginPathEditLabel = new QLabel(tr("Installation path"), this);
     _pluginPath = new QLineEdit(this);
     _pluginPath->setProperty("StyleEdit", true);
     _pluginPath->setText(_plugins->getUserPluginPath());
 
-    QPushButton *pluginPathEditButton = new QPushButton(tr("..."), this);
+    const auto pluginPathEditButton = new QPushButton(tr("..."), this);
     pluginPathEditButton->setProperty("FileButton", true);
     connect(pluginPathEditButton,
             SIGNAL(released()),

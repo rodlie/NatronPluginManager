@@ -1,0 +1,49 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  mac:
+    runs-on: macos-12
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Qt
+      run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/qtbase-5.15-static-macos.tar.bz2 --output qt.tar.bz2 && sudo tar xf qt.tar.bz2 -C /opt
+    - name: Setup libzip
+      run: curl -L https://github.com/rodlie/NatronPluginManager/releases/download/continuous/libzip-HighSierra.tar.gz --output libzip.tar.gz && sudo tar xf libzip.tar.gz -C /opt
+    - name: Setup local
+      run: sudo mkdir -p /opt/local/lib && sudo cp -a /opt/libzip/lib/* /opt/local/lib/
+    - name: Build
+      run: CMAKE=cmake sh share/macos.sh
+    - name: Artifact
+      run: sudo cp -a build/NatronPluginManager.dmg /opt/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: NatronPluginManager-${{github.sha}}-macOS-Intel
+        path: /opt/NatronPluginManager.dmg
+  windows:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup
+      run: sudo mkdir -p /opt/mxe-NatronPluginManager && sudo chmod 777 /opt/mxe-NatronPluginManager
+    - name: Setup SDK
+      run: wget https://github.com/rodlie/NatronPluginManager/releases/download/continuous/mxe-NatronPluginManager-20211230.tar.xz && tar xvf mxe-NatronPluginManager-20211230.tar.xz -C /opt/mxe-NatronPluginManager/
+    - name: Build
+      run: bash share/mingw.sh
+    - name: Artifact
+      run: sudo cp -a build/NatronPluginManager.exe /opt/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: NatronPluginManager-${{github.sha}}-Windows-x64
+        path: /opt/NatronPluginManager.exe
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: apt install
+      run: sudo apt-get update && sudo apt-get install cmake qtbase5-dev libzip-dev
+    - name: Configure
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Release

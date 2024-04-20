@@ -27,29 +27,17 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
-set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "NatronPluginManager")
-set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/rodlie/NatronPluginManager")
-#set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
-set(CPACK_DEBIAN_FILE_NAME "${PROJECT_NAME}.deb")
-
 set(COMPANY "Natron")
 set(COPYRIGHT "Copyright (c) Ole-Andre Rodlie")
 set(IDENTIFIER "org.natronvfx.plugins")
 
 option(USE_PKGCONF "Use pkg-config" ON)
 
-add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 add_definitions(-DQT_DEPRECATED_WARNINGS)
 add_definitions(-DAPP_NAME="${PROJECT_NAME}")
 add_definitions(-DAPP_VERSION="${PROJECT_VERSION}")
 add_definitions(-DAPP_ORG="Natron")
 add_definitions(-DAPP_DOMAIN="natronvfx.org")
-add_definitions(-DAPP_URL="https://plugins.natronvfx.org")
 
 add_compile_options(-Wall -Wextra)
 if(CMAKE_BUILD_TYPE MATCHES "^(release|Release|RELEASE)$")
@@ -59,7 +47,7 @@ else()
 endif()
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} 5.10 COMPONENTS Concurrent Network Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} 5.14 COMPONENTS Concurrent Network Widgets REQUIRED)
 
 if(${USE_PKGCONF})
     find_package(PkgConfig REQUIRED)
@@ -125,20 +113,19 @@ set(SRC
     share/assets.qrc
 )
 
+add_executable(${PROJECT_NAME}
+    ${ICON_FILE}
+    ${WINDOWS_ICON_FILE}
+    ${WINDOWS_RESOURCE_FILE}
+    ${SRC}
+)
+
+if(APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+endif()
+
 if(WIN32)
-    add_executable(${PROJECT_NAME}
-        WIN32
-        ${WINDOWS_ICON_FILE}
-        ${WINDOWS_RESOURCE_FILE}
-        ${SRC}
-    )
-elseif(APPLE)
-    add_executable(${PROJECT_NAME}
-        MACOSX_BUNDLE
-        ${ICON_FILE}
-        ${SRC})
-else()
-    add_executable(${PROJECT_NAME} ${SRC})
+    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 endif()
 
 target_link_libraries(${PROJECT_NAME}
@@ -165,6 +152,7 @@ if(UNIX AND NOT APPLE)
     install(FILES
         LICENSE
         README.md
+        docs/repo.md
         DESTINATION
         ${CMAKE_INSTALL_DOCDIR}-${PROJECT_VERSION}
     )
