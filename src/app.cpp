@@ -491,10 +491,10 @@ void NatronPluginManager::handleAboutActionTriggered()
                      "Free Software Foundation; either version 2 of the License, "
                      "or (at your option) any later version.");
     QString text = tr("<h3 style=\"font-weight:normal;\">%1</h3>"
-                      "<p>A plug-in manager for <a href=\"https://natrongithub.github.io\">Natron</a>.</p>"
+                      "<p>A <a href=\"%3\">plug-in manager</a> for <a href=\"https://natrongithub.github.io\">Natron</a>.</p>"
                       "<p style=\"font-size:small;\">%2</p>"
                       "<p style=\"font-size:small;\">Copyright &copy; <a href=\"https://github.com/rodlie\">Ole-André Rodlie</a>. All rights reserved.</p>")
-                   .arg(title, lic);
+                   .arg(title, lic, QString(APP_URL));
     QMessageBox::about(this, tr("About"), text);
 }
 

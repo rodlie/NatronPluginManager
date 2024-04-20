@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
     QApplication::setApplicationVersion(APP_VERSION);
     QApplication::setApplicationDisplayName(QObject::tr("Natron Plug-in Manager"));
     QApplication::setOrganizationName(APP_ORG);
-    QApplication::setOrganizationDomain(APP_DOMAIN);
 
     NatronPluginManager app;
     app.show();
