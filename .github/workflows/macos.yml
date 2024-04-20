@@ -1,10 +1,10 @@
-name: macOS
+name: macOS Monterey
 
 on: [push, pull_request]
 
 jobs:
-  bigsur:
-    runs-on: macos-11
+  monterey:
+    runs-on: macos-12
     steps:
     - uses: actions/checkout@v2
     - name: Setup Qt
