@@ -84,6 +84,10 @@ PluginListWidget::PluginListWidget(const Plugins::PluginSpecs &plugin,
         if (!pluginPixmap.isNull()) { pluginIconLabel->setPixmap(pluginPixmap); }
     }
 
+    const auto pluginTypeLabel = new QLabel(this);
+    pluginTypeLabel->setObjectName("PluginTypeLabel");
+    pluginTypeLabel->setText(plugin.isAddon ? tr("Addon") : tr("PyPlug"));
+
     _installButton = new QPushButton(tr("Install"), this);
     _removeButton = new QPushButton(tr("Remove"), this);
     _updateButton = new QPushButton(tr("Update"), this);
@@ -96,6 +100,7 @@ PluginListWidget::PluginListWidget(const Plugins::PluginSpecs &plugin,
     _removeButton->setProperty("RemoveButton", true);
     _updateButton->setProperty("UpdateButton", true);
 
+    pluginsFooterLayout->addWidget(pluginTypeLabel);
     pluginsFooterLayout->addStretch();
     pluginsFooterLayout->addWidget(_updateButton);
     pluginsFooterLayout->addWidget(_installButton);

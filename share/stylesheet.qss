@@ -207,11 +207,13 @@ QTextBrowser#PluginViewBrowser .QScrollBar::sub-line:horizontal {
     subcontrol-origin: margin;
 }
 
+QLabel#ComboSearchLabel,
 QLabel#ComboGroupLabel,
 QLabel#ComboStatusLabel {
     margin-right: 0.5em;
 }
 
+QLabel#ComboSearchLabel,
 QLabel#ComboGroupLabel {
     margin-left: 0.5em;
 }
@@ -299,4 +301,8 @@ QTextBrowser#PluginViewBrowser {
 
 QAbstractScrollArea::corner {
     border: 0;
+}
+
+QLabel#PluginTypeLabel {
+    color: #767776;
 }

@@ -109,9 +109,9 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
     pluginsComboWidgetLayout->addWidget(_comboStatus);
     pluginsComboWidgetLayout->addWidget(comboGroupLabel);
     pluginsComboWidgetLayout->addWidget(_comboGroup);
-    pluginsComboWidgetLayout->addStretch();
     pluginsComboWidgetLayout->addWidget(comboSearchLabel);
     pluginsComboWidgetLayout->addWidget(_lineEdit);
+    pluginsComboWidgetLayout->addStretch();
 
     pluginsWidgetLayout->addWidget(pluginsComboWidget);
     pluginsWidgetLayout->addWidget(_pluginList);
