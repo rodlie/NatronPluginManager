@@ -32,7 +32,7 @@
 #include <QAction>
 #include <QKeySequence>
 #include <QApplication>
-#include <QTimer>
+//#include <QTimer>
 #include <QtConcurrentRun>
 #include <QPalette>
 #include <QSettings>
@@ -115,9 +115,10 @@ NatronPluginManager::NatronPluginManager(QWidget *parent)
 
     mainLayout->addWidget(_stack);
 
-    QTimer::singleShot(0,
+/*    QTimer::singleShot(0,
                        this,
-                       SLOT(startup()));
+                       SLOT(startup()));*/
+    startup();
 }
 
 NatronPluginManager::~NatronPluginManager()

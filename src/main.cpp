@@ -22,15 +22,35 @@
 #include "app.h"
 
 #include <QApplication>
+#ifdef Q_OS_WIN
+#include <QSettings>
+#endif
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+#ifdef Q_OS_WIN
+#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+    // Set window title bar color based on dark/light theme
+    // https://www.qt.io/blog/dark-mode-on-windows-11-with-qt-6.5
+    // https://learn.microsoft.com/en-us/answers/questions/1161597/how-to-detect-windows-application-dark-mode
+    QSettings registry(QString::fromUtf8("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
+                       QSettings::NativeFormat);
+    if (registry.value(QString::fromUtf8("AppsUseLightTheme"), 0).toInt() == 0) {
+        qputenv("QT_QPA_PLATFORM", "windows:darkmode=1");
+    }
+#endif
+#endif
+
     QApplication::setApplicationName(APP_NAME);
     QApplication::setApplicationVersion(APP_VERSION);
     QApplication::setApplicationDisplayName(QObject::tr("Natron Plug-in Manager"));
     QApplication::setOrganizationName(APP_ORG);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
 
+    QApplication a(argc, argv);
     NatronPluginManager app;
     app.show();
 
