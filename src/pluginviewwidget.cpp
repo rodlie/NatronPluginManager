@@ -85,6 +85,7 @@ PluginViewWidget::PluginViewWidget(QWidget *parent,
 
     _pluginGroupLabel = new QLabel(tr("Group"), this);
     _pluginGroupLabel->setObjectName("PluginViewGroupLabel");
+    _pluginGroupLabel->setOpenExternalLinks(true);
 
     _installButton = new QPushButton(tr("Install"), this);
     _removeButton = new QPushButton(tr("Remove"), this);
@@ -165,9 +166,19 @@ void PluginViewWidget::showPlugin(const QString &id)
     _pluginTitleLabel->setText(plugin.label);
 
     if (!plugin.repo.label.isEmpty()) {
-        _pluginGroupLabel->setText(QString("%1 <span style=\"font-weight: normal; font-size: small;\">(%2)</span>")
-                                   .arg(plugin.group,
-                                        plugin.repo.label));
+        QString repoSpan = "<span style=\"font-weight: normal; font-size: small;\">";
+        QString repoHtml = "%1 %2%3</span>";
+        if (!plugin.repo.url.isEmpty()) {
+            repoHtml = "%1 %2<a href=\"%3\">%4</a></span>";
+            _pluginGroupLabel->setText(repoHtml.arg(plugin.group,
+                                                    repoSpan,
+                                                    plugin.repo.url.toString(),
+                                                    plugin.repo.label));
+        } else {
+            _pluginGroupLabel->setText(repoHtml.arg(plugin.group,
+                                                    repoSpan,
+                                                    plugin.repo.label));
+        }
     } else {
         _pluginGroupLabel->setText(plugin.group);
     }
